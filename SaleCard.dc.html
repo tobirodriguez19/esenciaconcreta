@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<div style="background:#fff;border:1px solid rgba(35,34,32,.08);border-radius:16px;padding:20px 22px;box-shadow:0 1px 2px rgba(0,0,0,.03);opacity:{{ cardOpacity }}">
+  <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:14px">
+    <div style="display:flex;align-items:center;gap:12px">
+      <span style="font-family:Newsreader,serif;font-size:20px;color:#232220">{{ sale.code }}</span>
+      <span style="{{ channelStyle }}">{{ channelLabel }}</span>
+    </div>
+    <span style="font-size:13px;color:#9a958c">{{ sale.date }}</span>
+  </div>
+
+  <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:14px;margin-bottom:18px">
+    <div style="font-size:19px;font-weight:600;color:#232220;line-height:1.2">{{ sale.customer }}</div>
+    <div style="font-size:20px;font-weight:600;color:#232220;white-space:nowrap">{{ sale.totalFmt }}</div>
+  </div>
+
+  <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:18px">
+    <!-- PAGO -->
+    <div style="display:flex;align-items:center;gap:12px;min-height:34px">
+      <span style="font-size:13px;color:#9a958c;width:74px;flex-shrink:0">Pago</span>
+      <sc-if value="{{ payEdit }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+          <select value="{{ draft }}" onChange="{{ onDraft }}" style="border:1px solid rgba(35,34,32,.2);border-radius:8px;padding:7px 10px;font-size:13px;background:#fff;outline:none">
+            <option value="pendiente">Pendiente</option>
+            <option value="pagado">Pagado</option>
+          </select>
+          <button onClick="{{ onSave }}" style="background:#232220;color:#FAF9F6;border:none;cursor:pointer;border-radius:8px;padding:7px 14px;font-size:12px">Guardar</button>
+          <button onClick="{{ onCancelEdit }}" style="background:none;border:1px solid rgba(35,34,32,.18);color:#56534c;cursor:pointer;border-radius:8px;padding:7px 12px;font-size:12px">Cancelar</button>
+        </div>
+      </sc-if>
+      <sc-if value="{{ payView }}" hint-placeholder-val="{{ true }}">
+        <div style="display:flex;align-items:center;gap:10px">
+          <span style="{{ payBadgeStyle }}"><span style="width:7px;height:7px;border-radius:999px;background:{{ payDot }};display:inline-block"></span>{{ payLabel }}</span>
+          <button onClick="{{ onEditPay }}" aria-label="Editar pago" style="background:none;border:none;cursor:pointer;color:#b3ada3;font-size:13px;padding:2px" style-hover="color:#232220">✎</button>
+        </div>
+      </sc-if>
+    </div>
+    <!-- METODO -->
+    <div style="display:flex;align-items:center;gap:12px;min-height:34px">
+      <span style="font-size:13px;color:#9a958c;width:74px;flex-shrink:0">Método</span>
+      <sc-if value="{{ methodEdit }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+          <select value="{{ draft }}" onChange="{{ onDraft }}" style="border:1px solid rgba(35,34,32,.2);border-radius:8px;padding:7px 10px;font-size:13px;background:#fff;outline:none">
+            <option value="transferencia">Transferencia</option>
+            <option value="efectivo">Efectivo</option>
+          </select>
+          <button onClick="{{ onSave }}" style="background:#232220;color:#FAF9F6;border:none;cursor:pointer;border-radius:8px;padding:7px 14px;font-size:12px">Guardar</button>
+          <button onClick="{{ onCancelEdit }}" style="background:none;border:1px solid rgba(35,34,32,.18);color:#56534c;cursor:pointer;border-radius:8px;padding:7px 12px;font-size:12px">Cancelar</button>
+        </div>
+      </sc-if>
+      <sc-if value="{{ methodView }}" hint-placeholder-val="{{ true }}">
+        <div style="display:flex;align-items:center;gap:10px">
+          <span style="font-size:14px;color:#232220">{{ methodLabel }}</span>
+          <button onClick="{{ onEditMethod }}" aria-label="Editar método" style="background:none;border:none;cursor:pointer;color:#b3ada3;font-size:13px;padding:2px" style-hover="color:#232220">✎</button>
+        </div>
+      </sc-if>
+    </div>
+    <!-- ENTREGA -->
+    <div style="display:flex;align-items:center;gap:12px;min-height:34px">
+      <span style="font-size:13px;color:#9a958c;width:74px;flex-shrink:0">Entrega</span>
+      <sc-if value="{{ delEdit }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+          <select value="{{ draft }}" onChange="{{ onDraft }}" style="border:1px solid rgba(35,34,32,.2);border-radius:8px;padding:7px 10px;font-size:13px;background:#fff;outline:none">
+            <option value="pendiente">Pendiente</option>
+            <option value="entregado">Entregado</option>
+          </select>
+          <button onClick="{{ onSave }}" style="background:#232220;color:#FAF9F6;border:none;cursor:pointer;border-radius:8px;padding:7px 14px;font-size:12px">Guardar</button>
+          <button onClick="{{ onCancelEdit }}" style="background:none;border:1px solid rgba(35,34,32,.18);color:#56534c;cursor:pointer;border-radius:8px;padding:7px 12px;font-size:12px">Cancelar</button>
+        </div>
+      </sc-if>
+      <sc-if value="{{ delView }}" hint-placeholder-val="{{ true }}">
+        <div style="display:flex;align-items:center;gap:10px">
+          <span style="{{ delBadgeStyle }}"><span style="width:7px;height:7px;border-radius:999px;background:{{ delDot }};display:inline-block"></span>{{ delLabel }}</span>
+          <button onClick="{{ onEditDel }}" aria-label="Editar entrega" style="background:none;border:none;cursor:pointer;color:#b3ada3;font-size:13px;padding:2px" style-hover="color:#232220">✎</button>
+        </div>
+      </sc-if>
+    </div>
+  </div>
+
+  <div style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#9a958c;margin-bottom:8px">Productos</div>
+  <div style="display:flex;flex-direction:column;gap:4px;margin-bottom:18px">
+    <sc-for list="{{ itemLines }}" as="it" hint-placeholder-count="2">
+      <div style="font-size:14px;color:#56534c">• {{ it }}</div>
+    </sc-for>
+  </div>
+
+  <div style="display:flex;gap:10px;flex-wrap:wrap;border-top:1px solid rgba(35,34,32,.07);padding-top:14px">
+    <button onClick="{{ onDetail }}" style="background:#F0EEE9;color:#232220;border:none;cursor:pointer;border-radius:999px;padding:9px 20px;font-size:13px;transition:background .2s" style-hover="background:#232220;color:#FAF9F6">Ver detalle</button>
+    <sc-if value="{{ showCancel }}" hint-placeholder-val="{{ false }}">
+      <button onClick="{{ onEditItems }}" style="background:none;border:1px solid rgba(35,34,32,.2);color:#56534c;cursor:pointer;border-radius:999px;padding:9px 18px;font-size:13px" style-hover="background:rgba(35,34,32,.05);color:#232220">Editar productos</button>
+    </sc-if>
+    <sc-if value="{{ showCancel }}" hint-placeholder-val="{{ false }}">
+      <button onClick="{{ onCancelSale }}" style="background:none;border:1px solid rgba(179,38,30,.3);color:#b3261e;cursor:pointer;border-radius:999px;padding:9px 18px;font-size:13px" style-hover="background:rgba(179,38,30,.06)">Cancelar venta</button>
+    </sc-if>
+    <sc-if value="{{ showUndo }}" hint-placeholder-val="{{ false }}">
+      <button onClick="{{ onUndoSale }}" style="background:none;border:1px solid rgba(35,34,32,.2);color:#56534c;cursor:pointer;border-radius:999px;padding:9px 18px;font-size:13px" style-hover="background:rgba(35,34,32,.05)">Deshacer cancelación</button>
+    </sc-if>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:420,&quot;height&quot;:420},&quot;sale&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;any&quot;},&quot;onField&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;any&quot;},&quot;onDetail&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;any&quot;},&quot;onCancelSale&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;any&quot;},&quot;onUndoSale&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;any&quot;}}">
+class Component extends DCLogic {
+  state = { field:null, draft:'' };
+  edit(field, cur){ this.setState({field, draft:cur}); }
+  cancelEdit=()=>this.setState({field:null, draft:''});
+  onDraft=e=>this.setState({draft:e.target.value});
+  save=()=>{ const f=this.state.field; if(this.props.onField) this.props.onField(f, this.state.draft); this.setState({field:null, draft:''}); };
+  renderVals(){
+    const s = this.props.sale || {};
+    const f = this.state.field;
+    const cancelled = !!s.cancelled;
+    const payBadge = s.payStatus==='pagado'
+      ? {dot:'#3d8a55', style:'display:inline-flex;align-items:center;gap:7px;font-size:13px;background:#E2EFE6;color:#2f6a40;border-radius:999px;padding:5px 12px', label:'Pagado'}
+      : {dot:'#cf8b2c', style:'display:inline-flex;align-items:center;gap:7px;font-size:13px;background:#F6E9D4;color:#9a6a1e;border-radius:999px;padding:5px 12px', label:'Pendiente'};
+    const delBadge = s.delivery==='entregado'
+      ? {dot:'#3d8a55', style:'display:inline-flex;align-items:center;gap:7px;font-size:13px;background:#E2EFE6;color:#2f6a40;border-radius:999px;padding:5px 12px', label:'Entregado'}
+      : {dot:'#cf8b2c', style:'display:inline-flex;align-items:center;gap:7px;font-size:13px;background:#F6E9D4;color:#9a6a1e;border-radius:999px;padding:5px 12px', label:'Pendiente'};
+    const channelStyle = 'display:inline-flex;align-items:center;font-size:11px;letter-spacing:.04em;border-radius:999px;padding:4px 11px;'+(s.channel==='online'?'background:#E1E7EE;color:#3a5878':'background:#E6E2D8;color:#6a5c3e');
+    return {
+      sale:s, cardOpacity: cancelled?'.55':'1',
+      channelLabel: s.channel==='online'?'Online':'Presencial', channelStyle,
+      itemLines: (s.items||[]).map(i=>i.name+(i.scent?(' '+i.scent):'')+' ×'+i.qty),
+      draft:this.state.draft, onDraft:this.onDraft, onSave:this.save, onCancelEdit:this.cancelEdit,
+      payEdit:f==='pago', payView:f!=='pago', payBadgeStyle:payBadge.style, payDot:payBadge.dot, payLabel:payBadge.label, onEditPay:()=>this.edit('pago', s.payStatus||'pendiente'),
+      methodEdit:f==='metodo', methodView:f!=='metodo', methodLabel:s.method==='efectivo'?'Efectivo':'Transferencia', onEditMethod:()=>this.edit('metodo', s.method||'transferencia'),
+      delEdit:f==='entrega', delView:f!=='entrega', delBadgeStyle:delBadge.style, delDot:delBadge.dot, delLabel:delBadge.label, onEditDel:()=>this.edit('entrega', s.delivery||'pendiente'),
+      showCancel:!cancelled, showUndo:cancelled,
+      onDetail:this.props.onDetail||(()=>{}), onCancelSale:this.props.onCancelSale||(()=>{}), onUndoSale:this.props.onUndoSale||(()=>{}), onEditItems:this.props.onEditItems||(()=>{})
+    };
+  }
+}
+</script>
+</body>
+</html>
