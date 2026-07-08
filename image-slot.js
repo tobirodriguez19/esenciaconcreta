@@ -226,7 +226,7 @@
 
   class ImageSlot extends HTMLElement {
     static get observedAttributes() {
-      return ['shape', 'radius', 'mask', 'fit', 'position', 'placeholder', 'src', 'id'];
+      return ['shape', 'radius', 'mask', 'fit', 'position', 'placeholder', 'src', 'id', 'alt', 'priority'];
     }
 
     constructor() {
@@ -615,6 +615,13 @@
         };
       }
       this._cap.textContent = this.getAttribute('placeholder') || 'Drop an image';
+      // alt falls back to placeholder so a filled slot always has a real
+      // accessible name, even if the host never set alt explicitly.
+      this._img.alt = this.getAttribute('alt') || this.getAttribute('placeholder') || '';
+      // Lazy-load everything except slots explicitly marked priority="" (e.g. the hero image),
+      // which stay eager so the above-the-fold image isn't delayed.
+      this._img.loading = this.hasAttribute('priority') ? 'eager' : 'lazy';
+      this._img.decoding = 'async';
       // Toggle via style.display — the [hidden] attribute alone loses to
       // the display:flex / display:block rules in the stylesheet above.
       if (url) {

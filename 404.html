@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Esencia Concreta</title>
+<!--
+  GitHub Pages no soporta rutas de SPA (History API) de forma nativa: cualquier
+  ruta que no sea un archivo real (ej. /producto/vela-bruma) devuelve este 404.
+  Este script guarda la ruta pedida en la query string y redirige a index.html,
+  que la restaura con history.replaceState antes de arrancar la app.
+  Técnica estándar: https://github.com/rafgraph/spa-github-pages
+-->
+<script>
+  var l = window.location;
+  l.replace(
+    l.protocol + '//' + l.hostname + (l.port ? ':' + l.port : '') + '/?/' +
+    l.pathname.slice(1).replace(/&/g, '~and~') +
+    (l.search ? '&' + l.search.slice(1).replace(/&/g, '~and~') : '') +
+    l.hash
+  );
+</script>
+</head>
+<body>
+</body>
+</html>

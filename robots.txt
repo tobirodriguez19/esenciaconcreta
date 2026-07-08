@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /checkout
+Disallow: /confirmacion
+
+Sitemap: https://esenciaconcreta.com.ar/sitemap.xml

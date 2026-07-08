@@ -3,6 +3,44 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Esencia Concreta — Piezas de hormigón hechas a mano en Rafaela</title>
+<meta name="description" content="Velas, floreros, portavelas, bandejas y posavasos de hormigón hechos a mano en Rafaela, Santa Fe. Piezas artesanales únicas para tu hogar.">
+<meta name="keywords" content="hormigón, cemento, velas de hormigón, decoración artesanal, Rafaela, Santa Fe, Esencia Concreta">
+<link rel="canonical" href="https://esenciaconcreta.com.ar/">
+<link rel="icon" href="uploads/Logo.jpg">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Esencia Concreta">
+<meta property="og:title" content="Esencia Concreta — Piezas de hormigón hechas a mano">
+<meta property="og:description" content="Velas, floreros, portavelas, bandejas y posavasos de hormigón hechos a mano en Rafaela, Santa Fe.">
+<meta property="og:url" content="https://esenciaconcreta.com.ar/">
+<meta property="og:image" content="https://esenciaconcreta.com.ar/uploads/Logo.jpg">
+<meta property="og:locale" content="es_AR">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Esencia Concreta — Piezas de hormigón hechas a mano">
+<meta name="twitter:description" content="Velas, floreros, portavelas, bandejas y posavasos de hormigón hechos a mano en Rafaela, Santa Fe.">
+<meta name="twitter:image" content="https://esenciaconcreta.com.ar/uploads/Logo.jpg">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "LocalBusiness",
+  "name": "Esencia Concreta",
+  "image": "https://esenciaconcreta.com.ar/uploads/Logo.jpg",
+  "description": "Piezas artesanales de hormigón hechas a mano en Rafaela, Santa Fe.",
+  "url": "https://esenciaconcreta.com.ar/",
+  "address": { "@type": "PostalAddress", "addressLocality": "Rafaela", "addressRegion": "Santa Fe", "addressCountry": "AR" },
+  "priceRange": "$$"
+}
+</script>
+<script>
+  // Restaura la ruta real guardada por 404.html (ver ese archivo) antes de que
+  // arranque la app, para que History API / los enlaces directos funcionen en GitHub Pages.
+  (function(l){
+    if(l.search[1]==='/'){
+      var decoded=l.search.slice(1).split('&').map(function(s){return s.replace(/~and~/g,'&');}).join('?');
+      window.history.replaceState(null,null, l.pathname.slice(0,-1)+decoded+l.hash);
+    }
+  }(window.location));
+</script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script src="./supabase-config.js"></script>
 <script src="./support.js"></script>
@@ -90,6 +128,9 @@
             <button onClick="{{ verProceso }}" style="background:none;border:none;cursor:pointer;font-size:14px;color:#4a4842;letter-spacing:.01em;padding:6px 0" style-hover="color:#232220">Conocenos</button>
             <button onClick="{{ verContacto }}" style="background:none;border:none;cursor:pointer;font-size:14px;color:#4a4842;letter-spacing:.01em;padding:6px 0" style-hover="color:#232220">Contacto</button>
           </nav>
+          <button onClick="{{ goSearch }}" aria-label="Buscar productos" style="display:flex;align-items:center;justify-content:center;width:38px;height:38px;background:none;border:1px solid rgba(35,34,32,.16);border-radius:999px;cursor:pointer;flex-shrink:0;color:#232220" style-hover="background:rgba(35,34,32,.05)">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+          </button>
           <button onClick="{{ openCart }}" aria-label="Carrito" style="display:flex;align-items:center;gap:8px;background:#232220;color:#FAF9F6;border:none;cursor:pointer;border-radius:999px;padding:9px 16px 9px 18px;font-size:13px;letter-spacing:.02em;flex-shrink:0" style-hover="background:#3a3833">
             Carrito
             <span style="min-width:20px;height:20px;padding:0 6px;border-radius:999px;background:#FAF9F6;color:#232220;font-size:12px;font-weight:600;display:inline-flex;align-items:center;justify-content:center;animation:{{ cartBumpAnim }}">{{ cartCount }}</span>
@@ -123,8 +164,9 @@
     <!-- ===================== HOME ===================== -->
     <sc-if value="{{ isHome }}" hint-placeholder-val="{{ true }}">
     <div data-screen-label="Home">
+      <h1 style="position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0">Esencia Concreta — piezas de hormigón artesanales hechas a mano en Rafaela, Santa Fe</h1>
       <!-- HERO -->
-      
+
 
       <!-- TRUST STRIP -->
       <section style="max-width: 1240px; margin: 0 auto; padding: clamp(24px,5vw,64px) clamp(20px,5vw,56px) clamp(36px,5vw,64px); position: relative">
@@ -133,13 +175,13 @@
           <div style="flex:1 1 320px;min-width:0;order:1;width:100%">
             <button onClick="{{ heroProduct.open }}" id="ec-hero-imgwrap" class="ec-hero-swipe" style="display:block;width:100%;max-width:440px;margin:0 auto;padding:0;border:none;cursor:pointer;background:none;position:relative;animation:{{ heroAnim }}">
               <div style="aspect-ratio: 4/5; background: #EFEEEA; border-radius: 20px; overflow: hidden; box-shadow: 0 40px 80px -50px rgba(35,34,32,.5); animation: {{ heroAnim }}; width: 100%; height: auto">
-                <image-slot id="{{ heroProduct.slotId }}" src="{{ heroProduct.img }}" shape="rect" placeholder="{{ heroProduct.name }}"></image-slot>
+                <image-slot id="{{ heroProduct.slotId }}" src="{{ heroProduct.img }}" shape="rect" placeholder="{{ heroProduct.name }}" priority></image-slot>
               </div>
               <span style="position:absolute;top:14px;left:14px;background:rgba(35,34,32,.88);color:#FAF9F6;border-radius:999px;padding:6px 13px;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase">Destacado</span>
             </button>
           </div><div id="ec-hero-text" style="flex: 1 1 320px; min-width: 0; order: 2; width: 514px; height: 408px; margin-right: 84px">
             <div style="font-size: 12px; letter-spacing: .2em; text-transform: uppercase; color: #9a958c; margin-bottom: -41px">{{ heroProduct.catUpper }}</div>
-            <h1 style="font-family: Newsreader,serif; font-weight: 400; font-size: clamp(32px,5.2vw,60px); line-height: 1.05; letter-spacing: -.01em; margin: 0; min-height: 1.9em; display: flex; align-items: flex-end; margin-top: 45px; margin-bottom: 42px; width: 514px; height: 129px">{{ heroProduct.name }}</h1>
+            <div style="font-family: Newsreader,serif; font-weight: 400; font-size: clamp(32px,5.2vw,60px); line-height: 1.05; letter-spacing: -.01em; margin: 0; min-height: 1.9em; display: flex; align-items: flex-end; margin-top: 45px; margin-bottom: 42px; width: 514px; height: 129px">{{ heroProduct.name }}</div>
             <p style="font-size: clamp(15px,1.5vw,18px); color: #56534c; margin: 16px 0 0; min-height: 3em; margin-top: -41px; margin-bottom: -40px">{{ heroProduct.aromasLabel }}</p>
             <div style="font-size: clamp(21px,2.4vw,25px); font-weight: 600; color: #232220; margin: 18px 0 26px; margin-bottom: -21px; margin-top: 20px">{{ heroProduct.priceFmt }}</div>
             
@@ -226,11 +268,21 @@
           <h1 style="font-family:Newsreader,serif;font-weight:400;font-size:clamp(30px,5vw,58px);margin:0 0 10px;letter-spacing:-.01em">Catálogo</h1>
           <p style="font-size:15px;color:#6a665e;margin:0">{{ catalogCount }} piezas · hechas a mano</p>
         </div>
+        <div style="position:relative;max-width:420px;margin-bottom:20px">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#9a958c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="position:absolute;left:16px;top:50%;transform:translateY(-50%);pointer-events:none"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+          <input id="ec-catalog-search" value="{{ searchQuery }}" onChange="{{ onSearchQuery }}" placeholder="Buscar productos…" aria-label="Buscar productos" style="width:100%;border:1px solid rgba(35,34,32,.16);border-radius:999px;padding:13px 16px 13px 44px;font-size:15px;outline:none;background:#fff;transition:border-color .2s" style-focus="border-color:#232220">
+        </div>
         <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:clamp(22px,4vw,40px)">
           <sc-for list="{{ chips }}" as="c" hint-placeholder-count="7">
             <button onClick="{{ c.set }}" style="{{ c.style }}">{{ c.label }}</button>
           </sc-for>
         </div>
+        <sc-if value="{{ catalogNoResults }}" hint-placeholder-val="{{ false }}">
+          <div style="text-align:center;padding:clamp(40px,8vw,80px) 20px;color:#9a958c">
+            <p style="font-size:17px;font-family:Newsreader,serif;color:#56534c;margin:0 0 8px">No encontramos productos que coincidan</p>
+            <p style="font-size:14px;margin:0">Probá con otra palabra o mirá otra categoría.</p>
+          </div>
+        </sc-if>
         <div class="ec-catalog-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:clamp(14px,1.8vw,26px)">
           <sc-for list="{{ catalogProducts }}" as="p" hint-placeholder-count="8">
             <div style="background:#fff;border:1px solid rgba(35,34,32,.06);border-radius:16px;overflow:hidden;transition:transform .35s ease,box-shadow .35s ease;box-shadow:0 1px 2px rgba(0,0,0,.03);display:flex;flex-direction:column" style-hover="transform:translateY(-5px);box-shadow:0 28px 46px -34px rgba(35,34,32,.5)">
@@ -1474,15 +1526,22 @@ class Component extends DCLogic {
     this.PHOTO_IDS = new Set(['vela-bruma','vela-niebla','portavela-cilindro','portavela-trio','bandeja-organica','bandeja-rect','florero-tubo','florero-bombe','posavasos-cuarteto','posavasos-terrazo','sahumerio-lineal','sahumerio-cuenco']);
     this.NO_PHOTO_IMG = 'data:image/svg+xml,'+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="400" height="500"><rect width="100%" height="100%" fill="#EFEEEA"/><text x="50%" y="50%" font-family="sans-serif" font-size="22" fill="#9a958c" text-anchor="middle" dominant-baseline="middle">Sin imagen</text></svg>');
     const cats=[];
+    let initView='home', initProductId=null, initCartOpen=false;
+    if(typeof location!=='undefined'){
+      if(location.hash==='#admin'){ initView='admin'; }
+      else if(location.pathname==='/carrito'){ initCartOpen=true; }
+      else { const r=this.parseRoute(location.pathname); initView=r.view; initProductId=r.productId||null; }
+    }
     this.state={
-      view:(typeof location!=='undefined'&&location.hash==='#admin')?'admin':'home', adminTab:'productos', productId:null,
+      view:initView, adminTab:'productos', productId:initProductId,
+      cartMounted:initCartOpen, cartOpen:initCartOpen,
       categories:cats, products:[], aromas:[], sales:[],
       config:{shipping:5000,alias:'esencia.concreta',cbu:'0000003100093421750001',titular:'María Pérez',whatsapp:'5493492583885'},
       oficio:{eyebrow:'',title:'',body:'',steps:[]}, oficioPhotoUrl:'', oficioEditing:false, oficioDraft:null,
       saleEditSeq:null, saleEditItems:[], saleSearch:'', photoModal:null,
-      cart:[], cartMounted:false, cartOpen:false,
+      cart:[],
       navMounted:false, navOpen:false,
-      filter:'todos', catalogColors:{}, catalogScroll:0, cartBump:0, galleryIndex:0,
+      filter:'todos', searchQuery:'', catalogColors:{}, catalogScroll:0, cartBump:0, galleryIndex:0,
       prodSearch:'', prodCatFilter:'todas', expanded:{}, catGroupCollapsed:{},
       detailColor:null, detailScent:null, detailQty:1,
       form:{nombre:'',apellido:'',telefono:'',email:'',direccion:''},
@@ -1726,12 +1785,38 @@ class Component extends DCLogic {
   // ============================================================
   // IMÁGENES (Supabase Storage) — subida real usada por el admin
   // ============================================================
-  sanitizeFileName(name){
+  sanitizeFileName(name,forceExt){
     const dot=name.lastIndexOf('.');
-    const ext=(dot>=0?name.slice(dot+1):'jpg').toLowerCase().replace(/[^a-z0-9]/g,'')||'jpg';
+    const ext=(forceExt||(dot>=0?name.slice(dot+1):'jpg')).toLowerCase().replace(/[^a-z0-9]/g,'')||'jpg';
     const noAccents=(dot>=0?name.slice(0,dot):name).toLowerCase().normalize('NFD').split('').filter(ch=>{ const c=ch.codePointAt(0); return c<768||c>879; }).join('');
     const base=noAccents.replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,'').slice(0,40);
     return (base||'foto')+'-'+Date.now()+'-'+Math.random().toString(36).slice(2,6)+'.'+ext;
+  }
+  // Reduce a un tamaño razonable y convierte a WebP cuando el navegador lo soporta
+  // (si no, deja el archivo tal cual). Corre 100% en el cliente, sin backend.
+  async optimizeImage(file){
+    try{
+      const bitmap=await createImageBitmap(file);
+      const maxDim=1600;
+      const scale=Math.min(1,maxDim/Math.max(bitmap.width,bitmap.height));
+      const w=Math.max(1,Math.round(bitmap.width*scale)), h=Math.max(1,Math.round(bitmap.height*scale));
+      const canvas=document.createElement('canvas'); canvas.width=w; canvas.height=h;
+      canvas.getContext('2d').drawImage(bitmap,0,0,w,h);
+      if(bitmap.close) bitmap.close();
+      const supportsWebp=canvas.toDataURL('image/webp').indexOf('data:image/webp')===0;
+      const mime=supportsWebp?'image/webp':(file.type==='image/png'?'image/png':'image/jpeg');
+      const ext=supportsWebp?'webp':(file.type==='image/png'?'png':'jpg');
+      const blob=await new Promise(res=>canvas.toBlob(res,mime,0.85));
+      return blob?{blob,ext,type:mime}:{blob:file,ext:(file.name.split('.').pop()||'jpg').toLowerCase(),type:file.type};
+    }catch(e){ console.error('optimizeImage failed',e); return {blob:file,ext:(file.name.split('.').pop()||'jpg').toLowerCase(),type:file.type}; }
+  }
+  // Hash liviano (tamaño+nombre del contenido optimizado) para no resubir la misma foto dos veces.
+  async fileFingerprint(blob){
+    try{
+      const buf=await blob.arrayBuffer();
+      const digest=await crypto.subtle.digest('SHA-256',buf);
+      return Array.from(new Uint8Array(digest)).map(b=>b.toString(16).padStart(2,'0')).join('');
+    }catch(e){ return null; }
   }
   storagePathFromUrl(url){ const marker='/product-photos/'; const i=(url||'').indexOf(marker); return i>=0?url.slice(i+marker.length):null; }
   async uploadProductPhoto(productId,color,file){
@@ -1739,11 +1824,19 @@ class Component extends DCLogic {
     if(!file||okTypes.indexOf(file.type)<0){ this.showToast('Formato no permitido. Usá JPG, PNG o WEBP'); return; }
     const maxBytes=5*1024*1024;
     if(file.size>maxBytes){ this.showToast('La imagen no puede superar 5MB'); return; }
-    const path=productId+'/'+(color?this.slug(color):'general')+'/'+this.sanitizeFileName(file.name);
-    const { error:upErr } = await supabaseClient.storage.from('product-photos').upload(path,file,{cacheControl:'3600',upsert:false,contentType:file.type});
+    const { blob,ext,type }=await this.optimizeImage(file);
+    const fingerprint=await this.fileFingerprint(blob);
+    if(fingerprint){
+      let dupQ=supabaseClient.from('product_photos').select('id').eq('product_id',productId).eq('fingerprint',fingerprint);
+      dupQ=color?dupQ.eq('color_name',color):dupQ.is('color_name',null);
+      const { data:dupes } = await dupQ;
+      if(dupes&&dupes.length){ this.showToast('Esa foto ya está subida para esta variante'); return; }
+    }
+    const path=productId+'/'+(color?this.slug(color):'general')+'/'+this.sanitizeFileName(file.name,ext);
+    const { error:upErr } = await supabaseClient.storage.from('product-photos').upload(path,blob,{cacheControl:'3600',upsert:false,contentType:type});
     if(upErr){ this.showToast('Error al subir imagen: '+upErr.message); return; }
     const { data:pub } = supabaseClient.storage.from('product-photos').getPublicUrl(path);
-    const { error:insErr } = await supabaseClient.from('product_photos').insert({product_id:productId,color_name:color||null,url:pub.publicUrl,sort_order:Math.floor(Date.now()/1000)});
+    const { error:insErr } = await supabaseClient.from('product_photos').insert({product_id:productId,color_name:color||null,url:pub.publicUrl,fingerprint,sort_order:Math.floor(Date.now()/1000)});
     if(insErr){ this.showToast('La imagen se subió pero no se pudo guardar el registro: '+insErr.message); return; }
     await this.loadCatalog();
     this.showToast('Foto actualizada');
@@ -1806,8 +1899,9 @@ class Component extends DCLogic {
     const okTypes=['image/jpeg','image/jpg','image/png','image/webp'];
     if(!file||okTypes.indexOf(file.type)<0){ this.showToast('Formato no permitido. Usá JPG, PNG o WEBP'); return; }
     if(file.size>5*1024*1024){ this.showToast('La imagen no puede superar 5MB'); return; }
-    const path='categories/'+catId+'/'+this.sanitizeFileName(file.name);
-    const { error:upErr } = await supabaseClient.storage.from('product-photos').upload(path,file,{cacheControl:'3600',upsert:false,contentType:file.type});
+    const { blob,ext,type }=await this.optimizeImage(file);
+    const path='categories/'+catId+'/'+this.sanitizeFileName(file.name,ext);
+    const { error:upErr } = await supabaseClient.storage.from('product-photos').upload(path,blob,{cacheControl:'3600',upsert:false,contentType:type});
     if(upErr){ this.showToast('Error al subir imagen: '+upErr.message); return; }
     const { data:pub } = supabaseClient.storage.from('product-photos').getPublicUrl(path);
     const { error:updErr } = await supabaseClient.from('categories').update({photo_url:pub.publicUrl}).eq('id',catId);
@@ -1829,8 +1923,85 @@ class Component extends DCLogic {
   // CICLO DE VIDA
   // ============================================================
   componentDidMount(){ this.startHero(); this.loadFilled(); this.scanSlots(); this._scanT=setInterval(()=>this.scanSlots(),1200); this.setupGestures(); this.setupCropGestures(); this.loadCatalog(); this.initAuth(); this.loadSiteContent();
-    this._hashHandler=()=>{ if(location.hash==='#admin') this.setState({view:'admin'}); };
-    window.addEventListener('hashchange',this._hashHandler);
+    // Legacy bookmark support: old #admin hash entry point → clean redirect to the real /admin route.
+    if(location.hash==='#admin'){ try{ history.replaceState(null,'','/admin'); }catch(e){} }
+    this._popHandler=()=>this.applyLocation(location.pathname);
+    window.addEventListener('popstate',this._popHandler);
+  }
+  // ---- History API routing ----
+  parseRoute(pathname){
+    if(!pathname||pathname==='/') return {view:'home'};
+    if(pathname==='/catalogo') return {view:'catalog'};
+    if(pathname==='/checkout') return {view:'checkout'};
+    if(pathname==='/confirmacion') return {view:'confirm'};
+    if(pathname==='/admin') return {view:'admin'};
+    const m=pathname.match(/^\/producto\/([^/]+)\/?$/);
+    if(m) return {view:'product',productId:decodeURIComponent(m[1])};
+    return {view:'home'};
+  }
+  navigate(path,replace){
+    try{
+      if(replace) history.replaceState(null,'',path);
+      else if(location.pathname!==path) history.pushState(null,'',path);
+    }catch(e){}
+  }
+  applyLocation(pathname){
+    if(pathname==='/carrito'){ if(this._closeT){ clearTimeout(this._closeT); this._closeT=null; } this.setState({cartMounted:true,cartOpen:true}); return; }
+    if(this.state.cartOpen){ this.setState({cartOpen:false}); if(this._closeT) clearTimeout(this._closeT); this._closeT=setTimeout(()=>this.setState({cartMounted:false}),300); }
+    const r=this.parseRoute(pathname);
+    const resetAdmin=(this.state.view==='admin'&&r.view!=='admin')?{catGroupCollapsed:{},expanded:{},editingProductId:null,productDraft:null}:{};
+    if(r.view==='product'){
+      const p=this.getProduct(r.productId);
+      this.setState({...resetAdmin,view:'product',productId:r.productId,detailColor:p?(this.state.catalogColors[r.productId]||(p.colors[0]||null)):null,detailScent:(p&&this.isScented(p))?p.scents[0]:null,detailQty:1,galleryIndex:0});
+    } else if(r.view==='confirm'){
+      if(this.state.order) this.setState({...resetAdmin,view:'confirm'}); else this.navigate('/',true);
+    } else {
+      this.setState({...resetAdmin,view:r.view});
+    }
+  }
+
+  // ---- SEO: title/meta/canonical/JSON-LD dinámicos según la vista actual ----
+  updateSeo(){
+    try{
+      const s=this.state;
+      const base='https://esenciaconcreta.com.ar';
+      let title='Esencia Concreta — Piezas de hormigón hechas a mano en Rafaela';
+      let desc='Velas, floreros, portavelas, bandejas y posavasos de hormigón hechos a mano en Rafaela, Santa Fe.';
+      let path='/';
+      let product=null;
+      if(s.view==='catalog'){ title='Catálogo — Esencia Concreta'; desc='Explorá todas nuestras piezas de hormigón hechas a mano: velas, floreros, portavelas y más.'; path='/catalogo'; }
+      else if(s.view==='product'&&s.productId){
+        const p=this.getProduct(s.productId);
+        if(p){ product=p; title=p.name+' — Esencia Concreta'; desc=p.shortDesc||'Pieza artesanal de hormigón hecha a mano en Rafaela.'; path='/producto/'+encodeURIComponent(p.id); }
+      }
+      else if(s.view==='checkout'){ title='Finalizar compra — Esencia Concreta'; path='/checkout'; }
+      else if(s.view==='confirm'){ title='Pedido confirmado — Esencia Concreta'; path='/confirmacion'; }
+      else if(s.view==='admin'){ title='Panel de administración — Esencia Concreta'; path='/admin'; }
+      const key=title+'|'+path;
+      if(this._seoKey===key) return;
+      this._seoKey=key;
+      document.title=title;
+      const setMeta=(sel,attr,val)=>{ const el=document.querySelector(sel); if(el) el.setAttribute(attr,val); };
+      setMeta('meta[name="description"]','content',desc);
+      setMeta('meta[property="og:title"]','content',title);
+      setMeta('meta[property="og:description"]','content',desc);
+      setMeta('meta[property="og:url"]','content',base+path);
+      setMeta('meta[name="twitter:title"]','content',title);
+      setMeta('meta[name="twitter:description"]','content',desc);
+      setMeta('link[rel="canonical"]','href',base+path);
+      let ld=document.getElementById('ec-product-jsonld');
+      if(product){
+        if(!ld){ ld=document.createElement('script'); ld.type='application/ld+json'; ld.id='ec-product-jsonld'; document.head.appendChild(ld); }
+        ld.textContent=JSON.stringify({
+          '@context':'https://schema.org','@type':'Product',
+          name:product.name, description:product.shortDesc||product.longDesc||'',
+          sku:product.sku||undefined, image:this.realPhotoUrl(product)||undefined,
+          offers:{'@type':'Offer',priceCurrency:'ARS',price:product.price,
+            availability:this.totalStock(product)>0?'https://schema.org/InStock':'https://schema.org/OutOfStock',
+            url:base+path}
+        });
+      } else if(ld){ ld.remove(); }
+    }catch(e){ console.error('updateSeo failed',e); }
   }
 
   // ============================================================
@@ -1882,7 +2053,7 @@ class Component extends DCLogic {
     if(error){ this.setState({authError:'Email o contraseña incorrectos'}); return; }
     this.setState({authPassword:'',authError:''});
   };
-  doLogout=async()=>{ await supabaseClient.auth.signOut(); this.setState({view:'home'}); };
+  doLogout=async()=>{ await supabaseClient.auth.signOut(); this.navigate('/'); this.setState({view:'home'}); };
 
   // ============================================================
   // STOCK — helpers de escritura remota compartidos por productos y ventas
@@ -1968,7 +2139,7 @@ class Component extends DCLogic {
     document.addEventListener('pointerdown',this._gd); document.addEventListener('pointermove',this._gm); document.addEventListener('pointerup',this._gu); document.addEventListener('pointercancel',this._gu);
   }
   loadFilled(){ try{ fetch('.image-slots.state.json',{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{ if(j&&typeof j==='object'){ const f={...this.state.filled}; let ch=false; for(const id in j){ const v=j[id]; const has=v&&(typeof v==='string'?v:(v.u)); if(has&&!f[id]){ f[id]=true; ch=true; } } if(ch) this.setState({filled:f}); } }).catch(()=>{}); }catch(e){} }
-  componentWillUnmount(){ [this._heroT,this._scanT].forEach(t=>t&&clearInterval(t)); [this._toastT,this._closeT,this._navT].forEach(t=>t&&clearTimeout(t)); if(this._gd){ document.removeEventListener('pointerdown',this._gd); document.removeEventListener('pointermove',this._gm); document.removeEventListener('pointerup',this._gu); document.removeEventListener('pointercancel',this._gu); } if(this._hashHandler) window.removeEventListener('hashchange',this._hashHandler); if(this._cropD){ document.removeEventListener('pointerdown',this._cropD); document.removeEventListener('pointermove',this._cropM); document.removeEventListener('pointerup',this._cropU); document.removeEventListener('pointercancel',this._cropU); } }
+  componentWillUnmount(){ [this._heroT,this._scanT].forEach(t=>t&&clearInterval(t)); [this._toastT,this._closeT,this._navT].forEach(t=>t&&clearTimeout(t)); if(this._gd){ document.removeEventListener('pointerdown',this._gd); document.removeEventListener('pointermove',this._gm); document.removeEventListener('pointerup',this._gu); document.removeEventListener('pointercancel',this._gu); } if(this._popHandler) window.removeEventListener('popstate',this._popHandler); if(this._cropD){ document.removeEventListener('pointerdown',this._cropD); document.removeEventListener('pointermove',this._cropM); document.removeEventListener('pointerup',this._cropU); document.removeEventListener('pointercancel',this._cropU); } }
   setupCropGestures(){
     let mode=null,startX=0,startY=0,rect0=null,cw=0,ch=0;
     const down=e=>{
@@ -2008,12 +2179,12 @@ class Component extends DCLogic {
   startHero(){ if(this._heroT) clearInterval(this._heroT); this._heroT=setInterval(()=>{ if(this.state.view==='home'){ const n=this.state.products.filter(p=>p.featured).length||this.state.products.length||1; this.setState(s=>({heroIndex:(s.heroIndex+1)%n})); } },8000); }
   setHero(i){ this.setState({heroIndex:i}); this.startHero(); }
 
-  clearAdminHash(){ try{ if(location.hash) history.replaceState(null,'',location.pathname+location.search); }catch(e){} }
-  goHome=()=>{ this.clearAdminHash(); this.setState({view:'home',catGroupCollapsed:{},expanded:{},editingProductId:null,productDraft:null}); this.scrollTop(); };
-  goCatalog=()=>{ this.setState({view:'catalog',filter:'todos'}); this.scrollTop(); };
-  openCatWith(cat){ this.setState({view:'catalog',filter:cat}); this.scrollTop(); };
+  goHome=()=>{ this.navigate('/'); this.setState({view:'home',catGroupCollapsed:{},expanded:{},editingProductId:null,productDraft:null}); this.scrollTop(); };
+  goCatalog=()=>{ this.navigate('/catalogo'); this.setState({view:'catalog',filter:'todos'}); this.scrollTop(); };
+  goSearch=()=>{ this.goCatalog(); setTimeout(()=>{ const el=document.getElementById('ec-catalog-search'); if(el) el.focus(); },80); };
+  openCatWith(cat){ this.navigate('/catalogo'); this.setState({view:'catalog',filter:cat}); this.scrollTop(); }
   setFilter(cat){ this.setState({filter:cat}); }
-  goAdmin=()=>{ this.setState({view:'admin'}); this.scrollTop(); };
+  goAdmin=()=>{ this.navigate('/admin'); this.setState({view:'admin'}); this.scrollTop(); };
   goAdminTab=(tab)=>{
     this.setState({adminTab:tab,catGroupCollapsed:{},expanded:{},editingProductId:null,productDraft:null});
     if(tab==='ventas'){
@@ -2026,13 +2197,13 @@ class Component extends DCLogic {
       });
     }
   };
-  verProceso=()=>{ const go=()=>{ const el=document.getElementById('ec-proceso'); if(el) window.scrollTo({top:el.getBoundingClientRect().top+window.scrollY-60,behavior:'smooth'}); }; if(this.state.view!=='home'){ this.setState({view:'home'}); setTimeout(go,80);} else go(); };
-  verContacto=()=>{ const go=()=>{ const el=document.querySelector('footer'); if(el) window.scrollTo({top:el.getBoundingClientRect().top+window.scrollY-20,behavior:'smooth'}); }; if(this.state.view!=='home'){ this.setState({view:'home'}); setTimeout(go,80);} else go(); };
+  verProceso=()=>{ const go=()=>{ const el=document.getElementById('ec-proceso'); if(el) window.scrollTo({top:el.getBoundingClientRect().top+window.scrollY-60,behavior:'smooth'}); }; if(this.state.view!=='home'){ this.navigate('/'); this.setState({view:'home'}); setTimeout(go,80);} else go(); };
+  verContacto=()=>{ const go=()=>{ const el=document.querySelector('footer'); if(el) window.scrollTo({top:el.getBoundingClientRect().top+window.scrollY-20,behavior:'smooth'}); }; if(this.state.view!=='home'){ this.navigate('/'); this.setState({view:'home'}); setTimeout(go,80);} else go(); };
   setCatColor(id,color){ this.setState({catalogColors:{...this.state.catalogColors,[id]:color}}); }
-  openProduct(id){ const p=this.getProduct(id); const fromCat=this.state.view==='catalog'; this.setState({view:'product',productId:id,detailColor:p?(this.state.catalogColors[id]||(p.colors[0]||null)):null,detailScent:this.isScented(p)?p.scents[0]:null,detailQty:1,galleryIndex:0,catalogScroll:fromCat?(window.scrollY||0):this.state.catalogScroll}); this.scrollTop(); }
+  openProduct(id){ const p=this.getProduct(id); const fromCat=this.state.view==='catalog'; this.navigate('/producto/'+encodeURIComponent(id)); this.setState({view:'product',productId:id,detailColor:p?(this.state.catalogColors[id]||(p.colors[0]||null)):null,detailScent:this.isScented(p)?p.scents[0]:null,detailQty:1,galleryIndex:0,catalogScroll:fromCat?(window.scrollY||0):this.state.catalogScroll}); this.scrollTop(); }
   setGallery(i){ this.setState({galleryIndex:i}); }
   galleryStep(d,n){ this.setState({galleryIndex:((this.state.galleryIndex+d)%n+n)%n}); }
-  backToCatalog=()=>{ const y=this.state.catalogScroll||0; this.setState({view:'catalog'}); setTimeout(()=>{ try{ window.scrollTo(0,y); }catch(e){} },40); };
+  backToCatalog=()=>{ const y=this.state.catalogScroll||0; this.navigate('/catalogo'); this.setState({view:'catalog'}); setTimeout(()=>{ try{ window.scrollTo(0,y); }catch(e){} },40); };
 
   // nav drawer
   openNav=()=>{ if(this._navT) clearTimeout(this._navT); this.setState({navMounted:true,navOpen:true}); };
@@ -2054,10 +2225,10 @@ class Component extends DCLogic {
   incLine(key){ const cart=this.state.cart.slice(); const it=cart.find(c=>c.key===key); it.qty=Math.min(this.stockFor(it.id,it.color,it.scent),it.qty+1); this.setState({cart}); }
   decLine(key){ let cart=this.state.cart.slice(); const it=cart.find(c=>c.key===key); it.qty-=1; if(it.qty<=0) cart=cart.filter(c=>c.key!==key); this.setState({cart}); }
   removeLine(key){ this.setState({cart:this.state.cart.filter(c=>c.key!==key)}); }
-  openCart=()=>{ if(this._closeT) clearTimeout(this._closeT); this.setState({cartMounted:true,cartOpen:true}); };
-  closeCart=()=>{ this.setState({cartOpen:false}); if(this._closeT) clearTimeout(this._closeT); this._closeT=setTimeout(()=>this.setState({cartMounted:false}),300); };
-  goCatalogFromCart=()=>{ this.closeCart(); this.goCatalog(); };
-  goCheckout=()=>{ if(!this.state.cart.length){ this.showToast('Tu carrito está vacío'); return; } this.closeCart(); this.setState({view:'checkout'}); this.scrollTop(); };
+  openCart=()=>{ if(this._closeT) clearTimeout(this._closeT); this.navigate('/carrito'); this.setState({cartMounted:true,cartOpen:true}); };
+  closeCart=(skipHistory)=>{ this.setState({cartOpen:false}); if(this._closeT) clearTimeout(this._closeT); this._closeT=setTimeout(()=>this.setState({cartMounted:false}),300); if(!skipHistory&&location.pathname==='/carrito'){ try{ history.back(); }catch(e){} } };
+  goCatalogFromCart=()=>{ this.closeCart(true); this.goCatalog(); };
+  goCheckout=()=>{ if(!this.state.cart.length){ this.showToast('Tu carrito está vacío'); return; } this.closeCart(true); this.navigate('/checkout'); this.setState({view:'checkout'}); this.scrollTop(); };
 
   // ============================================================
   // VENTAS — checkout público (RPC create_order) y datos de pago
@@ -2093,11 +2264,12 @@ class Component extends DCLogic {
     const isTransfer=this.state.payment==='transferencia';
     const order={code:'#'+String(data.sale_id).padStart(2,'0'),name:f.nombre,totalFmt:this.fmt(total),isTransfer,isEfectivo:!isTransfer,deliveryWord:this.state.fulfillment==='envio'?'el envío':'el retiro',items:lines.map(l=>({name:l.name,meta:l.meta,qty:l.qty,lineFmt:this.fmt(l.total)}))};
     const products=this.applyStock(this.state.products,this.state.cart,-1);
+    this.navigate('/confirmacion',true);
     this.setState({products,order,view:'confirm',cart:[]});
     this.scrollTop();
   };
   sendReceipt=()=>{ const num=String((this.state.config&&this.state.config.whatsapp)||'').replace(/\D/g,''); const url='https://wa.me/'+num; try{ window.open(url,'_blank','noopener'); }catch(e){ window.location.href=url; } };
-  backToShop=()=>{ this.setState({order:null,view:'home'}); this.scrollTop(); };
+  backToShop=()=>{ this.navigate('/'); this.setState({order:null,view:'home'}); this.scrollTop(); };
 
   // ============================================================
   // PRODUCTOS — alta y borrado
@@ -2301,8 +2473,9 @@ class Component extends DCLogic {
     const okTypes=['image/jpeg','image/jpg','image/png','image/webp'];
     if(!file||okTypes.indexOf(file.type)<0){ this.showToast('Formato no permitido. Usá JPG, PNG o WEBP'); return; }
     if(file.size>5*1024*1024){ this.showToast('La imagen no puede superar 5MB'); return; }
-    const path='site/oficio/'+this.sanitizeFileName(file.name);
-    const { error:upErr } = await supabaseClient.storage.from('product-photos').upload(path,file,{cacheControl:'3600',upsert:false,contentType:file.type});
+    const { blob,ext,type }=await this.optimizeImage(file);
+    const path='site/oficio/'+this.sanitizeFileName(file.name,ext);
+    const { error:upErr } = await supabaseClient.storage.from('product-photos').upload(path,blob,{cacheControl:'3600',upsert:false,contentType:type});
     if(upErr){ this.showToast('Error al subir imagen: '+upErr.message); return; }
     const { data:pub } = supabaseClient.storage.from('product-photos').getPublicUrl(path);
     const { error:updErr } = await supabaseClient.from('site_content').update({oficio_photo_url:pub.publicUrl}).eq('id',1);
@@ -2355,6 +2528,7 @@ class Component extends DCLogic {
 
   renderVals(){
     const s=this.state;
+    this.updateSeo();
     const cartQtyMap={}; s.cart.forEach(c=>{ cartQtyMap[c.id]=(cartQtyMap[c.id]||0)+c.qty; });
     const dec=p=>{ const scents=this.isScented(p)?p.scents:[]; const stock=this.totalStock(p); const cols=p.colors||[]; const userColor=s.catalogColors[p.id]; const catColor=cols.length?(userColor||cols[0]):null; const fp=userColor?this.firstPhoto(p,userColor):this.featuredPhoto(p); const cq=cartQtyMap[p.id]||0; return {...p,scents,stock,featured:!!p.featured,categoryLabel:this.catLabel(p.category),priceFmt:this.fmt(p.price),slotId:this.mainSlot(p.id),img:this.photoUrlFor(p),catImgSlot:fp.slot,catImgSrc:fp.src,cartQty:cq,inCart:cq>0,soldOut:stock<=0,stockLabel:stock>5?'En stock':(stock>0?('Últimas '+stock+' unidades'):'Sin stock'),stockColor:stock>5?'#6a665e':(stock>0?'#a8742e':'#b3261e'),colorDots:cols.map(n=>({name:n,hex:this.hex(n,p)})),colorBtns:cols.map(n=>({name:n,set:()=>this.setCatColor(p.id,n),style:'width:18px;height:18px;border-radius:999px;cursor:pointer;background:'+this.hex(n,p)+';transition:box-shadow .2s;'+(n===catColor?'box-shadow:inset 0 0 0 2px #fff,0 0 0 2px #232220;':'box-shadow:inset 0 0 0 1px rgba(35,34,32,.18);')}))}; };
     const decoded=s.products.map(dec);
@@ -2371,7 +2545,9 @@ class Component extends DCLogic {
 
     const catsSorted=s.categories.slice().sort((a,b)=>(a.sortOrder??0)-(b.sortOrder??0));
     const categories=catsSorted.map(c=>({id:c.id,label:c.label,slotId:'ec-cat-'+c.id,img:c.photoUrl||this.NO_PHOTO_IMG,open:()=>this.openCatWith(c.id)}));
-    const catalog=s.filter==='todos'?decoded:decoded.filter(p=>p.category===s.filter);
+    let catalog=s.filter==='todos'?decoded:decoded.filter(p=>p.category===s.filter);
+    const catSq=(s.searchQuery||'').trim().toLowerCase();
+    if(catSq) catalog=catalog.filter(p=>p.name.toLowerCase().includes(catSq)||(p.shortDesc||'').toLowerCase().includes(catSq)||this.catLabel(p.category).toLowerCase().includes(catSq));
     const chips=[{id:'todos',label:'Todo'}].concat(catsSorted.map(c=>({id:c.id,label:c.label}))).map(c=>({id:c.id,label:c.label,style:this.chipStyle(c.id===s.filter),set:()=>this.setFilter(c.id)}));
     decoded.forEach(p=>{ p.open=()=>this.openProduct(p.id); p.quickAdd=()=>this.quickAdd(p.id); });
 
@@ -2515,9 +2691,9 @@ class Component extends DCLogic {
       cfg:s.config,
       goHome:this.goHome, goCatalog:this.goCatalog, goAdmin:this.goAdmin, verProceso:this.verProceso, verContacto:this.verContacto,
       openCart:this.openCart, closeCart:this.closeCart, cartCount, cartBumpAnim:(s.cartBump%2===0?'ecBumpA':'ecBumpB')+' .45s ease',
-      navMounted:s.navMounted, openNav:this.openNav, closeNav:this.closeNav, navHome:this.navHome, navCatalog:this.navCatalog, navProceso:this.navProceso, navContacto:this.navContacto,
+      navMounted:s.navMounted, openNav:this.openNav, closeNav:this.closeNav, navHome:this.navHome, navCatalog:this.navCatalog, navProceso:this.navProceso, navContacto:this.navContacto, goSearch:this.goSearch,
       heroProduct, heroDots, heroAnim, categories, scrollCatPrev:()=>this.scrollCat(-1), scrollCatNext:()=>this.scrollCat(1),
-      catalogProducts:catalog, catalogCount:catalog.length, chips, backToCatalog:this.backToCatalog, selectedProduct, detailQty:s.detailQty, incDetail:this.incDetail, decDetail:this.decDetail, addDetail:this.addDetail,
+      catalogProducts:catalog, catalogCount:catalog.length, catalogNoResults:catalog.length===0, searchQuery:s.searchQuery, onSearchQuery:e=>this.setState({searchQuery:e.target.value}), chips, backToCatalog:this.backToCatalog, selectedProduct, detailQty:s.detailQty, incDetail:this.incDetail, decDetail:this.decDetail, addDetail:this.addDetail,
       cartLines:lines, cartEmpty:cartCount===0, cartHasItems:cartCount>0, cartSubtotalFmt:this.fmt(subtotal), cartTotalFmt:this.fmt(total),
       shippingFmt:this.fmt(s.config.shipping||0), shippingLabel:shipping>0?this.fmt(shipping):'Gratis',
       cartMounted:s.cartMounted, overlayAnim:s.cartOpen?'ecOverlayIn .3s ease both':'ecOverlayIn .3s ease both reverse', drawerAnim:s.cartOpen?'ecSlideIn .35s cubic-bezier(.4,0,.1,1) both':'ecSlideOut .3s ease both',
