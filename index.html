@@ -453,7 +453,7 @@
         <sc-if value="{{ adminAuthed }}" hint-placeholder-val="{{ false }}">
         <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:30px;align-items:center;justify-content:space-between">
           <div style="display:flex;gap:8px;flex-wrap:wrap">
-            <sc-for list="{{ adminTabs }}" as="t" hint-placeholder-count="5">
+            <sc-for list="{{ adminTabs }}" as="t" hint-placeholder-count="6">
               <button onClick="{{ t.go }}" style="{{ t.style }}">
                 {{ t.label }}
                 <sc-if value="{{ t.showBadge }}" hint-placeholder-val="{{ false }}">
@@ -476,12 +476,6 @@
             <input value="{{ prodSearch }}" onChange="{{ onProdSearch }}" placeholder="Buscar producto por nombre…" style="flex:1 1 200px;min-width:150px;border:1px solid rgba(35,34,32,.16);border-radius:10px;padding:10px 14px;font-size:14px;outline:none" style-focus="border-color:#232220">
             <select value="{{ prodCatFilter }}" onChange="{{ onProdCatFilter }}" style="border:1px solid rgba(35,34,32,.16);border-radius:10px;padding:10px 12px;font-size:13px;outline:none;background:#fff">
               <sc-for list="{{ prodCatOptions }}" as="o" hint-placeholder-count="6"><option value="{{ o.id }}">{{ o.label }}</option></sc-for>
-            </select>
-            <select value="{{ prodSort }}" onChange="{{ onProdSort }}" style="border:1px solid rgba(35,34,32,.16);border-radius:10px;padding:10px 12px;font-size:13px;outline:none;background:#fff">
-              <option value="">Orden: por defecto</option>
-              <option value="nombre">Nombre (A-Z)</option>
-              <option value="precio-asc">Precio: menor</option>
-              <option value="precio-desc">Precio: mayor</option>
             </select>
           </div>
           <sc-if value="{{ prodAdding }}" hint-placeholder-val="{{ false }}">
@@ -506,12 +500,47 @@
                   <input value="{{ np.sku }}" onChange="{{ onNPSku }}" placeholder="EC-VEL-003" style="border:1px solid rgba(35,34,32,.16);border-radius:10px;padding:10px 12px;font-size:14px;outline:none" style-focus="border-color:#232220">
                 </label>
               </div>
-              <label style="display:flex;flex-direction:column;gap:6px;font-size:12px;color:#6a665e;margin-bottom:13px">Colores <span style="color:#a8a298">(separados por coma)</span>
-                <input value="{{ np.colors }}" onChange="{{ onNPColors }}" placeholder="Cemento, Arena" style="border:1px solid rgba(35,34,32,.16);border-radius:10px;padding:10px 12px;font-size:14px;outline:none" style-focus="border-color:#232220">
-              </label>
               <label style="display:flex;flex-direction:column;gap:6px;font-size:12px;color:#6a665e;margin-bottom:16px">Descripción corta
                 <input value="{{ np.shortDesc }}" onChange="{{ onNPDesc }}" placeholder="Pieza artesanal de hormigón." style="border:1px solid rgba(35,34,32,.16);border-radius:10px;padding:10px 12px;font-size:14px;outline:none" style-focus="border-color:#232220">
               </label>
+
+              <div style="font-size:12px;color:#6a665e;margin-bottom:6px">Colores <span style="color:#a8a298">(opcional — dejalo vacío si el producto no lleva color)</span></div>
+              <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px">
+                <sc-for list="{{ npColorChips }}" as="ch" hint-placeholder-count="2">
+                  <div style="display:flex;align-items:center;gap:8px;background:#FAF9F6;border:1px solid rgba(35,34,32,.1);border-radius:999px;padding:6px 6px 6px 10px">
+                    <span style="width:13px;height:13px;border-radius:999px;background:{{ ch.hex }};box-shadow:inset 0 0 0 1px rgba(35,34,32,.14)"></span>
+                    <span style="font-size:13px;color:#232220">{{ ch.name }}</span>
+                    <button onClick="{{ ch.onRemove }}" aria-label="Quitar color" style="background:none;border:none;cursor:pointer;color:#c4bdb0;font-size:15px;padding:0;line-height:1" style-hover="color:#b3261e">×</button>
+                  </div>
+                </sc-for>
+              </div>
+              <div style="display:flex;align-items:center;gap:6px;border:1px dashed rgba(35,34,32,.2);border-radius:999px;padding:4px 5px 4px 10px;margin-bottom:16px;max-width:340px">
+                <input type="color" value="{{ np.colorDraftHex }}" onChange="{{ onNPColorHex }}" style="border:none;outline:none;background:transparent;width:24px;height:24px;padding:0;cursor:pointer;flex-shrink:0">
+                <input value="{{ np.colorDraft }}" onChange="{{ onNPColorDraft }}" placeholder="Agregar color" style="border:none;outline:none;background:transparent;font-size:13px;width:120px;color:#232220">
+                <button onClick="{{ addNPColor }}" style="background:#232220;color:#FAF9F6;border:none;cursor:pointer;border-radius:999px;width:28px;height:28px;font-size:16px;line-height:1;flex-shrink:0" style-hover="background:#3a3833">+</button>
+              </div>
+
+              <div style="font-size:12px;color:#6a665e;margin-bottom:6px">Aromas <span style="color:#a8a298">(opcional)</span></div>
+              <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px">
+                <sc-for list="{{ npAromaChips }}" as="ch" hint-placeholder-count="2">
+                  <div style="display:flex;align-items:center;gap:8px;background:#FAF9F6;border:1px solid rgba(35,34,32,.1);border-radius:999px;padding:6px 6px 6px 14px">
+                    <span style="font-size:13px;color:#232220">{{ ch.name }}</span>
+                    <button onClick="{{ ch.onRemove }}" aria-label="Quitar aroma" style="background:none;border:none;cursor:pointer;color:#c4bdb0;font-size:15px;padding:0;line-height:1" style-hover="color:#b3261e">×</button>
+                  </div>
+                </sc-for>
+              </div>
+              <div style="display:flex;align-items:center;gap:6px;border:1px dashed rgba(35,34,32,.2);border-radius:999px;padding:4px 5px 4px 14px;margin-bottom:16px;max-width:340px">
+                <input value="{{ np.aromaDraft }}" onChange="{{ onNPAromaDraft }}" placeholder="Agregar o crear aroma" style="border:none;outline:none;background:transparent;font-size:13px;flex:1;min-width:0;color:#232220">
+                <button onClick="{{ addNPAroma }}" style="background:#232220;color:#FAF9F6;border:none;cursor:pointer;border-radius:999px;width:28px;height:28px;font-size:16px;line-height:1;flex-shrink:0" style-hover="background:#3a3833">+</button>
+              </div>
+
+              <label style="display:flex;flex-direction:column;gap:6px;font-size:12px;color:#6a665e;margin-bottom:16px">Foto principal <span style="color:#a8a298">(opcional, se puede agregar después)</span>
+                <input type="file" accept="image/jpeg,image/png,image/webp" onChange="{{ onNPPhoto }}" style="font-size:13px">
+                <sc-if value="{{ np.photoName }}" hint-placeholder-val="{{ '' }}">
+                  <span style="font-size:12px;color:#6a665e">Seleccionada: {{ np.photoName }}</span>
+                </sc-if>
+              </label>
+
               <div style="display:flex;gap:12px;flex-wrap:wrap">
                 <button onClick="{{ addProduct }}" style="background:#232220;color:#FAF9F6;border:none;cursor:pointer;border-radius:999px;padding:12px 26px;font-size:14px" style-hover="background:#3a3833">Crear producto</button>
                 <button onClick="{{ toggleProdAdding }}" style="background:transparent;color:#56534c;border:1px solid rgba(35,34,32,.18);cursor:pointer;border-radius:999px;padding:12px 22px;font-size:14px" style-hover="background:rgba(35,34,32,.05)">Cancelar</button>
@@ -519,8 +548,17 @@
             </div>
           </sc-if>
 
-          <div style="display:flex;flex-direction:column;gap:14px">
-            <sc-for list="{{ adminProducts }}" as="p" hint-placeholder-count="6">
+          <div style="display:flex;flex-direction:column;gap:22px">
+            <sc-for list="{{ adminGroups }}" as="g" hint-placeholder-count="4">
+              <div>
+                <button onClick="{{ g.onToggle }}" style="display:flex;align-items:center;gap:10px;width:100%;background:#F1EFEA;border:none;cursor:pointer;border-radius:10px;padding:11px 16px;margin-bottom:10px;text-align:left" style-hover="background:#EAE7DF">
+                  <span style="font-size:13px;color:#6a665e;width:14px">{{ g.arrow }}</span>
+                  <span style="font-family:Newsreader,serif;font-size:17px;color:#232220">{{ g.label }}</span>
+                  <span style="font-size:12.5px;color:#9a958c">{{ g.count }} productos</span>
+                </button>
+                <sc-if value="{{ g.expanded }}" hint-placeholder-val="{{ true }}">
+                <div style="display:flex;flex-direction:column;gap:14px;margin-bottom:8px">
+            <sc-for list="{{ g.products }}" as="p" hint-placeholder-count="3">
               <div style="background:#fff;border:1px solid {{ p.cardBorder }};border-left:4px solid {{ p.cardAccent }};border-radius:14px;padding:16px 18px">
                 <div style="display:flex;align-items:flex-start;gap:16px;flex-wrap:wrap">
                   <!-- FOTO PRINCIPAL: control único, siempre visible, se guarda al instante -->
@@ -579,32 +617,6 @@
                       </label>
                     </div>
                   </div>
-
-                  <!-- AROMAS -->
-                  <sc-if value="{{ p.catAroma }}" hint-placeholder-val="{{ false }}">
-                  <div style="margin-top:14px;padding-top:14px;border-top:1px solid rgba(35,34,32,.07)">
-                    <div style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#9a958c;margin-bottom:10px">Aromas</div>
-                    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px">
-                      <sc-for list="{{ p.aromaRows }}" as="r" hint-placeholder-count="2">
-                        <div style="display:flex;align-items:center;gap:8px;background:#FAF9F6;border:1px solid rgba(35,34,32,.1);border-radius:999px;padding:6px 6px 6px 14px">
-                          <span style="font-size:13px;color:#232220">{{ r.name }}</span>
-                          <button onClick="{{ r.onRemove }}" aria-label="Quitar aroma" style="background:none;border:none;cursor:pointer;color:#c4bdb0;font-size:15px;padding:0;line-height:1" style-hover="color:#b3261e">×</button>
-                        </div>
-                      </sc-for>
-                      <sc-if value="{{ p.aromaNoRows }}" hint-placeholder-val="{{ false }}">
-                        <span style="font-size:13px;color:#9a958c;padding:6px 2px">Sin aromas asignados todavía.</span>
-                      </sc-if>
-                    </div>
-                    <div style="display:flex;align-items:center;gap:6px;border:1px dashed rgba(35,34,32,.2);border-radius:999px;padding:4px 5px 4px 14px;max-width:320px">
-                      <input value="{{ aromaSearch }}" onChange="{{ onAromaSearch }}" placeholder="Buscar aroma para agregar…" style="border:none;outline:none;background:transparent;font-size:13px;flex:1;min-width:0;color:#232220">
-                    </div>
-                    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px">
-                      <sc-for list="{{ p.aromaResults }}" as="r" hint-placeholder-count="3">
-                        <button onClick="{{ r.add }}" style="background:#fff;border:1px solid rgba(35,34,32,.16);color:#232220;cursor:pointer;border-radius:999px;padding:6px 14px;font-size:12.5px" style-hover="background:#232220;color:#FAF9F6">+ {{ r.name }}</button>
-                      </sc-for>
-                    </div>
-                  </div>
-                  </sc-if>
 
                   <!-- COLORES Y STOCK -->
                   <div style="margin-top:14px;padding-top:14px;border-top:1px solid rgba(35,34,32,.07)">
@@ -677,11 +689,42 @@
                     </div>
                   </div>
 
+                  <!-- AROMAS -->
+                  <div style="margin-top:14px;padding-top:14px;border-top:1px solid rgba(35,34,32,.07)">
+                    <div style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#9a958c;margin-bottom:10px">Aromas</div>
+                    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px">
+                      <sc-for list="{{ p.aromaRows }}" as="r" hint-placeholder-count="2">
+                        <div style="display:flex;align-items:center;gap:8px;background:#FAF9F6;border:1px solid rgba(35,34,32,.1);border-radius:999px;padding:6px 6px 6px 14px">
+                          <span style="font-size:13px;color:#232220">{{ r.name }}</span>
+                          <button onClick="{{ r.onRemove }}" aria-label="Quitar aroma" style="background:none;border:none;cursor:pointer;color:#c4bdb0;font-size:15px;padding:0;line-height:1" style-hover="color:#b3261e">×</button>
+                        </div>
+                      </sc-for>
+                      <sc-if value="{{ p.aromaNoRows }}" hint-placeholder-val="{{ false }}">
+                        <span style="font-size:13px;color:#9a958c;padding:6px 2px">Sin aromas asignados todavía.</span>
+                      </sc-if>
+                    </div>
+                    <div style="display:flex;align-items:center;gap:6px;border:1px dashed rgba(35,34,32,.2);border-radius:999px;padding:4px 5px 4px 14px;max-width:320px">
+                      <input value="{{ aromaSearch }}" onChange="{{ onAromaSearch }}" placeholder="Buscar o crear aroma…" style="border:none;outline:none;background:transparent;font-size:13px;flex:1;min-width:0;color:#232220">
+                    </div>
+                    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px">
+                      <sc-for list="{{ p.aromaResults }}" as="r" hint-placeholder-count="3">
+                        <button onClick="{{ r.add }}" style="background:#fff;border:1px solid rgba(35,34,32,.16);color:#232220;cursor:pointer;border-radius:999px;padding:6px 14px;font-size:12.5px" style-hover="background:#232220;color:#FAF9F6">+ {{ r.name }}</button>
+                      </sc-for>
+                      <sc-if value="{{ p.aromaCanCreate }}" hint-placeholder-val="{{ false }}">
+                        <button onClick="{{ p.onCreateAroma }}" style="background:#232220;color:#FAF9F6;border:none;cursor:pointer;border-radius:999px;padding:6px 14px;font-size:12.5px" style-hover="background:#3a3833">+ Crear "{{ aromaSearch }}"</button>
+                      </sc-if>
+                    </div>
+                  </div>
+
                   <!-- GUARDAR / CANCELAR -->
                   <div style="margin-top:16px;padding-top:14px;border-top:1px solid rgba(35,34,32,.07);display:flex;gap:10px;justify-content:flex-end">
                     <button onClick="{{ p.onCancelDraft }}" style="background:transparent;color:#56534c;border:1px solid rgba(35,34,32,.18);cursor:pointer;border-radius:999px;padding:11px 22px;font-size:14px" style-hover="background:rgba(35,34,32,.05)">Cancelar</button>
                     <button onClick="{{ p.onSaveDraft }}" style="background:#232220;color:#FAF9F6;border:none;cursor:pointer;border-radius:999px;padding:11px 26px;font-size:14px" style-hover="background:#3a3833">Guardar cambios</button>
                   </div>
+                </div>
+                </sc-if>
+              </div>
+            </sc-for>
                 </div>
                 </sc-if>
               </div>
@@ -702,9 +745,6 @@
               <label style="display:flex;flex-direction:column;gap:6px;font-size:12px;color:#6a665e;flex:1 1 200px">Nombre de la categoría
                 <input value="{{ ncat.label }}" onChange="{{ onNCatLabel }}" placeholder="Ej. Maceteros" style="border:1px solid rgba(35,34,32,.16);border-radius:10px;padding:10px 12px;font-size:14px;outline:none" style-focus="border-color:#232220">
               </label>
-              <label style="display:flex;align-items:center;gap:9px;font-size:14px;color:#56534c;cursor:pointer;padding:10px 0">
-                <input type="checkbox" checked="{{ ncat.hasAroma }}" onChange="{{ onNCatAroma }}" style="accent-color:#232220;width:17px;height:17px">Permite aromas
-              </label>
               <button onClick="{{ addCategory }}" style="background:#232220;color:#FAF9F6;border:none;cursor:pointer;border-radius:999px;padding:11px 24px;font-size:14px" style-hover="background:#3a3833">Crear</button>
             </div>
           </sc-if>
@@ -723,9 +763,6 @@
                   </div>
                 </div>
                 <input value="{{ c.label }}" onChange="{{ c.onLabel }}" style="flex:1 1 160px;min-width:130px;border:1px solid transparent;border-radius:8px;padding:6px 8px;font-size:16px;color:#232220;background:#FAF9F6;font-family:Newsreader,serif;outline:none" style-focus="border-color:rgba(35,34,32,.2)">
-                <label style="display:flex;align-items:center;gap:8px;font-size:13px;color:#56534c;cursor:pointer">
-                  <input type="checkbox" checked="{{ c.hasAroma }}" onChange="{{ c.onToggleAroma }}" style="accent-color:#232220;width:16px;height:16px">Aromas
-                </label>
                 <div style="font-size:13px;color:#9a958c;min-width:96px">{{ c.count }} productos</div>
                 <div style="display:flex;flex-direction:column;gap:3px">
                   <button onClick="{{ c.onUp }}" aria-label="Subir" style="{{ c.upStyle }}">▲</button>
@@ -1329,15 +1366,15 @@ class Component extends DCLogic {
       cart:[], cartMounted:false, cartOpen:false,
       navMounted:false, navOpen:false,
       filter:'todos', catalogColors:{}, catalogScroll:0, cartBump:0, galleryIndex:0,
-      prodSearch:'', prodCatFilter:'todas', prodSort:'', expanded:{},
+      prodSearch:'', prodCatFilter:'todas', expanded:{}, catGroupCollapsed:{},
       detailColor:null, detailScent:null, detailQty:1,
       form:{nombre:'',apellido:'',telefono:'',email:'',direccion:''},
       fulfillment:'retiro', payment:'transferencia',
       heroIndex:0,
       stockEditId:null, aromaSearch:'',
       editingProductId:null, productDraft:null, draftColorInput:'', draftColorHex:'#B6B1A8',
-      prodAdding:false, newProduct:this.emptyNP(),
-      catAdding:false, newCat:{label:'',hasAroma:true},
+      prodAdding:false, newProduct:this.emptyNP(), newProductPhoto:null,
+      catAdding:false, newCat:{label:''},
       newAroma:'', aromaEdits:{}, aromaEditName:null,
       saleAdding:false, salePick:{id:'',color:'',scent:'',qty:1}, saleDraft:{customer:'',payment:'efectivo',items:[]},
       saleDetailSeq:null,
@@ -1354,15 +1391,13 @@ class Component extends DCLogic {
   fmt(n){ return '$'+Number(n||0).toLocaleString('es-AR'); }
   hex(name,p){ return (p&&p.colorHex&&p.colorHex[name])||this.HEX[name]||'#B6B1A8'; }
   slug(s){ return String(s).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,''); }
-  emptyNP(){ return {name:'',category:'velas',price:'',colors:'',stock:'',shortDesc:'',sku:''}; }
+  emptyNP(){ return {name:'',category:'velas',price:'',stock:'',shortDesc:'',sku:'',colorsList:[],colorDraft:'',colorDraftHex:'#B6B1A8',aromasList:[],aromaDraft:'',photoName:''}; }
   scrollTop(){ const go=()=>{ try{ window.scrollTo(0,0); }catch(e){} }; go(); requestAnimationFrame(()=>{ go(); requestAnimationFrame(go); }); }
   stop=e=>{ if(e&&e.stopPropagation) e.stopPropagation(); };
   getProduct(id){ return this.state.products.find(x=>x.id===id); }
   getCat(id){ return this.state.categories.find(c=>c.id===id); }
   catLabel(id){ const c=this.getCat(id); return c?c.label:id; }
-  catHasAroma(id){ const c=this.getCat(id); return !!(c&&c.hasAroma); }
-  isScentedCat(catId,scents){ const c=(this.state?this.state.categories:null)||this._cats; const cat=(c||[]).find(x=>x.id===catId); return !!(cat&&cat.hasAroma&&scents&&scents.length); }
-  isScented(p){ return !!(p&&this.catHasAroma(p.category)&&p.scents&&p.scents.length); }
+  isScented(p){ return !!(p&&p.scents&&p.scents.length); }
   // Build unified per-color (and per-color×aroma) stock from legacy fields.
   colorKeys(p){ return (p&&p.colors&&p.colors.length)?p.colors:['']; }
   variantQty(p,color,scent){ const cs=p.cstock||{}; if(this.isScented(p)){ return (cs[color]&&cs[color][scent])||0; } return cs[color]||0; }
@@ -1434,9 +1469,10 @@ class Component extends DCLogic {
   };
   setDraftColorHex=(idx,hex)=>{ const d=this.state.productDraft; const colors=d.colors.map((c,i)=>i===idx?{...c,hex}:c); this.setState({productDraft:{...d,colors}}); };
   removeDraftColor=(idx)=>{
-    const d=this.state.productDraft; if(d.colors.length<=1){ this.showToast('El producto necesita al menos un color'); return; }
+    const d=this.state.productDraft;
     const name=d.colors[idx].name; const colors=d.colors.filter((_,i)=>i!==idx);
     const cstock={...d.cstock}; delete cstock[name];
+    if(!colors.length){ cstock['']=d.scents.length?d.scents.reduce((o,sc)=>{o[sc]=0;return o;},{}):0; }
     this.setState({productDraft:{...d,colors,cstock}});
   };
   draftAdjustVariant=(color,scent,delta)=>{
@@ -1454,24 +1490,34 @@ class Component extends DCLogic {
   draftAssignAroma=(name)=>{
     const d=this.state.productDraft; if(d.scents.indexOf(name)>=0) return;
     const scents=[...d.scents,name]; const cstock=JSON.parse(JSON.stringify(d.cstock));
-    d.colors.forEach(c=>{ if(!cstock[c.name]||typeof cstock[c.name]!=='object') cstock[c.name]={}; if(!(name in cstock[c.name])) cstock[c.name][name]=0; });
+    const keys=d.colors.length?d.colors.map(c=>c.name):[''];
+    keys.forEach(k=>{ if(!cstock[k]||typeof cstock[k]!=='object') cstock[k]={}; if(!(name in cstock[k])) cstock[k][name]=0; });
     this.setState({productDraft:{...d,scents,cstock}});
   };
   draftRemoveAroma=(name)=>{
     const d=this.state.productDraft; const scents=d.scents.filter(s=>s!==name); const cstock=JSON.parse(JSON.stringify(d.cstock));
-    d.colors.forEach(c=>{ if(cstock[c.name]&&typeof cstock[c.name]==='object') delete cstock[c.name][name]; });
+    const keys=d.colors.length?d.colors.map(c=>c.name):[''];
+    keys.forEach(k=>{ if(cstock[k]&&typeof cstock[k]==='object') delete cstock[k][name]; });
     this.setState({productDraft:{...d,scents,cstock}});
+  };
+  createAndAssignAroma=async()=>{
+    const name=(this.state.aromaSearch||'').trim(); if(!name) return;
+    if(this.state.aromas.some(a=>a.toLowerCase()===name.toLowerCase())){ this.draftAssignAroma(name); this.setState({aromaSearch:''}); return; }
+    const { error } = await supabaseClient.from('aromas').insert({name});
+    if(error){ this.showToast('Error al crear aroma: '+error.message); return; }
+    this.setState({aromas:[name,...this.state.aromas],aromaSearch:''});
+    this.draftAssignAroma(name);
   };
   saveProductDraft=async()=>{
     const id=this.state.editingProductId; const d=this.state.productDraft; const orig=this.getProduct(id);
     if(!id||!d||!orig) return;
     if(!d.name.trim()){ this.showToast('Poné un nombre'); return; }
-    if(!d.colors.length){ this.showToast('El producto necesita al menos un color'); return; }
     try{
       const price=parseInt(String(d.price).replace(/\D/g,''),10)||0;
       const { error:pErr } = await supabaseClient.from('products').update({name:d.name.trim(),short_desc:d.shortDesc,long_desc:d.longDesc,price,sku:d.sku||null,category_id:d.category}).eq('id',id);
       if(pErr) throw pErr;
 
+      // product_colors solo guarda colores con nombre real — un producto sin color no tiene filas ahí.
       const origColors=orig.colors||[];
       for(const oc of origColors){
         if(!d.colors.some(c=>c.orig===oc)){
@@ -1483,10 +1529,6 @@ class Component extends DCLogic {
         const c=d.colors[i];
         if(c.orig===null){
           await supabaseClient.from('product_colors').insert({product_id:id,color_name:c.name,hex_value:c.hex||null,sort_order:i});
-          const rows=d.scents.length
-            ? d.scents.map(sc=>({product_id:id,color_name:c.name,aroma_name:sc,quantity:(d.cstock[c.name]&&d.cstock[c.name][sc])||0}))
-            : [{product_id:id,color_name:c.name,aroma_name:null,quantity:(typeof d.cstock[c.name]==='number'?d.cstock[c.name]:0)}];
-          await supabaseClient.from('stock').insert(rows);
         } else {
           const patch={sort_order:i, hex_value:c.hex||null};
           if(c.orig!==c.name) patch.color_name=c.name;
@@ -1495,6 +1537,7 @@ class Component extends DCLogic {
         }
       }
 
+      // aromas del catálogo global asignados/quitados a este producto
       const origScents=orig.scents||[];
       for(const os of origScents){
         if(d.scents.indexOf(os)<0){
@@ -1502,30 +1545,40 @@ class Component extends DCLogic {
           await supabaseClient.from('stock').delete().eq('product_id',id).eq('aroma_name',os);
         }
       }
-      for(let i=0;i<d.scents.length;i++){
-        const sc=d.scents[i];
+      for(const sc of d.scents){
         if(origScents.indexOf(sc)<0){
-          await supabaseClient.from('product_aromas').insert({product_id:id,aroma_name:sc,sort_order:i});
-          const rows=d.colors.map(c=>({product_id:id,color_name:c.name,aroma_name:sc,quantity:(d.cstock[c.name]&&d.cstock[c.name][sc])||0}));
-          await supabaseClient.from('stock').insert(rows);
+          await supabaseClient.from('product_aromas').insert({product_id:id,aroma_name:sc,sort_order:d.scents.indexOf(sc)});
         }
       }
 
+      // Stock: se normaliza a "al menos un color" usando '' como bucket general cuando el
+      // producto no tiene colores (evita casos especiales duplicados de inserción).
+      const draftColors=d.colors.length?d.colors:[{orig:origColors.length?null:'',name:'',hex:''}];
       const scentedDraft=d.scents.length>0;
-      for(const c of d.colors){
+      for(const c of draftColors){
+        const key=c.name;
         if(scentedDraft){
           for(const sc of d.scents){
-            const draftQty=(d.cstock[c.name]&&d.cstock[c.name][sc])||0;
-            const origHasColor=c.orig&&orig.cstock&&orig.cstock[c.orig]&&typeof orig.cstock[c.orig]==='object';
-            if(!origHasColor||origScents.indexOf(sc)<0) continue; // brand-new color/aroma combo, already inserted above
+            const draftQty=(d.cstock[key]&&d.cstock[key][sc])||0;
+            const origHasCombo=c.orig!==null&&orig.cstock&&orig.cstock[c.orig]&&typeof orig.cstock[c.orig]==='object'&&origScents.indexOf(sc)>=0;
+            if(!origHasCombo){
+              await supabaseClient.from('stock').insert({product_id:id,color_name:key,aroma_name:sc,quantity:draftQty});
+              if(draftQty>0) await this.recordStockMovement(id,key,sc,'entrada',draftQty,'Alta de variante');
+              continue;
+            }
             const origQty=orig.cstock[c.orig][sc]||0;
-            if(draftQty!==origQty){ await this.upsertStockRemote(id,c.name,sc,draftQty); await this.recordStockMovement(id,c.name,sc,'ajuste',draftQty-origQty,'Edición de producto'); }
+            if(draftQty!==origQty){ await this.upsertStockRemote(id,key,sc,draftQty); await this.recordStockMovement(id,key,sc,'ajuste',draftQty-origQty,'Edición de producto'); }
           }
         } else {
-          const draftQty=typeof d.cstock[c.name]==='number'?d.cstock[c.name]:0;
-          if(!c.orig) continue; // brand-new color, already inserted above
+          const draftQty=typeof d.cstock[key]==='number'?d.cstock[key]:0;
+          const origHasColor=c.orig!==null&&typeof orig.cstock[c.orig]==='number';
+          if(!origHasColor){
+            await supabaseClient.from('stock').insert({product_id:id,color_name:key,aroma_name:null,quantity:draftQty});
+            if(draftQty>0) await this.recordStockMovement(id,key,null,'entrada',draftQty,'Alta de variante');
+            continue;
+          }
           const origQty=typeof orig.cstock[c.orig]==='number'?orig.cstock[c.orig]:0;
-          if(draftQty!==origQty){ await this.upsertStockRemote(id,c.name,null,draftQty); await this.recordStockMovement(id,c.name,null,'ajuste',draftQty-origQty,'Edición de producto'); }
+          if(draftQty!==origQty){ await this.upsertStockRemote(id,key,null,draftQty); await this.recordStockMovement(id,key,null,'ajuste',draftQty-origQty,'Edición de producto'); }
         }
       }
 
@@ -1695,17 +1748,15 @@ class Component extends DCLogic {
       ]);
       const err=[catsQ,prodQ,colorsQ,aromasQ,prodAromasQ,stockQ,photosQ].map(r=>r.error).find(Boolean);
       if(err){ console.error('Supabase loadCatalog error',err); this.showToast('No se pudo cargar el catálogo'); return; }
-      const categories=catsQ.data.map(c=>({id:c.id,label:c.label,hasAroma:c.has_aroma,photoUrl:c.photo_url||'',sortOrder:c.sort_order}));
-      const catById={}; categories.forEach(c=>catById[c.id]=c);
+      const categories=catsQ.data.map(c=>({id:c.id,label:c.label,photoUrl:c.photo_url||'',sortOrder:c.sort_order}));
       const colorsByProduct={}; const colorHexByProduct={}; colorsQ.data.forEach(r=>{ (colorsByProduct[r.product_id]=colorsByProduct[r.product_id]||[]).push(r.color_name); if(r.hex_value){ (colorHexByProduct[r.product_id]=colorHexByProduct[r.product_id]||{})[r.color_name]=r.hex_value; } });
       const aromasByProduct={}; prodAromasQ.data.forEach(r=>{ (aromasByProduct[r.product_id]=aromasByProduct[r.product_id]||[]).push(r.aroma_name); });
       const stockByProduct={}; stockQ.data.forEach(r=>{ (stockByProduct[r.product_id]=stockByProduct[r.product_id]||[]).push(r); });
       const photosByProduct={}; photosQ.data.forEach(r=>{ (photosByProduct[r.product_id]=photosByProduct[r.product_id]||[]).push(r); });
       const products=prodQ.data.map(p=>{
-        const cat=catById[p.category_id];
         const colors=colorsByProduct[p.id]||[];
-        const scents=(cat&&cat.hasAroma)?(aromasByProduct[p.id]||[]):[];
-        const scented=!!(cat&&cat.hasAroma&&scents.length);
+        const scents=aromasByProduct[p.id]||[];
+        const scented=scents.length>0;
         const cstock={}; colors.forEach(col=>{ cstock[col]=scented?{}:0; });
         (stockByProduct[p.id]||[]).forEach(r=>{
           if(!(r.color_name in cstock)) cstock[r.color_name]=scented?{}:0;
@@ -1832,25 +1883,49 @@ class Component extends DCLogic {
   // PRODUCTOS — alta y borrado
   // ============================================================
   setNP(patch){ this.setState({newProduct:{...this.state.newProduct,...patch}}); }
-  toggleProdAdding=()=>this.setState({prodAdding:!this.state.prodAdding,newProduct:this.emptyNP()});
+  toggleProdAdding=()=>this.setState({prodAdding:!this.state.prodAdding,newProduct:this.emptyNP(),newProductPhoto:null});
+  addNPColor=()=>{ const np=this.state.newProduct; const name=(np.colorDraft||'').trim(); if(!name) return; if(np.colorsList.some(c=>c.name.toLowerCase()===name.toLowerCase())){ this.showToast('Ese color ya existe'); return; } this.setNP({colorsList:[...np.colorsList,{name,hex:np.colorDraftHex}],colorDraft:'',colorDraftHex:'#B6B1A8'}); };
+  removeNPColor=(idx)=>{ const np=this.state.newProduct; this.setNP({colorsList:np.colorsList.filter((_,i)=>i!==idx)}); };
+  addNPAroma=()=>{ const np=this.state.newProduct; const name=(np.aromaDraft||'').trim(); if(!name) return; if(np.aromasList.some(a=>a.toLowerCase()===name.toLowerCase())){ this.showToast('Ese aroma ya está agregado'); return; } this.setNP({aromasList:[...np.aromasList,name],aromaDraft:''}); };
+  removeNPAroma=(idx)=>{ const np=this.state.newProduct; this.setNP({aromasList:np.aromasList.filter((_,i)=>i!==idx)}); };
+  onNPPhoto=e=>{ const f=e.target.files&&e.target.files[0]; this.setState({newProductPhoto:f||null}); this.setNP({photoName:f?f.name:''}); };
   addProduct=async()=>{
     const np=this.state.newProduct; const name=(np.name||'').trim();
     if(!name){ this.showToast('Poné un nombre'); return; }
     const price=parseInt(String(np.price).replace(/\D/g,''),10)||0;
-    let colors=(np.colors||'').split(',').map(s=>s.trim()).filter(Boolean);
-    if(!colors.length) colors=['Cemento'];
+    const colors=np.colorsList||[]; const aromas=np.aromasList||[];
     let id=this.slug(name); if(!id) id='prod-'+Date.now();
     if(this.state.products.some(p=>p.id===id)) id=id+'-'+Math.floor(Math.random()*999);
     const sd=(np.shortDesc||'').trim();
     const sku=(np.sku||'').trim()||('AUTO-'+Date.now().toString().slice(-6));
     const { error:prodErr } = await supabaseClient.from('products').insert({id,sku,category_id:np.category||'velas',name,short_desc:sd||'Pieza artesanal de hormigón.',long_desc:sd||'Pieza artesanal hecha a mano en hormigón.',price,featured:false,active:true});
     if(prodErr){ this.showToast('Error al crear producto: '+prodErr.message); return; }
-    await supabaseClient.from('product_colors').insert(colors.map((c,i)=>({product_id:id,color_name:c,sort_order:i})));
-    const total=Math.max(0,parseInt(np.stock,10)||0); const n=colors.length; const base=Math.floor(total/n);
-    const stockRows=colors.map((c,i)=>({product_id:id,color_name:c,aroma_name:null,quantity:base+(i===0?(total-base*n):0)}));
+
+    if(colors.length){
+      await supabaseClient.from('product_colors').insert(colors.map((c,i)=>({product_id:id,color_name:c.name,hex_value:c.hex||null,sort_order:i})));
+    }
+    if(aromas.length){
+      const newAromaNames=aromas.filter(a=>!this.state.aromas.some(x=>x.toLowerCase()===a.toLowerCase()));
+      if(newAromaNames.length) await supabaseClient.from('aromas').insert(newAromaNames.map(name=>({name})));
+      await supabaseClient.from('product_aromas').insert(aromas.map((a,i)=>({product_id:id,aroma_name:a,sort_order:i})));
+    }
+
+    const total=Math.max(0,parseInt(np.stock,10)||0);
+    const colorKeys=colors.length?colors.map(c=>c.name):[''];
+    const comboCount=Math.max(1,aromas.length?colorKeys.length*aromas.length:colorKeys.length);
+    const base=Math.floor(total/comboCount); const remainder=total-base*comboCount;
+    const stockRows=[]; let idx=0;
+    if(aromas.length){
+      colorKeys.forEach(ck=>{ aromas.forEach(a=>{ stockRows.push({product_id:id,color_name:ck,aroma_name:a,quantity:base+(idx===0?remainder:0)}); idx++; }); });
+    } else {
+      colorKeys.forEach(ck=>{ stockRows.push({product_id:id,color_name:ck,aroma_name:null,quantity:base+(idx===0?remainder:0)}); idx++; });
+    }
     await supabaseClient.from('stock').insert(stockRows);
-    await Promise.all(stockRows.map(r=>this.recordStockMovement(id,r.color_name,null,'entrada',r.quantity,'Alta de producto')));
-    this.setState({newProduct:this.emptyNP(),prodAdding:false});
+    await Promise.all(stockRows.map(r=>this.recordStockMovement(id,r.color_name,r.aroma_name,'entrada',r.quantity,'Alta de producto')));
+
+    if(this.state.newProductPhoto) await this.uploadProductPhoto(id,null,this.state.newProductPhoto);
+
+    this.setState({newProduct:this.emptyNP(),newProductPhoto:null,prodAdding:false});
     await this.loadCatalog();
     this.showToast(name+' · creado');
   };
@@ -1861,9 +1936,9 @@ class Component extends DCLogic {
   // ============================================================
   // CATEGORÍAS
   // ============================================================
-  toggleCatAdding=()=>this.setState({catAdding:!this.state.catAdding,newCat:{label:'',hasAroma:true}});
+  toggleCatAdding=()=>this.setState({catAdding:!this.state.catAdding,newCat:{label:''}});
   setNCat(patch){ this.setState({newCat:{...this.state.newCat,...patch}}); }
-  addCategory=async()=>{ const label=(this.state.newCat.label||'').trim(); if(!label){ this.showToast('Poné un nombre'); return; } let id=this.slug(label); if(!id) id='cat-'+Date.now(); if(this.state.categories.some(c=>c.id===id)) id=id+'-'+Math.floor(Math.random()*999); const hasAroma=!!this.state.newCat.hasAroma; const sortOrder=this.state.categories.reduce((m,c)=>Math.max(m,c.sortOrder||0),0)+1; const { error } = await supabaseClient.from('categories').insert({id,label,has_aroma:hasAroma,sort_order:sortOrder}); if(error){ this.showToast('Error al crear categoría: '+error.message); return; } this.setState({categories:[...this.state.categories,{id,label,hasAroma,sortOrder}],catAdding:false,newCat:{label:'',hasAroma:true}}); this.showToast(label+' · categoría creada'); };
+  addCategory=async()=>{ const label=(this.state.newCat.label||'').trim(); if(!label){ this.showToast('Poné un nombre'); return; } let id=this.slug(label); if(!id) id='cat-'+Date.now(); if(this.state.categories.some(c=>c.id===id)) id=id+'-'+Math.floor(Math.random()*999); const sortOrder=this.state.categories.reduce((m,c)=>Math.max(m,c.sortOrder||0),0)+1; const { error } = await supabaseClient.from('categories').insert({id,label,sort_order:sortOrder}); if(error){ this.showToast('Error al crear categoría: '+error.message); return; } this.setState({categories:[...this.state.categories,{id,label,sortOrder}],catAdding:false,newCat:{label:''}}); this.showToast(label+' · categoría creada'); };
   moveCategory=async(id,dir)=>{
     const list=this.state.categories.slice().sort((a,b)=>(a.sortOrder??0)-(b.sortOrder??0));
     const i=list.findIndex(c=>c.id===id); if(i<0) return;
@@ -1874,7 +1949,6 @@ class Component extends DCLogic {
     await supabaseClient.from('categories').update({sort_order:posA}).eq('id',b.id);
   };
   setCatLabel(id,v){ this.setState({categories:this.state.categories.map(c=>c.id===id?{...c,label:v}:c)}); this.debounce('catlabel:'+id,()=>supabaseClient.from('categories').update({label:v}).eq('id',id)); }
-  toggleCatAroma=async(id)=>{ const cat=this.getCat(id); const next=!cat.hasAroma; this.setState({categories:this.state.categories.map(c=>c.id===id?{...c,hasAroma:next}:c)}); await supabaseClient.from('categories').update({has_aroma:next}).eq('id',id); };
   deleteCategory(id){ const c=this.getCat(id); const n=this.state.products.filter(p=>p.category===id).length; if(n>0){ this.showToast('No se puede: hay '+n+' productos en esa categoría'); return; } this.askConfirm({title:'Eliminar categoría',message:'¿Eliminar la categoría "'+(c?c.label:'')+'"?',yesLabel:'Eliminar',danger:true,onYes:async()=>{ const { error } = await supabaseClient.from('categories').delete().eq('id',id); if(error){ this.showToast('No se pudo eliminar: '+error.message); return; } this.setState({categories:this.state.categories.filter(x=>x.id!==id)}); this.showToast('Categoría eliminada'); }}); }
 
   // ============================================================
@@ -2087,11 +2161,7 @@ class Component extends DCLogic {
     let prodList=decoded;
     if(pq) prodList=prodList.filter(p=>p.name.toLowerCase().includes(pq)||this.catLabel(p.category).toLowerCase().includes(pq));
     if(s.prodCatFilter!=='todas') prodList=prodList.filter(p=>p.category===s.prodCatFilter);
-    if(s.prodSort==='precio-asc') prodList=prodList.slice().sort((a,b)=>a.price-b.price);
-    else if(s.prodSort==='precio-desc') prodList=prodList.slice().sort((a,b)=>b.price-a.price);
-    else if(s.prodSort==='nombre') prodList=prodList.slice().sort((a,b)=>a.name.localeCompare(b.name));
     const adminProducts=prodList.map(p=>{
-      const catAroma=this.catHasAroma(p.category);
       const uiKeys=(p.colors&&p.colors.length)?p.colors:[''];
       const missing=uiKeys.filter(c=>this.filledPhotos(p,c||null).length===0).map(c=>c||'general');
       const warn=missing.length>0;
@@ -2102,10 +2172,10 @@ class Component extends DCLogic {
       const vColorEntries=isEditing?d.colors:(p.colors||[]).map(name=>({orig:name,name,hex:(p.colorHex&&p.colorHex[name])||''}));
       const vScents=isEditing?d.scents:p.scents;
       const vCstock=isEditing?d.cstock:p.cstock;
-      const vScented=catAroma&&vScents.length>0;
+      const vScented=vScents.length>0;
       const vColorKeys=vColorEntries.length?vColorEntries.map(c=>c.name):[''];
       const draftColorTotal=(cs,color,scented)=>{ if(scented){ const m=cs[color]||{}; return vScents.reduce((a,sc)=>a+(m[sc]||0),0); } return (typeof cs[color]==='number')?cs[color]:0; };
-      return {...p, catAroma, scentCount:vScents.length, isEditing, notEditing:!isEditing,
+      return {...p, scentCount:vScents.length, isEditing, notEditing:!isEditing,
         cardBorder:warn?'rgba(214,138,46,.4)':'rgba(35,34,32,.07)', cardAccent:warn?'#e0922e':'transparent',
         warn, warnMsg: warn?('Falta foto: '+missing.join(', ')):'',
         expanded:!!s.expanded[p.id], expandLabel:s.expanded[p.id]?'Cancelar':'Editar', onToggleExpand:()=>this.toggleExpand(p.id),
@@ -2113,8 +2183,10 @@ class Component extends DCLogic {
         shortDesc:isEditing?d.shortDesc:(p.shortDesc||''), longDesc:isEditing?d.longDesc:(p.longDesc||''),
         onName:e=>this.setDraftField('name',e.target.value), onCategory:e=>this.setDraftField('category',e.target.value), onPrice:e=>this.setDraftField('price',e.target.value), onSku:e=>this.setDraftField('sku',e.target.value),
         onShortDesc:e=>this.setDraftField('shortDesc',e.target.value), onLongDesc:e=>this.setDraftField('longDesc',e.target.value),
-        aromaRows:vScents.map(n=>({name:n,onRemove:()=>this.draftRemoveAroma(n)})), aromaNoRows:catAroma&&vScents.length===0,
-        aromaResults:catAroma?s.aromas.filter(a=>vScents.indexOf(a)<0&&a.toLowerCase().includes((s.aromaSearch||'').toLowerCase())).map(a=>({name:a,add:()=>this.draftAssignAroma(a)})):[],
+        aromaRows:vScents.map(n=>({name:n,onRemove:()=>this.draftRemoveAroma(n)})), aromaNoRows:vScents.length===0,
+        aromaResults:s.aromas.filter(a=>vScents.indexOf(a)<0&&a.toLowerCase().includes((s.aromaSearch||'').toLowerCase())).map(a=>({name:a,add:()=>this.draftAssignAroma(a)})),
+        aromaCanCreate:!!(s.aromaSearch||'').trim()&&!s.aromas.some(a=>a.toLowerCase()===(s.aromaSearch||'').trim().toLowerCase()),
+        onCreateAroma:()=>this.createAndAssignAroma(),
         onDelete:()=>this.deleteProduct(p.id),
         hasColors:(p.colors||[]).length>0,
         onUploadMain:e=>{ const f=e.target.files&&e.target.files[0]; if(f) this.uploadProductPhoto(p.id,null,f); e.target.value=''; },
@@ -2133,15 +2205,23 @@ class Component extends DCLogic {
       };
     });
     const catOptions=s.categories.map(c=>({id:c.id,label:c.label}));
+    const catsForGroups=s.categories.slice().sort((a,b)=>(a.sortOrder??0)-(b.sortOrder??0));
+    const adminGroups=catsForGroups.map(c=>{
+      const items=adminProducts.filter(p=>p.category===c.id).sort((a,b)=>(a.sku||'').localeCompare(b.sku||'',undefined,{numeric:true,sensitivity:'base'})||a.name.localeCompare(b.name));
+      const collapsed=!!s.catGroupCollapsed[c.id];
+      return { id:c.id, label:c.label, count:items.length, products:items, collapsed, expanded:!collapsed,
+        onToggle:()=>this.setState({catGroupCollapsed:{...s.catGroupCollapsed,[c.id]:!collapsed}}),
+        arrow:collapsed?'▸':'▾' };
+    }).filter(g=>g.count>0);
 
     // admin categories
     const catArrowStyle=dis=>'background:'+(dis?'#F4F2EC':'#F0EEE9')+';color:'+(dis?'#cfc8bc':'#232220')+';border:none;cursor:'+(dis?'default':'pointer')+';border-radius:6px;width:26px;height:18px;font-size:9px;line-height:1;padding:0;transition:all .2s';
     const catsSortedForOrder=s.categories.slice().sort((a,b)=>(a.sortOrder??0)-(b.sortOrder??0));
-    const adminCategories=catsSortedForOrder.map((c,ci,arr)=>({id:c.id,label:c.label,hasAroma:c.hasAroma,slotId:'ec-cat-'+c.id,img:c.photoUrl||this.NO_PHOTO_IMG,count:s.products.filter(p=>p.category===c.id).length,
+    const adminCategories=catsSortedForOrder.map((c,ci,arr)=>({id:c.id,label:c.label,slotId:'ec-cat-'+c.id,img:c.photoUrl||this.NO_PHOTO_IMG,count:s.products.filter(p=>p.category===c.id).length,
       onUp:()=>this.moveCategory(c.id,-1), onDown:()=>this.moveCategory(c.id,1), upStyle:catArrowStyle(ci===0), downStyle:catArrowStyle(ci===arr.length-1),
       onUploadPhoto:e=>{ const f=e.target.files&&e.target.files[0]; if(f) this.uploadCategoryPhoto(c.id,f); e.target.value=''; },
       onRemovePhoto:()=>this.removeCategoryPhoto(c.id),
-      onLabel:e=>this.setCatLabel(c.id,e.target.value),onToggleAroma:()=>this.toggleCatAroma(c.id),onDelete:()=>this.deleteCategory(c.id)}));
+      onLabel:e=>this.setCatLabel(c.id,e.target.value),onDelete:()=>this.deleteCategory(c.id)}));
 
     // admin aromas
     const aromaList=s.aromas.map(name=>{ const usedIn=s.products.filter(p=>(p.scents||[]).indexOf(name)>=0).length; const blocked=usedIn>0; const editing=s.aromaEditName===name; return {name,usedIn,editing,viewing:!editing,draft:(s.aromaEdits[name]!=null?s.aromaEdits[name]:name),onEdit:()=>this.startAromaEdit(name),onDraft:e=>this.setAromaEdit(name,e.target.value),onSave:()=>this.saveAromaName(name),onCancel:()=>this.cancelAromaEdit(name),onDelete:()=>this.deleteAroma(name),delStyle:'background:none;border:1px solid rgba(35,34,32,.14);color:'+(blocked?'#d8d2c8':'#b3ada3')+';cursor:'+(blocked?'not-allowed':'pointer')+';border-radius:8px;width:34px;height:34px;font-size:14px;flex-shrink:0;transition:all .2s;display:flex;align-items:center;justify-content:center'+(blocked?'':';')}; });
@@ -2194,7 +2274,7 @@ class Component extends DCLogic {
     const featuredItems=decoded.filter(p=>p.featured).sort((a,b)=>(a.featuredPos??1e9)-(b.featuredPos??1e9)).map((p,i,arr)=>({...p,salesUnits:this.salesUnits(p.id),pos:i+1,starIcon:'★',starStyle:starStyle(true),onFeatured:()=>this.toggleFeatured(p.id),onUp:()=>this.moveFeatured(p.id,-1),onDown:()=>this.moveFeatured(p.id,1),upStyle:arrowStyle(i===0),downStyle:arrowStyle(i===arr.length-1)}));
     const restItems=decoded.filter(p=>!p.featured).map(p=>({...p,salesUnits:this.salesUnits(p.id)})).sort((a,b)=>b.salesUnits-a.salesUnits).map(p=>({...p,starIcon:'☆',starStyle:starStyle(false),onFeatured:()=>this.toggleFeatured(p.id)}));
 
-    const tabsDef=[['productos','Productos'],['categorias','Categorías'],['aromas','Aromas'],['ventas','Ventas'],['destacados','Destacados'],['inicio','Inicio']];
+    const tabsDef=[['productos','Productos'],['categorias','Categorías'],['aromas','Aromas'],['ventas','Ventas'],['destacados','Destacados'],['inicio','Inicio (El Oficio)']];
     const adminTabs=tabsDef.map(([k,l])=>({key:k,label:l,go:()=>this.goAdminTab(k),style:this.tabStyle(s.adminTab===k),showBadge:k==='ventas'&&unseen>0,badge:unseen}));
     const cf=s.confirm;
 
@@ -2230,15 +2310,19 @@ class Component extends DCLogic {
       onUploadOficioPhoto:e=>{ const f=e.target.files&&e.target.files[0]; if(f) this.uploadOficioPhoto(f); e.target.value=''; },
       onRemoveOficioPhoto:()=>this.removeOficioPhoto(),
       saleEditOpen:seEditing, saleEditItems, saleEditHasItems:s.saleEditItems.length>0, saleEditTotalFmt:this.fmt(saleEditTotal), saleEditCode:seSale?code(seSale.seq):'', saleEditCustomer:seSale?seSale.customer:'', closeSaleEdit:this.closeSaleEdit, addSaleEditItem:this.addSaleEditItem, saveSaleEdit:this.saveSaleEdit,
-      adminProducts, adminProductCount:s.products.length, catOptions,
+      adminProducts, adminGroups, adminProductCount:s.products.length, catOptions,
       prodSearch:s.prodSearch, onProdSearch:e=>this.setState({prodSearch:e.target.value}),
       prodCatFilter:s.prodCatFilter, onProdCatFilter:e=>this.setState({prodCatFilter:e.target.value}),
-      prodSort:s.prodSort, onProdSort:e=>this.setState({prodSort:e.target.value}),
       prodCatOptions:[{id:'todas',label:'Todas las categorías'}].concat(s.categories.map(c=>({id:c.id,label:c.label}))),
       prodAdding:s.prodAdding, prodAddBtnLabel:s.prodAdding?'Cerrar':'+ Agregar producto', prodAddBtnStyle:this.pillBtn(s.prodAdding),
-      np:s.newProduct, onNPName:e=>this.setNP({name:e.target.value}), onNPPrice:e=>this.setNP({price:e.target.value}), onNPCat:e=>this.setNP({category:e.target.value}), onNPStock:e=>this.setNP({stock:e.target.value}), onNPColors:e=>this.setNP({colors:e.target.value}), onNPDesc:e=>this.setNP({shortDesc:e.target.value}), onNPSku:e=>this.setNP({sku:e.target.value}), toggleProdAdding:this.toggleProdAdding, addProduct:this.addProduct,
+      np:s.newProduct, onNPName:e=>this.setNP({name:e.target.value}), onNPPrice:e=>this.setNP({price:e.target.value}), onNPCat:e=>this.setNP({category:e.target.value}), onNPStock:e=>this.setNP({stock:e.target.value}), onNPDesc:e=>this.setNP({shortDesc:e.target.value}), onNPSku:e=>this.setNP({sku:e.target.value}), toggleProdAdding:this.toggleProdAdding, addProduct:this.addProduct,
+      onNPColorDraft:e=>this.setNP({colorDraft:e.target.value}), onNPColorHex:e=>this.setNP({colorDraftHex:e.target.value}), addNPColor:this.addNPColor,
+      npColorChips:s.newProduct.colorsList.map((c,i)=>({name:c.name,hex:c.hex,onRemove:()=>this.removeNPColor(i)})),
+      onNPAromaDraft:e=>this.setNP({aromaDraft:e.target.value}), addNPAroma:this.addNPAroma,
+      npAromaChips:s.newProduct.aromasList.map((a,i)=>({name:a,onRemove:()=>this.removeNPAroma(i)})),
+      onNPPhoto:this.onNPPhoto,
       aromaSearch:s.aromaSearch||'', onAromaSearch:this.onAromaSearch,
-      adminCategories, adminCatCount:s.categories.length, catAdding:s.catAdding, catAddBtnLabel:s.catAdding?'Cerrar':'+ Agregar categoría', catAddBtnStyle:this.pillBtn(s.catAdding), ncat:s.newCat, onNCatLabel:e=>this.setNCat({label:e.target.value}), onNCatAroma:()=>this.setNCat({hasAroma:!s.newCat.hasAroma}), toggleCatAdding:this.toggleCatAdding, addCategory:this.addCategory,
+      adminCategories, adminCatCount:s.categories.length, catAdding:s.catAdding, catAddBtnLabel:s.catAdding?'Cerrar':'+ Agregar categoría', catAddBtnStyle:this.pillBtn(s.catAdding), ncat:s.newCat, onNCatLabel:e=>this.setNCat({label:e.target.value}), toggleCatAdding:this.toggleCatAdding, addCategory:this.addCategory,
       aromaList, aromaCount:s.aromas.length, newAroma:s.newAroma, onNewAroma:this.setNewAroma, addAroma:this.addAroma,
       onCfgShipping:this.onCfgShipping, onCfgTitular:this.onCfgTitular, onCfgAlias:this.onCfgAlias, onCfgCbu:this.onCfgCbu, onCfgWhatsapp:this.onCfgWhatsapp,
       adminSales, salesTotal:s.sales.length, hasSales:adminSales.length>0, noSales:adminSales.length===0,
