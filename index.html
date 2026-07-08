@@ -1370,6 +1370,7 @@ class Component extends DCLogic {
     super(props);
     this.HEX = {'Arena':'#D8CBB6','Cemento':'#B6B1A8','Blanco':'#EFEDE7','Carbón':'#2A2926','Negro':'#2A2926','Terrazo claro':'#D6CFC2','Terrazo oscuro':'#8C877E'};
     this.PHOTO_IDS = new Set(['vela-bruma','vela-niebla','portavela-cilindro','portavela-trio','bandeja-organica','bandeja-rect','florero-tubo','florero-bombe','posavasos-cuarteto','posavasos-terrazo','sahumerio-lineal','sahumerio-cuenco']);
+    this.NO_PHOTO_IMG = 'data:image/svg+xml,'+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="400" height="500"><rect width="100%" height="100%" fill="#EFEEEA"/><text x="50%" y="50%" font-family="sans-serif" font-size="22" fill="#9a958c" text-anchor="middle" dominant-baseline="middle">Sin imagen</text></svg>');
     const cats=[];
     this.state={
       view:(typeof location!=='undefined'&&location.hash==='#admin')?'admin':'home', adminTab:'productos', productId:null,
@@ -1428,7 +1429,7 @@ class Component extends DCLogic {
   photoBase(id,color){ return color?this.colorSlot(id,color):this.mainSlot(id); }
   // Explicit per-color photo arrays of stable slot ids (true add/remove, no gaps).
   photoSlotIds(p,color){ const k=color||'_'; const arr=p.photoSlots&&p.photoSlots[k]; if(arr&&arr.length) return arr.slice(); return [this.photoBase(p.id,color)]; }
-  photoUrlFor(p,color){ const list=(p.photos||[]).filter(ph=>color?ph.color_name===color:!ph.color_name); if(list.length) return list[list.length-1].url; if(!color&&this.PHOTO_IDS.has(p.id)) return 'uploads/products/'+p.id+'.jpg'; return ''; }
+  photoUrlFor(p,color){ const list=(p.photos||[]).filter(ph=>color?ph.color_name===color:!ph.color_name); if(list.length) return list[list.length-1].url; if(!color&&this.PHOTO_IDS.has(p.id)) return 'uploads/products/'+p.id+'.jpg'; return this.NO_PHOTO_IMG; }
   photoSeedSrc(p,sid,color){ return (sid===this.mainSlot(p.id)&&!color)?this.photoUrlFor(p):''; }
   filledPhotos(p,color){ return this.photoSlotIds(p,color).filter(sid=>this.isFilled(sid, !!this.photoSeedSrc(p,sid,color))); }
   firstPhoto(p,color){ const own=this.filledPhotos(p,color); if(own.length) return {slot:own[0],src:''}; const main=this.mainSlot(p.id); const seed=this.photoUrlFor(p); if(this.isFilled(main,!!seed)) return {slot:main,src:seed}; const keys=this.colorKeys(p).filter(Boolean); for(const k of keys){ const f=this.filledPhotos(p,k); if(f.length) return {slot:f[0],src:''}; } return {slot:main,src:seed}; }
@@ -1613,7 +1614,7 @@ class Component extends DCLogic {
     const { error:upErr } = await supabaseClient.storage.from('product-photos').upload(path,file,{cacheControl:'3600',upsert:false,contentType:file.type});
     if(upErr){ this.showToast('Error al subir imagen: '+upErr.message); return; }
     const { data:pub } = supabaseClient.storage.from('product-photos').getPublicUrl(path);
-    const { error:insErr } = await supabaseClient.from('product_photos').insert({product_id:productId,color_name:color||null,url:pub.publicUrl,sort_order:Date.now()});
+    const { error:insErr } = await supabaseClient.from('product_photos').insert({product_id:productId,color_name:color||null,url:pub.publicUrl,sort_order:Math.floor(Date.now()/1000)});
     if(insErr){ this.showToast('La imagen se subió pero no se pudo guardar el registro: '+insErr.message); return; }
     await this.loadCatalog();
     this.showToast('Foto actualizada');
@@ -1765,7 +1766,8 @@ class Component extends DCLogic {
   startHero(){ if(this._heroT) clearInterval(this._heroT); this._heroT=setInterval(()=>{ if(this.state.view==='home'){ const n=this.state.products.filter(p=>p.featured).length||this.state.products.length||1; this.setState(s=>({heroIndex:(s.heroIndex+1)%n})); } },8000); }
   setHero(i){ this.setState({heroIndex:i}); this.startHero(); }
 
-  goHome=()=>{ this.setState({view:'home'}); this.scrollTop(); };
+  clearAdminHash(){ try{ if(location.hash) history.replaceState(null,'',location.pathname+location.search); }catch(e){} }
+  goHome=()=>{ this.clearAdminHash(); this.setState({view:'home'}); this.scrollTop(); };
   goCatalog=()=>{ this.setState({view:'catalog',filter:'todos'}); this.scrollTop(); };
   openCatWith(cat){ this.setState({view:'catalog',filter:cat}); this.scrollTop(); };
   setFilter(cat){ this.setState({filter:cat}); }
