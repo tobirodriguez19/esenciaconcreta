@@ -354,8 +354,20 @@
               <div class="ec-swipe" style="aspect-ratio:4/5;background:#EFEEEA;border-radius:20px;overflow:hidden;box-shadow:0 40px 80px -54px rgba(35,34,32,.55);cursor:grab;touch-action:pan-y pinch-zoom">
                 <div style="display:flex;height:100%;transform:{{ selectedProduct.galleryShift }};transition:transform .42s cubic-bezier(.4,0,.2,1)">
                   <sc-for list="{{ selectedProduct.galleryPhotos }}" as="ph" hint-placeholder-count="1">
-                    <div style="flex:0 0 100%;height:100%">
-                      <image-slot id="{{ ph.slot }}" src="{{ ph.src }}" shape="rect" placeholder="{{ selectedProduct.name }}" style="pointer-events:none"></image-slot>
+                    <div style="flex:0 0 100%;height:100%;position:relative">
+                      <sc-if value="{{ ph.isPhoto }}" hint-placeholder-val="{{ true }}">
+                        <image-slot id="{{ ph.slot }}" src="{{ ph.src }}" shape="rect" placeholder="{{ selectedProduct.name }}" style="pointer-events:none"></image-slot>
+                      </sc-if>
+                      <sc-if value="{{ ph.isVideo }}" hint-placeholder-val="{{ false }}">
+                        <video id="{{ ph.slot }}" src="{{ ph.src }}" preload="metadata" playsinline muted controls="{{ ph.playing }}" style="width:100%;height:100%;object-fit:cover;background:#000;display:block"></video>
+                        <sc-if value="{{ ph.notPlaying }}" hint-placeholder-val="{{ true }}">
+                          <button onClick="{{ ph.play }}" aria-label="Reproducir video" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.12);border:none;cursor:pointer;padding:0">
+                            <span style="width:64px;height:64px;border-radius:999px;background:rgba(255,255,255,.92);display:flex;align-items:center;justify-content:center;box-shadow:0 10px 26px -8px rgba(0,0,0,.5)">
+                              <svg width="24" height="24" viewBox="0 0 24 24" fill="#232220"><path d="M8 5v14l11-7z"></path></svg>
+                            </span>
+                          </button>
+                        </sc-if>
+                      </sc-if>
                     </div>
                   </sc-for>
                 </div>
@@ -386,7 +398,7 @@
                 <sc-for list="{{ selectedProduct.scentOptions }}" as="sopt" hint-placeholder-count="4">
                   <button onClick="{{ sopt.set }}" style="{{ sopt.style }}">{{ sopt.label }}</button>
                 </sc-for>
-              </div><div style="font-size:13px;letter-spacing:.04em;text-transform:uppercase;color:#9a958c;margin-bottom:12px">Aroma · {{ selectedProduct.selScent }}</div></sc-if><p style="font-size: 16px; color: #56534c; margin: 0 0 30px; max-width: 460px; margin-bottom: 9px">{{ selectedProduct.longDesc }}</p>
+              </div><div style="font-size:13px;letter-spacing:.04em;text-transform:uppercase;color:#9a958c;margin-bottom:12px">Aroma · {{ selectedProduct.selScent }}</div></sc-if><p style="font-size: 16px; color: #56534c; margin: 0 0 30px; max-width: 460px; margin-bottom: 9px; white-space: pre-line">{{ selectedProduct.longDesc }}</p>
             
             
             <sc-if value="{{ selectedProduct.hasScents }}" hint-placeholder-val="{{ false }}">
@@ -447,10 +459,16 @@
           </div>
         </div>
       </section>
-      <section id="about-contacto" style="background:#EAE6DE">
-        <div style="max-width:720px;margin:0 auto;padding:clamp(44px,8vw,90px) clamp(20px,5vw,56px);text-align:center">
+    </div>
+    </sc-if>
+
+    <!-- ===================== CONTACTO ===================== -->
+    <sc-if value="{{ isContact }}" hint-placeholder-val="{{ false }}">
+    <div data-screen-label="Contacto" style="animation:ecFade .5s ease both">
+      <section style="background:#EAE6DE">
+        <div style="max-width:720px;margin:0 auto;padding:clamp(56px,10vw,120px) clamp(20px,5vw,56px);text-align:center">
           <div style="font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:#8a857b;margin-bottom:14px">Contacto</div>
-          <h2 style="font-family:Newsreader,serif;font-weight:400;font-size:clamp(26px,4vw,40px);margin:0 0 24px;letter-spacing:-.01em">Hablemos</h2>
+          <h1 style="font-family:Newsreader,serif;font-weight:400;font-size:clamp(28px,4.4vw,44px);margin:0 0 24px;letter-spacing:-.01em">Hablemos</h1>
           <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:32px">
             <span style="font-size:15px;color:#56534c">Rafaela, Santa Fe</span>
             <span style="font-size:15px;color:#56534c">WhatsApp: (3492)583885</span>
@@ -776,6 +794,23 @@
                         <textarea value="{{ p.longDesc }}" onChange="{{ p.onLongDesc }}" style="border:1px solid rgba(35,34,32,.16);border-radius:10px;padding:10px 12px;font-size:14px;outline:none;min-height:72px;resize:vertical;font-family:inherit" style-focus="border-color:#232220"></textarea>
                       </label>
                     </div>
+                  </div>
+
+                  <!-- VIDEO -->
+                  <div style="margin-top:14px;padding-top:14px;border-top:1px solid rgba(35,34,32,.07)">
+                    <div style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#9a958c;margin-bottom:10px">Video (opcional, aparece como una foto más en el carrusel)</div>
+                    <sc-if value="{{ p.hasVideo }}" hint-placeholder-val="{{ false }}">
+                      <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+                        <video src="{{ p.videoUrl }}" preload="metadata" muted style="width:100px;height:74px;object-fit:cover;border-radius:8px;background:#000"></video>
+                        <button onClick="{{ p.onRemoveVideo }}" style="background:none;border:1px solid rgba(35,34,32,.18);cursor:pointer;border-radius:999px;padding:8px 16px;font-size:12.5px;color:#56534c" style-hover="background:rgba(35,34,32,.05)">Quitar video</button>
+                      </div>
+                    </sc-if>
+                    <sc-if value="{{ p.hasNoVideo }}" hint-placeholder-val="{{ true }}">
+                      <label style="display:inline-flex;align-items:center;gap:8px;background:#F0EEE9;border:1px dashed rgba(35,34,32,.22);border-radius:999px;cursor:pointer;padding:9px 18px;font-size:12.5px;color:#56534c" style-hover="background:#EAE7DF">
+                        Subir video (MP4, máx. 50MB)
+                        <input type="file" accept="video/mp4,video/webm,video/quicktime,video/ogg" onChange="{{ p.onUploadVideo }}" style="display:none">
+                      </label>
+                    </sc-if>
                   </div>
 
                   <!-- COLORES Y STOCK -->
@@ -1626,7 +1661,7 @@ class Component extends DCLogic {
       saleEditSeq:null, saleEditItems:[], saleSearch:'', photoModal:null,
       cart:[],
       navMounted:false, navOpen:false,
-      filter:'todos', searchQuery:'', chipsExpanded:false, navCatExpanded:false, catalogColors:{}, catalogScroll:0, lastCatalogProductId:null, cartBump:0, galleryIndex:0,
+      filter:'todos', searchQuery:'', chipsExpanded:false, navCatExpanded:false, catalogColors:{}, catalogScroll:0, lastCatalogProductId:null, cartBump:0, galleryIndex:0, videoActivated:false,
       prodSearch:'', prodCatFilter:'todas', expanded:{}, catGroupCollapsed:{},
       detailColor:null, detailScent:null, detailQty:1,
       form:{nombre:'',apellido:'',telefono:'',email:'',direccion:''},
@@ -1970,6 +2005,31 @@ class Component extends DCLogic {
     await this.loadCatalog();
     this.showToast('Foto eliminada');
   }
+  async uploadProductVideo(productId,file){
+    const okTypes=['video/mp4','video/webm','video/quicktime','video/ogg'];
+    if(!file||okTypes.indexOf(file.type)<0){ this.showToast('Formato no permitido. Usá MP4, WEBM o MOV'); return; }
+    const maxBytes=50*1024*1024;
+    if(file.size>maxBytes){ this.showToast('El video no puede superar 50MB'); return; }
+    const ext=(file.name.split('.').pop()||'mp4').toLowerCase().replace(/[^a-z0-9]/g,'')||'mp4';
+    const path=productId+'/video/'+this.sanitizeFileName(file.name,ext);
+    const { error:upErr } = await supabaseClient.storage.from('product-photos').upload(path,file,{cacheControl:'3600',upsert:false,contentType:file.type});
+    if(upErr){ this.showToast('Error al subir video: '+upErr.message); return; }
+    const { data:pub } = supabaseClient.storage.from('product-photos').getPublicUrl(path);
+    const { error:updErr } = await supabaseClient.from('products').update({video_url:pub.publicUrl}).eq('id',productId);
+    if(updErr){ this.showToast('El video se subió pero no se pudo guardar: '+updErr.message); return; }
+    await this.loadCatalog();
+    this.showToast('Video actualizado');
+  }
+  async removeProductVideo(productId){
+    const p=this.getProduct(productId);
+    if(!p||!p.videoUrl){ this.showToast('No hay video para quitar'); return; }
+    const path=this.storagePathFromUrl(p.videoUrl);
+    const { error } = await supabaseClient.from('products').update({video_url:null}).eq('id',productId);
+    if(error){ this.showToast('Error: '+error.message); return; }
+    if(path) await supabaseClient.storage.from('product-photos').remove([path]);
+    await this.loadCatalog();
+    this.showToast('Video eliminado');
+  }
   // ---- editor de recorte ----
   openCropEditor(photo){ this.setState({cropModal:{photoId:photo.id,url:photo.url,originalUrl:photo.original_url||null,rect:{x:10,y:10,w:80,h:80}}}); }
   closeCropEditor=()=>this.setState({cropModal:null});
@@ -2045,6 +2105,7 @@ class Component extends DCLogic {
     if(pathname==='/confirmacion') return {view:'confirm'};
     if(pathname==='/admin') return {view:'admin'};
     if(pathname==='/conocenos') return {view:'about'};
+    if(pathname==='/contacto') return {view:'contact'};
     const m=pathname.match(/^\/producto\/([^/]+)\/?$/);
     if(m) return {view:'product',productId:decodeURIComponent(m[1])};
     return {view:'home'};
@@ -2062,7 +2123,7 @@ class Component extends DCLogic {
     const resetAdmin=(this.state.view==='admin'&&r.view!=='admin')?{catGroupCollapsed:{},expanded:{},editingProductId:null,productDraft:null}:{};
     if(r.view==='product'){
       const p=this.getProduct(r.productId);
-      this.setState({...resetAdmin,view:'product',productId:r.productId,detailColor:p?(this.state.catalogColors[r.productId]||(p.colors[0]||null)):null,detailScent:(p&&this.isScented(p))?p.scents[0]:null,detailQty:1,galleryIndex:0});
+      this.setState({...resetAdmin,view:'product',productId:r.productId,detailColor:p?(this.state.catalogColors[r.productId]||(p.colors[0]||null)):null,detailScent:(p&&this.isScented(p))?p.scents[0]:null,detailQty:1,galleryIndex:0,videoActivated:false});
     } else if(r.view==='confirm'){
       if(this.state.order) this.setState({...resetAdmin,view:'confirm'}); else this.navigate('/',true);
     } else {
@@ -2084,7 +2145,8 @@ class Component extends DCLogic {
         const p=this.getProduct(s.productId);
         if(p){ product=p; title=p.name+' — Esencia Concreta'; desc=p.shortDesc||'Pieza artesanal de hormigón hecha a mano en Rafaela.'; path='/producto/'+encodeURIComponent(p.id); }
       }
-      else if(s.view==='about'){ title='Conocenos — Esencia Concreta'; desc='Conocé el oficio detrás de Esencia Concreta y cómo contactarnos.'; path='/conocenos'; }
+      else if(s.view==='about'){ title='Conocenos — Esencia Concreta'; desc='Conocé el oficio detrás de Esencia Concreta.'; path='/conocenos'; }
+      else if(s.view==='contact'){ title='Contacto — Esencia Concreta'; desc='WhatsApp, Instagram y ubicación de Esencia Concreta en Rafaela, Santa Fe.'; path='/contacto'; }
       else if(s.view==='checkout'){ title='Finalizar compra — Esencia Concreta'; path='/checkout'; }
       else if(s.view==='confirm'){ title='Pedido confirmado — Esencia Concreta'; path='/confirmacion'; }
       else if(s.view==='admin'){ title='Panel de administración — Esencia Concreta'; path='/admin'; }
@@ -2203,7 +2265,7 @@ class Component extends DCLogic {
     try{
       const [catsQ,prodQ,colorsQ,aromasQ,prodAromasQ,stockQ,photosQ]=await Promise.all([
         supabaseClient.from('categories').select('id,label,photo_url,sort_order').eq('active',true).order('sort_order'),
-        supabaseClient.from('products').select('id,category_id,sku,name,short_desc,long_desc,price,featured,featured_order').eq('active',true),
+        supabaseClient.from('products').select('id,category_id,sku,name,short_desc,long_desc,price,featured,featured_order,video_url').eq('active',true),
         supabaseClient.from('product_colors').select('product_id,color_name,hex_value,sort_order').order('sort_order'),
         supabaseClient.from('aromas').select('name').eq('active',true),
         supabaseClient.from('product_aromas').select('product_id,aroma_name,sort_order').order('sort_order'),
@@ -2227,7 +2289,7 @@ class Component extends DCLogic {
           if(scented&&r.aroma_name) cstock[r.color_name][r.aroma_name]=r.quantity;
           else if(!scented) cstock[r.color_name]=r.quantity;
         });
-        return {id:p.id,sku:p.sku,category:p.category_id,name:p.name,price:p.price,featured:p.featured,featuredPos:p.featured_order,shortDesc:p.short_desc,longDesc:p.long_desc,colors,scents,cstock,photoSlots:{},photos:photosByProduct[p.id]||[],colorHex:colorHexByProduct[p.id]||{}};
+        return {id:p.id,sku:p.sku,category:p.category_id,name:p.name,price:p.price,featured:p.featured,featuredPos:p.featured_order,shortDesc:p.short_desc,longDesc:p.long_desc,colors,scents,cstock,photoSlots:{},photos:photosByProduct[p.id]||[],colorHex:colorHexByProduct[p.id]||{},videoUrl:p.video_url||''};
       });
       const aromas=aromasQ.data.map(a=>a.name);
       this.setState({categories,products,aromas});
@@ -2310,13 +2372,14 @@ class Component extends DCLogic {
       });
     }
   };
-  scrollToId=(id,offset)=>{ const el=document.getElementById(id); if(!el) return; const y=el.getBoundingClientRect().top+window.scrollY-offset; try{ window.scrollTo({top:y,left:0,behavior:'smooth'}); }catch(e){ window.scrollTo(0,y); } };
   verProceso=()=>{ this.navigate('/conocenos'); this.setState({view:'about'}); this.scrollTop(); };
-  verContacto=()=>{ if(this.state.view!=='about'){ this.navigate('/conocenos'); this.setState({view:'about'}); try{ window.scrollTo(0,0); }catch(e){} setTimeout(()=>this.scrollToId('about-contacto',70),650);} else this.scrollToId('about-contacto',70); };
+  verContacto=()=>{ this.navigate('/contacto'); this.setState({view:'contact'}); this.scrollTop(); };
   setCatColor(id,color){ this.setState({catalogColors:{...this.state.catalogColors,[id]:color}}); }
-  openProduct(id){ const p=this.getProduct(id); const fromCat=this.state.view==='catalog'; this.navigate('/producto/'+encodeURIComponent(id)); this.setState({view:'product',productId:id,detailColor:p?(this.state.catalogColors[id]||(p.colors[0]||null)):null,detailScent:this.isScented(p)?p.scents[0]:null,detailQty:1,galleryIndex:0,catalogScroll:fromCat?(window.scrollY||0):this.state.catalogScroll,lastCatalogProductId:fromCat?id:this.state.lastCatalogProductId}); this.scrollTop(); }
-  setGallery(i){ this.setState({galleryIndex:i}); }
-  galleryStep(d,n){ this.setState({galleryIndex:((this.state.galleryIndex+d)%n+n)%n}); }
+  openProduct(id){ const p=this.getProduct(id); const fromCat=this.state.view==='catalog'; this.navigate('/producto/'+encodeURIComponent(id)); this.setState({view:'product',productId:id,detailColor:p?(this.state.catalogColors[id]||(p.colors[0]||null)):null,detailScent:this.isScented(p)?p.scents[0]:null,detailQty:1,galleryIndex:0,videoActivated:false,catalogScroll:fromCat?(window.scrollY||0):this.state.catalogScroll,lastCatalogProductId:fromCat?id:this.state.lastCatalogProductId}); this.scrollTop(); }
+  pauseVideos(){ try{ document.querySelectorAll('video').forEach(v=>v.pause()); }catch(e){} }
+  playVideo=(slotId)=>{ this.setState({videoActivated:true}); setTimeout(()=>{ const v=document.getElementById(slotId); if(v){ v.muted=false; v.play().catch(()=>{}); } },30); };
+  setGallery(i){ this.pauseVideos(); this.setState({galleryIndex:i,videoActivated:false}); }
+  galleryStep(d,n){ this.pauseVideos(); this.setState({galleryIndex:((this.state.galleryIndex+d)%n+n)%n,videoActivated:false}); }
   backToCatalog=()=>{
     const y=this.state.catalogScroll||0;
     const pid=this.state.lastCatalogProductId;
@@ -2341,7 +2404,7 @@ class Component extends DCLogic {
   cartCount(){ return this.state.cart.reduce((a,b)=>a+b.qty,0); }
   addToCart(id,color,scent,qty){ const p=this.getProduct(id); const avail=this.stockFor(id,color,scent); if(avail<=0){ this.showToast('Sin stock disponible'); return; } const key=id+'|'+color+'|'+(scent||''); const cart=this.state.cart.slice(); const ex=cart.find(c=>c.key===key); if(ex){ ex.qty=Math.min(avail,ex.qty+qty); } else { cart.push({key,id,color,scent:scent||null,qty:Math.min(avail,qty)}); } this.setState({cart,cartBump:this.state.cartBump+1}); }
   quickAdd(id){ const p=this.getProduct(id); const color=this.state.catalogColors[id]||(p.colors&&p.colors.length?p.colors[0]:null); this.addToCart(id,color,this.isScented(p)?p.scents[0]:null,1); }
-  setDetailColor(n){ this.setState({detailColor:n,galleryIndex:0}); }
+  setDetailColor(n){ this.pauseVideos(); this.setState({detailColor:n,galleryIndex:0,videoActivated:false}); }
   setDetailScent(n){ this.setState({detailScent:n,detailQty:1}); }
   incDetail=()=>{ const max=this.stockFor(this.state.productId,this.state.detailColor,this.state.detailScent)||0; this.setState({detailQty:Math.min(Math.max(1,max),this.state.detailQty+1)}); };
   decDetail=()=>{ this.setState({detailQty:Math.max(1,this.state.detailQty-1)}); };
@@ -2687,7 +2750,7 @@ class Component extends DCLogic {
 
     // selected product (color photo fallback)
     let selectedProduct=null;
-    if(s.productId){ const base=byId(s.productId); if(base){ const hasColors=base.colors.length>0; const col=hasColors?(s.detailColor||base.colors[0]):null; const hasScents=base.scents.length>0; const sc=hasScents?(s.detailScent||base.scents[0]):null; const selStock=this.stockFor(base.id,col,sc); const rawPhotos=this.photosFor(base,col); const photos=(rawPhotos.length?rawPhotos:[{id:'placeholder',url:this.NO_PHOTO_IMG}]).map(ph=>({slot:'ec-photo-'+ph.id,src:ph.url})); const gi=Math.min(Math.max(0,s.galleryIndex),photos.length-1); const cur=photos[gi]; this._galLen=photos.length; selectedProduct={...base,selColor:col,selScent:sc,hasScents,hasColors,gallerySlot:cur.slot,gallerySrc:cur.src,galleryPhotos:photos,galleryShift:'translateX(-'+(gi*100)+'%)',galleryHasNav:photos.length>1,galleryDots:photos.map((_,i)=>({style:'width:'+(i===gi?'22px':'7px')+';height:7px;border-radius:999px;border:none;cursor:pointer;padding:0;transition:all .3s ease;background:'+(i===gi?'#232220':'rgba(35,34,32,.25)'),go:()=>this.setGallery(i)})),galleryPrev:()=>this.galleryStep(-1,photos.length),galleryNext:()=>this.galleryStep(1,photos.length),stockLabel:selStock>5?'En stock':(selStock>0?('Últimas '+selStock+' unidades'):'Sin stock'),stockColor:selStock>5?'#6a665e':(selStock>0?'#a8742e':'#b3261e'),addLabel:selStock<=0?'Sin stock':'Agregar al carrito',colorOptions:base.colors.map(n=>{ const cstk=this.colorStock(base,n); return {name:n,hex:this.hex(n,base),cstk,style:this.swatchStyle(this.hex(n,base),n===col)+(cstk<=0?'opacity:.4;':''),set:()=>this.setDetailColor(n)}; }).sort((a,b)=>(a.cstk<=0?1:0)-(b.cstk<=0?1:0)),scentOptions:base.scents.map(n=>{ const st=this.stockFor(base.id,col,n); return {name:n,st,label:st>0?n:(n+' · sin stock'),style:this.scentChipStyle(n===sc)+(st<=0?'opacity:.45;':''),set:()=>this.setDetailScent(n)}; }).sort((a,b)=>(a.st<=0?1:0)-(b.st<=0?1:0))}; } }
+    if(s.productId){ const base=byId(s.productId); if(base){ const hasColors=base.colors.length>0; const col=hasColors?(s.detailColor||base.colors[0]):null; const hasScents=base.scents.length>0; const sc=hasScents?(s.detailScent||base.scents[0]):null; const selStock=this.stockFor(base.id,col,sc); const rawPhotos=this.photosFor(base,col); const photoItems=(rawPhotos.length?rawPhotos:[{id:'placeholder',url:this.NO_PHOTO_IMG}]).map(ph=>({slot:'ec-photo-'+ph.id,src:ph.url,isVideo:false,isPhoto:true})); const videoItems=base.videoUrl?[{slot:'ec-video-'+base.id,src:base.videoUrl,isVideo:true,isPhoto:false}]:[]; const photos=photoItems.concat(videoItems).map((ph,idx)=>{ if(!ph.isVideo) return ph; const active=s.videoActivated&&s.galleryIndex===idx; return {...ph,playing:active,notPlaying:!active,play:()=>this.playVideo(ph.slot)}; }); const gi=Math.min(Math.max(0,s.galleryIndex),photos.length-1); const cur=photos[gi]; this._galLen=photos.length; selectedProduct={...base,selColor:col,selScent:sc,hasScents,hasColors,gallerySlot:cur.slot,gallerySrc:cur.src,galleryPhotos:photos,galleryShift:'translateX(-'+(gi*100)+'%)',galleryHasNav:photos.length>1,galleryDots:photos.map((_,i)=>({style:'width:'+(i===gi?'22px':'7px')+';height:7px;border-radius:999px;border:none;cursor:pointer;padding:0;transition:all .3s ease;background:'+(i===gi?'#232220':'rgba(35,34,32,.25)'),go:()=>this.setGallery(i)})),galleryPrev:()=>this.galleryStep(-1,photos.length),galleryNext:()=>this.galleryStep(1,photos.length),stockLabel:selStock>5?'En stock':(selStock>0?('Últimas '+selStock+' unidades'):'Sin stock'),stockColor:selStock>5?'#6a665e':(selStock>0?'#a8742e':'#b3261e'),addLabel:selStock<=0?'Sin stock':'Agregar al carrito',colorOptions:base.colors.map(n=>{ const cstk=this.colorStock(base,n); return {name:n,hex:this.hex(n,base),cstk,style:this.swatchStyle(this.hex(n,base),n===col)+(cstk<=0?'opacity:.4;':''),set:()=>this.setDetailColor(n)}; }).sort((a,b)=>(a.cstk<=0?1:0)-(b.cstk<=0?1:0)),scentOptions:base.scents.map(n=>{ const st=this.stockFor(base.id,col,n); return {name:n,st,label:st>0?n:(n+' · sin stock'),style:this.scentChipStyle(n===sc)+(st<=0?'opacity:.45;':''),set:()=>this.setDetailScent(n)}; }).sort((a,b)=>(a.st<=0?1:0)-(b.st<=0?1:0))}; } }
     const relatedProducts=selectedProduct?decoded.filter(p=>p.category===selectedProduct.category&&p.id!==selectedProduct.id).slice(0,12).map(p=>({id:p.id,name:p.name,priceFmt:p.priceFmt,slot:p.catImgSlot,src:p.catImgSrc,open:()=>this.openProduct(p.id)})):[];
     const hasRelated=relatedProducts.length>0;
 
@@ -2724,6 +2787,9 @@ class Component extends DCLogic {
         shortDesc:isEditing?d.shortDesc:(p.shortDesc||''), longDesc:isEditing?d.longDesc:(p.longDesc||''),
         onName:e=>this.setDraftField('name',e.target.value), onCategory:e=>this.setDraftField('category',e.target.value), onPrice:e=>this.setDraftField('price',e.target.value), onSku:e=>this.setDraftField('sku',e.target.value),
         onShortDesc:e=>this.setDraftField('shortDesc',e.target.value), onLongDesc:e=>this.setDraftField('longDesc',e.target.value),
+        hasVideo:!!p.videoUrl, hasNoVideo:!p.videoUrl,
+        onUploadVideo:e=>{ const f=e.target.files&&e.target.files[0]; if(f) this.uploadProductVideo(p.id,f); e.target.value=''; },
+        onRemoveVideo:()=>this.removeProductVideo(p.id),
         aromaRows:vScents.map(n=>({name:n,onRemove:()=>this.draftRemoveAroma(n)})), aromaNoRows:vScents.length===0,
         aromaResults:s.aromas.filter(a=>vScents.indexOf(a)<0&&a.toLowerCase().includes((s.aromaSearch||'').toLowerCase())).map(a=>({name:a,add:()=>this.draftAssignAroma(a)})),
         aromaCanCreate:!!(s.aromaSearch||'').trim()&&!s.aromas.some(a=>a.toLowerCase()===(s.aromaSearch||'').trim().toLowerCase()),
@@ -2823,7 +2889,7 @@ class Component extends DCLogic {
       isAdmin:s.view==='admin', isStore:s.view!=='admin',
       adminAuthed:s.view==='admin'&&s.authRole==='admin', adminNeedsLogin:s.view==='admin'&&s.authRole!=='admin',
       authEmail:s.authEmail, authPassword:s.authPassword, authError:s.authError, onAuthEmail:this.onAuthEmail, onAuthPassword:this.onAuthPassword, doLogin:this.doLogin, doLogout:this.doLogout,
-      isHome:s.view==='home', isCatalog:s.view==='catalog', isProduct:s.view==='product'&&!!selectedProduct, isCheckout:s.view==='checkout', isConfirm:s.view==='confirm'&&!!s.order, isAbout:s.view==='about',
+      isHome:s.view==='home', isCatalog:s.view==='catalog', isProduct:s.view==='product'&&!!selectedProduct, isCheckout:s.view==='checkout', isConfirm:s.view==='confirm'&&!!s.order, isAbout:s.view==='about', isContact:s.view==='contact',
       cfg:s.config,
       goHome:this.goHome, goCatalog:this.goCatalog, goAdmin:this.goAdmin, verProceso:this.verProceso, verContacto:this.verContacto,
       openCart:this.openCart, closeCart:this.closeCart, cartCount, cartBumpAnim:(s.cartBump%2===0?'ecBumpA':'ecBumpB')+' .45s ease',
