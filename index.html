@@ -181,7 +181,7 @@
           <sc-for list="{{ categories }}" as="cat" hint-placeholder-count="6">
             <button onClick="{{ cat.open }}" style="flex:0 0 clamp(150px,42vw,196px);scroll-snap-align:start;text-align:left;background:#fff;border:1px solid rgba(35,34,32,.06);cursor:pointer;border-radius:16px;overflow:hidden;padding:0;transition:transform .35s ease,box-shadow .35s ease;box-shadow:0 1px 2px rgba(0,0,0,.03)" style-hover="transform:translateY(-5px);box-shadow:0 26px 44px -32px rgba(35,34,32,.5)">
               <div style="aspect-ratio:4/5;background:#EFEEEA;overflow:hidden">
-                <image-slot id="{{ cat.slotId }}" shape="rect" placeholder="{{ cat.label }}"></image-slot>
+                <image-slot id="{{ cat.slotId }}" src="{{ cat.img }}" shape="rect" placeholder="{{ cat.label }}"></image-slot>
               </div>
               <div style="padding:14px 16px 16px">
                 <div style="font-family:Newsreader,serif;font-size:19px">{{ cat.label }}</div>
@@ -639,21 +639,17 @@
                             </div>
                           </sc-if>
                             </div>
-                            <button onClick="{{ v.onEditPhotos }}" title="Editar fotos" style="position:relative;flex-shrink:0;height:82px;width:{{ v.fanWidth }}px;min-width:80px;background:none;border:none;cursor:pointer;padding:0">
-                              <sc-if value="{{ v.hasPhotos }}" hint-placeholder-val="{{ true }}">
-                                <div style="position:relative;height:72px">
-                                  <sc-for list="{{ v.photoThumbs }}" as="ph" hint-placeholder-count="2">
-                                    <div style="{{ ph.style }}">
-                                      <image-slot id="{{ ph.slotId }}" src="{{ ph.src }}" shape="rounded" radius="8" style="width:100%;height:100%;pointer-events:none"></image-slot>
-                                    </div>
-                                  </sc-for>
-                                </div>
-                              </sc-if>
-                              <sc-if value="{{ v.noPhotos }}" hint-placeholder-val="{{ false }}">
-                                <div style="height:72px;width:58px;margin-left:auto;border-radius:8px;border:1.5px dashed rgba(35,34,32,.22);display:flex;align-items:center;justify-content:center;font-size:11px;color:#9a958c">Fotos</div>
-                              </sc-if>
-                              <span style="position:absolute;right:-4px;bottom:-2px;width:24px;height:24px;border-radius:999px;background:#232220;color:#FAF9F6;display:flex;align-items:center;justify-content:center;font-size:12px;box-shadow:0 2px 8px -2px rgba(0,0,0,.5);z-index:20">✎</span>
-                            </button>
+                            <div style="display:flex;flex-direction:column;gap:5px;align-items:center;flex-shrink:0">
+                              <div style="width:58px;height:72px;border-radius:8px;overflow:hidden;background:#EFEEEA;border:1px solid rgba(35,34,32,.08)">
+                                <image-slot id="{{ v.photoSlot }}" src="{{ v.photoSrc }}" shape="rect" placeholder="" style="pointer-events:none"></image-slot>
+                              </div>
+                              <div style="display:flex;gap:8px">
+                                <label style="background:none;border:none;cursor:pointer;font-size:10.5px;color:#6a665e;padding:0" style-hover="color:#232220">Subir
+                                  <input type="file" accept="image/jpeg,image/png,image/webp" onChange="{{ v.onUploadPhoto }}" style="display:none">
+                                </label>
+                                <button onClick="{{ v.onRemovePhoto }}" style="background:none;border:none;cursor:pointer;font-size:10.5px;color:#b3ada3;padding:0" style-hover="color:#b3261e">Quitar</button>
+                              </div>
+                            </div>
                           </div>
                         </div>
                       </sc-for>
@@ -696,9 +692,14 @@
               <div style="background:#fff;border:1px solid rgba(35,34,32,.07);border-radius:14px;padding:14px 16px;display:flex;align-items:center;gap:16px;flex-wrap:wrap">
                 <div style="flex-shrink:0;display:flex;flex-direction:column;gap:5px;align-items:center">
                   <div style="width:54px;height:54px;border-radius:10px;overflow:hidden;background:#EFEEEA">
-                    <image-slot id="{{ c.slotId }}" shape="rect" placeholder="Foto"></image-slot>
+                    <image-slot id="{{ c.slotId }}" src="{{ c.img }}" shape="rect" placeholder="Foto"></image-slot>
                   </div>
-                  <button onClick="{{ c.onChangePhoto }}" style="background:none;border:none;cursor:pointer;font-size:11px;color:#6a665e;padding:0" style-hover="color:#232220">Cambiar</button>
+                  <div style="display:flex;gap:8px">
+                    <label style="background:none;border:none;cursor:pointer;font-size:10.5px;color:#6a665e;padding:0" style-hover="color:#232220">Subir
+                      <input type="file" accept="image/jpeg,image/png,image/webp" onChange="{{ c.onUploadPhoto }}" style="display:none">
+                    </label>
+                    <button onClick="{{ c.onRemovePhoto }}" style="background:none;border:none;cursor:pointer;font-size:10.5px;color:#b3ada3;padding:0" style-hover="color:#b3261e">Quitar</button>
+                  </div>
                 </div>
                 <input value="{{ c.label }}" onChange="{{ c.onLabel }}" style="flex:1 1 160px;min-width:130px;border:1px solid transparent;border-radius:8px;padding:6px 8px;font-size:16px;color:#232220;background:#FAF9F6;font-family:Newsreader,serif;outline:none" style-focus="border-color:rgba(35,34,32,.2)">
                 <label style="display:flex;align-items:center;gap:8px;font-size:13px;color:#56534c;cursor:pointer">
@@ -1158,40 +1159,6 @@
     </div>
   </sc-if>
 
-  <!-- ===================== FOTOS MODAL ===================== -->
-  <sc-if value="{{ photoModalOpen }}" hint-placeholder-val="{{ false }}">
-    <div onClick="{{ closePhotoModal }}" style="position:fixed;inset:0;background:rgba(20,19,17,.5);z-index:82;display:flex;align-items:center;justify-content:center;padding:20px;animation:ecOverlayIn .2s ease both">
-      <div onClick="{{ stop }}" style="background:#FAF9F6;border-radius:18px;width:min(620px,100%);max-height:88vh;overflow-y:auto;padding:26px;animation:ecPop .25s ease both">
-        <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:6px">
-          <div style="display:flex;align-items:center;gap:10px">
-            <sc-if value="{{ photoMod.hasColor }}" hint-placeholder-val="{{ true }}">
-              <span style="width:15px;height:15px;border-radius:999px;box-shadow:inset 0 0 0 1px rgba(35,34,32,.14);background:{{ photoMod.hex }}"></span>
-            </sc-if>
-            <h3 style="font-family:Newsreader,serif;font-weight:400;font-size:23px;margin:0">Fotos · {{ photoMod.colorLabel }}</h3>
-          </div>
-          <button onClick="{{ closePhotoModal }}" style="background:none;border:none;cursor:pointer;font-size:24px;color:#6a665e;line-height:1" style-hover="color:#232220">×</button>
-        </div>
-        <p style="font-size:13px;color:#9a958c;margin:0 0 18px">{{ photoMod.productName }} · arrastrá o tocá cada recuadro para subir una foto.</p>
-        <div style="display:flex;gap:14px;flex-wrap:wrap;align-items:flex-start">
-          <sc-for list="{{ photoMod.photos }}" as="ph" hint-placeholder-count="2">
-            <div style="width:138px">
-              <div style="aspect-ratio:4/5;border-radius:10px;overflow:hidden;background:#EFEEEA;border:1px solid {{ ph.border }};margin-bottom:5px">
-                <image-slot id="{{ ph.slotId }}" src="{{ ph.src }}" shape="rect" placeholder="Soltá una foto"></image-slot>
-              </div>
-              <div style="display:flex;gap:12px">
-                <button onClick="{{ ph.onChangePhoto }}" style="background:none;border:none;cursor:pointer;font-size:11px;color:#6a665e;padding:0" style-hover="color:#232220">Cambiar</button>
-                <button onClick="{{ ph.onRemove }}" style="background:none;border:none;cursor:pointer;font-size:11px;color:#b3ada3;padding:0" style-hover="color:#b3261e">Quitar</button>
-              </div>
-            </div>
-          </sc-for>
-          <button onClick="{{ photoMod.onAdd }}" style="width:138px;aspect-ratio:4/5;border-radius:10px;border:1.5px dashed rgba(35,34,32,.22);background:#fff;cursor:pointer;color:#6a665e;font-size:13px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px" style-hover="border-color:#232220;color:#232220">
-            <span style="font-size:22px;line-height:1">+</span>Agregar foto
-          </button>
-        </div>
-      </div>
-    </div>
-  </sc-if>
-
   <!-- ===================== DESCRIPCIÓN MODAL ===================== -->
   <sc-if value="{{ descModalOpen }}" hint-placeholder-val="{{ false }}">
     <div onClick="{{ closeDescModal }}" style="position:fixed;inset:0;background:rgba(20,19,17,.5);z-index:75;display:flex;align-items:center;justify-content:center;padding:20px;animation:ecOverlayIn .2s ease both">
@@ -1429,20 +1396,24 @@ class Component extends DCLogic {
   photoBase(id,color){ return color?this.colorSlot(id,color):this.mainSlot(id); }
   // Explicit per-color photo arrays of stable slot ids (true add/remove, no gaps).
   photoSlotIds(p,color){ const k=color||'_'; const arr=p.photoSlots&&p.photoSlots[k]; if(arr&&arr.length) return arr.slice(); return [this.photoBase(p.id,color)]; }
-  photoUrlFor(p,color){ const list=(p.photos||[]).filter(ph=>color?ph.color_name===color:!ph.color_name); if(list.length) return list[list.length-1].url; if(!color&&this.PHOTO_IDS.has(p.id)) return 'uploads/products/'+p.id+'.jpg'; return this.NO_PHOTO_IMG; }
-  photoSeedSrc(p,sid,color){ return (sid===this.mainSlot(p.id)&&!color)?this.photoUrlFor(p):''; }
+  // Real photo only (Storage upload, or the 12 original static uploads/). Empty string = nothing real.
+  realPhotoUrl(p,color){
+    if(color){ const list=(p.photos||[]).filter(ph=>ph.color_name===color); if(list.length) return list[list.length-1].url; }
+    const general=(p.photos||[]).filter(ph=>!ph.color_name);
+    if(general.length) return general[general.length-1].url;
+    if(!color&&this.PHOTO_IDS.has(p.id)) return 'uploads/products/'+p.id+'.jpg';
+    return '';
+  }
+  // Display resolution: real photo, else the "Sin imagen" placeholder — always non-empty, safe to use as <image-slot src>.
+  photoUrlFor(p,color){ return this.realPhotoUrl(p,color)||this.NO_PHOTO_IMG; }
+  photoSeedSrc(p,sid,color){ return (sid===this.photoBase(p.id,color))?this.realPhotoUrl(p,color):''; }
   filledPhotos(p,color){ return this.photoSlotIds(p,color).filter(sid=>this.isFilled(sid, !!this.photoSeedSrc(p,sid,color))); }
-  firstPhoto(p,color){ const own=this.filledPhotos(p,color); if(own.length) return {slot:own[0],src:''}; const main=this.mainSlot(p.id); const seed=this.photoUrlFor(p); if(this.isFilled(main,!!seed)) return {slot:main,src:seed}; const keys=this.colorKeys(p).filter(Boolean); for(const k of keys){ const f=this.filledPhotos(p,k); if(f.length) return {slot:f[0],src:''}; } return {slot:main,src:seed}; }
-  addPhoto(pid,color){ const p=this.getProduct(pid); const k=color||'_'; const cur=this.photoSlotIds(p,color); const nid=this.photoBase(pid,color)+'__'+Math.random().toString(36).slice(2,7); const photoSlots={...(p.photoSlots||{})}; photoSlots[k]=[...cur,nid]; this.updateProduct(pid,{photoSlots}); }
-  removePhotoSlot(pid,color,slotId){ const p=this.getProduct(pid); const k=color||'_'; const cur=this.photoSlotIds(p,color); const next=cur.filter(x=>x!==slotId); const photoSlots={...(p.photoSlots||{})}; photoSlots[k]=next; this.clearPhoto(slotId); this.updateProduct(pid,{photoSlots}); }
+  firstPhoto(p,color){ return {slot:this.mainSlot(p.id), src:this.photoUrlFor(p,color)}; }
   salesUnits(id){ let n=0; this.state.sales.forEach(s=>{ if(s.cancelled) return; s.items.forEach(i=>{ if(i.id===id) n+=i.qty; }); }); return n; }
   showToast(m){ this.setState({toast:m}); if(this._toastT) clearTimeout(this._toastT); this._toastT=setTimeout(()=>this.setState({toast:null}),2800); }
   askConfirm(o){ this.setState({confirm:o}); }
   confirmYes=()=>{ const c=this.state.confirm; this.setState({confirm:null}); if(c&&c.onYes) c.onYes(); };
   confirmNo=()=>this.setState({confirm:null});
-
-  openPhotoModal(pid,color){ this.setState({photoModal:{pid,color:color||null}}); }
-  closePhotoModal=()=>this.setState({photoModal:null});
 
   // ============================================================
   // PRODUCTOS — edición con borrador local (Guardar/Cancelar)
@@ -1630,14 +1601,36 @@ class Component extends DCLogic {
     await this.loadCatalog();
     this.showToast('Foto eliminada');
   }
-  featuredPhoto(p){ const main=this.mainSlot(p.id); const seedSrc=this.photoUrlFor(p); if(this.state.filled[main]||seedSrc) return {slot:main,src:seedSrc}; const keys=this.colorKeys(p).filter(Boolean); for(const k of keys){ const f=this.filledPhotos(p,k); if(f.length) return {slot:f[0],src:''}; } const gen=this.filledPhotos(p,null); if(gen.length) return {slot:gen[0],src:''}; return {slot:main,src:seedSrc}; }
+  async uploadCategoryPhoto(catId,file){
+    const okTypes=['image/jpeg','image/jpg','image/png','image/webp'];
+    if(!file||okTypes.indexOf(file.type)<0){ this.showToast('Formato no permitido. Usá JPG, PNG o WEBP'); return; }
+    if(file.size>5*1024*1024){ this.showToast('La imagen no puede superar 5MB'); return; }
+    const path='categories/'+catId+'/'+this.sanitizeFileName(file.name);
+    const { error:upErr } = await supabaseClient.storage.from('product-photos').upload(path,file,{cacheControl:'3600',upsert:false,contentType:file.type});
+    if(upErr){ this.showToast('Error al subir imagen: '+upErr.message); return; }
+    const { data:pub } = supabaseClient.storage.from('product-photos').getPublicUrl(path);
+    const { error:updErr } = await supabaseClient.from('categories').update({photo_url:pub.publicUrl}).eq('id',catId);
+    if(updErr){ this.showToast('La imagen se subió pero no se pudo guardar: '+updErr.message); return; }
+    await this.loadCatalog();
+    this.showToast('Foto de categoría actualizada');
+  }
+  async removeCategoryPhoto(catId){
+    const { error } = await supabaseClient.from('categories').update({photo_url:null}).eq('id',catId);
+    if(error){ this.showToast('Error al quitar: '+error.message); return; }
+    await this.loadCatalog();
+    this.showToast('Foto eliminada');
+  }
+  featuredPhoto(p){ return {slot:this.mainSlot(p.id), src:this.photoUrlFor(p)}; }
   updateProduct(id,patch){ this.setState({products:this.state.products.map(p=>p.id===id?{...p,...patch}:p)}); }
   applyStock(products,items,sign){ return products.map(p=>{ const its=items.filter(i=>i.id===p.id); if(!its.length) return p; const cs=JSON.parse(JSON.stringify(p.cstock||{})); const cols=p.colors||[]; its.forEach(i=>{ const col=i.color&&cols.indexOf(i.color)>=0?i.color:(cols[0]||'Cemento'); if(this.isScented(p)&&i.scent){ if(!cs[col]||typeof cs[col]!=='object') cs[col]={}; cs[col][i.scent]=Math.max(0,(cs[col][i.scent]||0)+sign*i.qty); } else { const cur=(typeof cs[col]==='number')?cs[col]:0; cs[col]=Math.max(0,cur+sign*i.qty); } }); return {...p,cstock:cs}; }); }
 
   // ============================================================
   // CICLO DE VIDA
   // ============================================================
-  componentDidMount(){ this.startHero(); this.loadFilled(); this.scanSlots(); this._scanT=setInterval(()=>this.scanSlots(),1200); this.setupGestures(); this.loadCatalog(); this.initAuth(); }
+  componentDidMount(){ this.startHero(); this.loadFilled(); this.scanSlots(); this._scanT=setInterval(()=>this.scanSlots(),1200); this.setupGestures(); this.loadCatalog(); this.initAuth();
+    this._hashHandler=()=>{ if(location.hash==='#admin') this.setState({view:'admin'}); };
+    window.addEventListener('hashchange',this._hashHandler);
+  }
 
   // ============================================================
   // AUTENTICACIÓN (Supabase Auth + rol admin)
@@ -1714,7 +1707,7 @@ class Component extends DCLogic {
   async loadCatalog(){
     try{
       const [catsQ,prodQ,colorsQ,aromasQ,prodAromasQ,stockQ,photosQ]=await Promise.all([
-        supabaseClient.from('categories').select('id,label,has_aroma'),
+        supabaseClient.from('categories').select('id,label,has_aroma,photo_url'),
         supabaseClient.from('products').select('id,category_id,sku,name,short_desc,long_desc,price,featured').eq('active',true),
         supabaseClient.from('product_colors').select('product_id,color_name,hex_value,sort_order').order('sort_order'),
         supabaseClient.from('aromas').select('name'),
@@ -1724,7 +1717,7 @@ class Component extends DCLogic {
       ]);
       const err=[catsQ,prodQ,colorsQ,aromasQ,prodAromasQ,stockQ,photosQ].map(r=>r.error).find(Boolean);
       if(err){ console.error('Supabase loadCatalog error',err); this.showToast('No se pudo cargar el catálogo'); return; }
-      const categories=catsQ.data.map(c=>({id:c.id,label:c.label,hasAroma:c.has_aroma}));
+      const categories=catsQ.data.map(c=>({id:c.id,label:c.label,hasAroma:c.has_aroma,photoUrl:c.photo_url||''}));
       const catById={}; categories.forEach(c=>catById[c.id]=c);
       const colorsByProduct={}; const colorHexByProduct={}; colorsQ.data.forEach(r=>{ (colorsByProduct[r.product_id]=colorsByProduct[r.product_id]||[]).push(r.color_name); if(r.hex_value){ (colorHexByProduct[r.product_id]=colorHexByProduct[r.product_id]||{})[r.color_name]=r.hex_value; } });
       const aromasByProduct={}; prodAromasQ.data.forEach(r=>{ (aromasByProduct[r.product_id]=aromasByProduct[r.product_id]||[]).push(r.aroma_name); });
@@ -1761,7 +1754,7 @@ class Component extends DCLogic {
     document.addEventListener('pointerdown',this._gd); document.addEventListener('pointermove',this._gm); document.addEventListener('pointerup',this._gu); document.addEventListener('pointercancel',this._gu);
   }
   loadFilled(){ try{ fetch('.image-slots.state.json',{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{ if(j&&typeof j==='object'){ const f={...this.state.filled}; let ch=false; for(const id in j){ const v=j[id]; const has=v&&(typeof v==='string'?v:(v.u)); if(has&&!f[id]){ f[id]=true; ch=true; } } if(ch) this.setState({filled:f}); } }).catch(()=>{}); }catch(e){} }
-  componentWillUnmount(){ [this._heroT,this._scanT].forEach(t=>t&&clearInterval(t)); [this._toastT,this._closeT,this._navT].forEach(t=>t&&clearTimeout(t)); if(this._gd){ document.removeEventListener('pointerdown',this._gd); document.removeEventListener('pointermove',this._gm); document.removeEventListener('pointerup',this._gu); document.removeEventListener('pointercancel',this._gu); } }
+  componentWillUnmount(){ [this._heroT,this._scanT].forEach(t=>t&&clearInterval(t)); [this._toastT,this._closeT,this._navT].forEach(t=>t&&clearTimeout(t)); if(this._gd){ document.removeEventListener('pointerdown',this._gd); document.removeEventListener('pointermove',this._gm); document.removeEventListener('pointerup',this._gu); document.removeEventListener('pointercancel',this._gu); } if(this._hashHandler) window.removeEventListener('hashchange',this._hashHandler); }
   scanSlots(){ try{ const present={}, filledNow={}; document.querySelectorAll('image-slot').forEach(el=>{ if(!el.id) return; present[el.id]=true; if(el.hasAttribute('data-filled')) filledNow[el.id]=true; }); const cur=this.state.filled||{}; const next=Object.assign({},cur); let changed=false; for(const id in present){ const f=!!filledNow[id]; if((!!cur[id])!==f){ if(f) next[id]=true; else delete next[id]; changed=true; } } if(changed) this.setState({filled:next}); }catch(e){} }
   startHero(){ if(this._heroT) clearInterval(this._heroT); this._heroT=setInterval(()=>{ if(this.state.view==='home'){ const n=this.state.products.filter(p=>p.featured).length||this.state.products.length||1; this.setState(s=>({heroIndex:(s.heroIndex+1)%n})); } },8000); }
   setHero(i){ this.setState({heroIndex:i}); this.startHero(); }
@@ -2043,14 +2036,14 @@ class Component extends DCLogic {
     const heroDots=heroPool.map((p,i)=>({go:()=>this.setHero(i),style:'width:'+(i===hIdx?'26px':'8px')+';height:8px;border-radius:999px;border:none;cursor:pointer;padding:0;transition:all .35s ease;background:'+(i===hIdx?'#232220':'rgba(35,34,32,.22)')}));
     const heroAnim=(s.heroIndex%2===0?'ecCrossA':'ecCrossB')+' .55s ease';
 
-    const categories=s.categories.map(c=>({id:c.id,label:c.label,slotId:'ec-cat-'+c.id,open:()=>this.openCatWith(c.id)}));
+    const categories=s.categories.map(c=>({id:c.id,label:c.label,slotId:'ec-cat-'+c.id,img:c.photoUrl||this.NO_PHOTO_IMG,open:()=>this.openCatWith(c.id)}));
     const catalog=s.filter==='todos'?decoded:decoded.filter(p=>p.category===s.filter);
     const chips=[{id:'todos',label:'Todo'}].concat(s.categories.map(c=>({id:c.id,label:c.label}))).map(c=>({id:c.id,label:c.label,style:this.chipStyle(c.id===s.filter),set:()=>this.setFilter(c.id)}));
     decoded.forEach(p=>{ p.open=()=>this.openProduct(p.id); p.quickAdd=()=>this.quickAdd(p.id); });
 
     // selected product (color photo fallback)
     let selectedProduct=null;
-    if(s.productId){ const base=byId(s.productId); if(base){ const hasColors=base.colors.length>0; const col=hasColors?(s.detailColor||base.colors[0]):null; const hasScents=base.scents.length>0; const sc=hasScents?(s.detailScent||base.scents[0]):null; const selStock=this.stockFor(base.id,col,sc); let gp=this.filledPhotos(base,col); if(!gp.length){ const g=this.filledPhotos(base,null); if(g.length) gp=g; } if(!gp.length&&hasColors){ for(const k of base.colors){ const f=this.filledPhotos(base,k); if(f.length){ gp=f; break; } } } const photos=gp.length?gp.map(sid=>({slot:sid,src:''})):[{slot:this.mainSlot(base.id),src:this.photoUrlFor(base)}]; const gi=Math.min(Math.max(0,s.galleryIndex),photos.length-1); const cur=photos[gi]; this._galLen=photos.length; selectedProduct={...base,selColor:col,selScent:sc,hasScents,hasColors,gallerySlot:cur.slot,gallerySrc:cur.src,galleryPhotos:photos.map(p=>({slot:p.slot,src:p.src})),galleryShift:'translateX(-'+(gi*100)+'%)',galleryHasNav:photos.length>1,galleryDots:photos.map((_,i)=>({style:'width:'+(i===gi?'22px':'7px')+';height:7px;border-radius:999px;border:none;cursor:pointer;padding:0;transition:all .3s ease;background:'+(i===gi?'#232220':'rgba(35,34,32,.25)'),go:()=>this.setGallery(i)})),galleryPrev:()=>this.galleryStep(-1,photos.length),galleryNext:()=>this.galleryStep(1,photos.length),stockLabel:selStock>5?'En stock':(selStock>0?('Últimas '+selStock+' unidades'):'Sin stock'),stockColor:selStock>5?'#6a665e':(selStock>0?'#a8742e':'#b3261e'),addLabel:selStock<=0?'Sin stock':'Agregar al carrito',colorOptions:base.colors.map(n=>{ const cstk=this.colorStock(base,n); return {name:n,hex:this.hex(n,base),cstk,style:this.swatchStyle(this.hex(n,base),n===col)+(cstk<=0?'opacity:.4;':''),set:()=>this.setDetailColor(n)}; }).sort((a,b)=>(a.cstk<=0?1:0)-(b.cstk<=0?1:0)),scentOptions:base.scents.map(n=>{ const st=this.stockFor(base.id,col,n); return {name:n,st,label:st>0?n:(n+' · sin stock'),style:this.scentChipStyle(n===sc)+(st<=0?'opacity:.45;':''),set:()=>this.setDetailScent(n)}; }).sort((a,b)=>(a.st<=0?1:0)-(b.st<=0?1:0))}; } }
+    if(s.productId){ const base=byId(s.productId); if(base){ const hasColors=base.colors.length>0; const col=hasColors?(s.detailColor||base.colors[0]):null; const hasScents=base.scents.length>0; const sc=hasScents?(s.detailScent||base.scents[0]):null; const selStock=this.stockFor(base.id,col,sc); const photos=[{slot:this.mainSlot(base.id),src:this.photoUrlFor(base,col)}]; const gi=0; const cur=photos[0]; this._galLen=1; selectedProduct={...base,selColor:col,selScent:sc,hasScents,hasColors,gallerySlot:cur.slot,gallerySrc:cur.src,galleryPhotos:photos,galleryShift:'translateX(0%)',galleryHasNav:false,galleryDots:[],galleryPrev:()=>{},galleryNext:()=>{},stockLabel:selStock>5?'En stock':(selStock>0?('Últimas '+selStock+' unidades'):'Sin stock'),stockColor:selStock>5?'#6a665e':(selStock>0?'#a8742e':'#b3261e'),addLabel:selStock<=0?'Sin stock':'Agregar al carrito',colorOptions:base.colors.map(n=>{ const cstk=this.colorStock(base,n); return {name:n,hex:this.hex(n,base),cstk,style:this.swatchStyle(this.hex(n,base),n===col)+(cstk<=0?'opacity:.4;':''),set:()=>this.setDetailColor(n)}; }).sort((a,b)=>(a.cstk<=0?1:0)-(b.cstk<=0?1:0)),scentOptions:base.scents.map(n=>{ const st=this.stockFor(base.id,col,n); return {name:n,st,label:st>0?n:(n+' · sin stock'),style:this.scentChipStyle(n===sc)+(st<=0?'opacity:.45;':''),set:()=>this.setDetailScent(n)}; }).sort((a,b)=>(a.st<=0?1:0)-(b.st<=0?1:0))}; } }
 
     const lines=this.buildLines();
     const cartCount=this.cartCount();
@@ -2093,12 +2086,14 @@ class Component extends DCLogic {
         mainSlot:this.mainSlot(p.id), mainSrc:this.photoUrlFor(p),
         onUploadMain:e=>{ const f=e.target.files&&e.target.files[0]; if(f) this.uploadProductPhoto(p.id,null,f); e.target.value=''; },
         onClearMain:()=>this.removeStoragePhoto(p.id,null),
-        variantRows:vColorKeys.map((c,ci)=>{ const color=c||null; const entry=vColorEntries[ci]; const filled=this.filledPhotos(p,color); const thumbs=filled.slice(0,3).map((sid,i,arr)=>({slotId:sid, src:this.photoSeedSrc(p,sid,color), style:'position:absolute;left:'+(i*15)+'px;top:0;width:58px;height:72px;border-radius:8px;overflow:hidden;background:#EFEEEA;border:1.5px solid #fff;box-shadow:0 3px 9px -3px rgba(0,0,0,.45);transform:rotate('+((i-(arr.length-1)/2)*8)+'deg);transform-origin:bottom center;z-index:'+(arr.length-i)}));
+        variantRows:vColorKeys.map((c,ci)=>{ const color=c||null; const entry=vColorEntries[ci];
           return { key:c, name:color||'Stock', hasColor:!!color, noColor:!color, hex:color?(entry&&entry.hex)||this.hex(color,p):'#B6B1A8', scented:vScented, simple:!vScented,
           colorTotal:isEditing?draftColorTotal(vCstock,color||'',vScented):this.colorStock(p,color||''),
           canRemove:!!color&&vColorKeys.length>1, onRename:e=>this.renameDraftColor(ci,e.target.value), onHex:e=>this.setDraftColorHex(ci,e.target.value), onRemove:()=>this.removeDraftColor(ci),
           onMinus:()=>this.draftAdjustVariant(color||'',null,-1), onPlus:()=>this.draftAdjustVariant(color||'',null,1), onInput:e=>this.draftSetVariant(color||'',null,e.target.value),
-          photoThumbs:thumbs, photoCount:filled.length, hasPhotos:filled.length>0, noPhotos:filled.length===0, fanWidth:(filled.length?Math.min(3,filled.length):1)*15+44, onEditPhotos:()=>this.openPhotoModal(p.id,color),
+          photoSlot:this.photoBase(p.id,color), photoSrc:this.photoUrlFor(p,color),
+          onUploadPhoto:e=>{ const f=e.target.files&&e.target.files[0]; if(f) this.uploadProductPhoto(p.id,color,f); e.target.value=''; },
+          onRemovePhoto:()=>this.removeStoragePhoto(p.id,color),
           scentRows:(vScented?vScents:[]).map(sc=>({name:sc,qty:(vCstock[color||'']&&vCstock[color||''][sc])||0,onMinus:()=>this.draftAdjustVariant(color||'',sc,-1),onPlus:()=>this.draftAdjustVariant(color||'',sc,1),onInput:e=>this.draftSetVariant(color||'',sc,e.target.value)})) }; }),
         colorDraft:s.draftColorInput||'', onColorDraft:this.onDraftColorInput, colorHexDraft:s.draftColorHex||'#B6B1A8', onColorHexDraft:this.onDraftColorHex, onAddColor:this.addDraftColor,
         openAromaModal:()=>this.openAromaModal(p.id),
@@ -2117,14 +2112,11 @@ class Component extends DCLogic {
       aromaModal={productName:amP.name, rows:(d.scents||[]).map(n=>({name:n,total:totalFor(n),onRemove:()=>this.draftRemoveAroma(n)})), noRows:(d.scents||[]).length===0, results, noResults:results.length===0, search:s.aromaSearch, onSearch:this.onAromaSearch};
     }
 
-    // photo modal (per color album)
-    const pm=s.photoModal; let photoMod={open:false,productName:'',colorLabel:'',hasColor:false,hex:'#EFEEEA',photos:[],noPhotos:true,onAdd:()=>{}};
-    if(pm){ const pp=this.getProduct(pm.pid); if(pp){ const color=pm.color; const ids=this.photoSlotIds(pp,color); photoMod={open:true, productName:pp.name, colorLabel:color||'General', hasColor:!!color, hex:color?this.hex(color,pp):'#EFEEEA', noPhotos:ids.length===0,
-      photos:ids.map(sid=>{ const seed=this.photoSeedSrc(pp,sid,color); const filled=this.isFilled(sid,!!seed); return {slotId:sid, src:seed, border:filled?'rgba(35,34,32,.08)':'rgba(214,138,46,.5)', onChangePhoto:()=>this.changePhoto(sid), onRemove:()=>this.removePhotoSlot(pp.id,color,sid)}; }),
-      onAdd:()=>this.addPhoto(pp.id,color) }; } }
-
     // admin categories
-    const adminCategories=s.categories.map(c=>({id:c.id,label:c.label,hasAroma:c.hasAroma,slotId:'ec-cat-'+c.id,count:s.products.filter(p=>p.category===c.id).length,onChangePhoto:()=>this.changePhoto('ec-cat-'+c.id),onLabel:e=>this.setCatLabel(c.id,e.target.value),onToggleAroma:()=>this.toggleCatAroma(c.id),onDelete:()=>this.deleteCategory(c.id)}));
+    const adminCategories=s.categories.map(c=>({id:c.id,label:c.label,hasAroma:c.hasAroma,slotId:'ec-cat-'+c.id,img:c.photoUrl||this.NO_PHOTO_IMG,count:s.products.filter(p=>p.category===c.id).length,
+      onUploadPhoto:e=>{ const f=e.target.files&&e.target.files[0]; if(f) this.uploadCategoryPhoto(c.id,f); e.target.value=''; },
+      onRemovePhoto:()=>this.removeCategoryPhoto(c.id),
+      onLabel:e=>this.setCatLabel(c.id,e.target.value),onToggleAroma:()=>this.toggleCatAroma(c.id),onDelete:()=>this.deleteCategory(c.id)}));
 
     // admin aromas
     const aromaList=s.aromas.map(name=>{ const usedIn=s.products.filter(p=>(p.scents||[]).indexOf(name)>=0).length; const blocked=usedIn>0; const editing=s.aromaEditName===name; return {name,usedIn,editing,viewing:!editing,draft:(s.aromaEdits[name]!=null?s.aromaEdits[name]:name),onEdit:()=>this.startAromaEdit(name),onDraft:e=>this.setAromaEdit(name,e.target.value),onSave:()=>this.saveAromaName(name),onCancel:()=>this.cancelAromaEdit(name),onDelete:()=>this.deleteAroma(name),delStyle:'background:none;border:1px solid rgba(35,34,32,.14);color:'+(blocked?'#d8d2c8':'#b3ada3')+';cursor:'+(blocked?'not-allowed':'pointer')+';border-radius:8px;width:34px;height:34px;font-size:14px;flex-shrink:0;transition:all .2s;display:flex;align-items:center;justify-content:center'+(blocked?'':';')}; });
@@ -2214,7 +2206,6 @@ class Component extends DCLogic {
       prodAdding:s.prodAdding, prodAddBtnLabel:s.prodAdding?'Cerrar':'+ Agregar producto', prodAddBtnStyle:this.pillBtn(s.prodAdding),
       np:s.newProduct, onNPName:e=>this.setNP({name:e.target.value}), onNPPrice:e=>this.setNP({price:e.target.value}), onNPCat:e=>this.setNP({category:e.target.value}), onNPStock:e=>this.setNP({stock:e.target.value}), onNPColors:e=>this.setNP({colors:e.target.value}), onNPDesc:e=>this.setNP({shortDesc:e.target.value}), onNPSku:e=>this.setNP({sku:e.target.value}), toggleProdAdding:this.toggleProdAdding, addProduct:this.addProduct,
       aromaModalOpen:!!amP, aromaModal, closeAromaModal:this.closeAromaModal,
-      photoModalOpen:photoMod.open, photoMod, closePhotoModal:this.closePhotoModal,
       descModalOpen:!!s.descModalProduct, descProduct:(s.descModalProduct&&s.productDraft&&s.editingProductId===s.descModalProduct)?(()=>{const dp=this.getProduct(s.descModalProduct);return {name:dp.name,shortDesc:s.productDraft.shortDesc||'',longDesc:s.productDraft.longDesc||'',onShort:e=>this.setDraftField('shortDesc',e.target.value),onLong:e=>this.setDraftField('longDesc',e.target.value)};})():{name:'',shortDesc:'',longDesc:'',onShort:()=>{},onLong:()=>{}}, closeDescModal:this.closeDescModal,
       adminCategories, adminCatCount:s.categories.length, catAdding:s.catAdding, catAddBtnLabel:s.catAdding?'Cerrar':'+ Agregar categoría', catAddBtnStyle:this.pillBtn(s.catAdding), ncat:s.newCat, onNCatLabel:e=>this.setNCat({label:e.target.value}), onNCatAroma:()=>this.setNCat({hasAroma:!s.newCat.hasAroma}), toggleCatAdding:this.toggleCatAdding, addCategory:this.addCategory,
       aromaList, aromaCount:s.aromas.length, newAroma:s.newAroma, onNewAroma:this.setNewAroma, addAroma:this.addAroma,
