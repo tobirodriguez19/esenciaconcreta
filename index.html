@@ -54,6 +54,9 @@
 <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;0,6..72,500;1,6..72,400&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/css/app.css">
 <script src="/image-slot.js"></script>
+<script src="/js/core/utils.js"></script>
+<script src="/js/core/gestures.js"></script>
+<script src="/js/core/seo.js"></script>
 </helmet>
 <meta name="ext-resource-dependency" content="uploads/products/bandeja-organica.jpg">
 <meta name="ext-resource-dependency" content="uploads/products/bandeja-rect.jpg">
@@ -1598,6 +1601,9 @@ class Component extends DCLogic {
   // ============================================================
   constructor(props){
     super(props);
+    // Métodos compartidos, definidos en js/core/*.js (ver <helmet>) y mezclados acá
+    // antes de armar el estado inicial, porque emptyNP()/parseRoute() ya se usan abajo.
+    Object.assign(this, EC.utils(this), EC.gestures(this), EC.seo(this));
     this.HEX = {'Arena':'#D8CBB6','Cemento':'#B6B1A8','Blanco':'#EFEDE7','Carbón':'#2A2926','Negro':'#2A2926','Terrazo claro':'#D6CFC2','Terrazo oscuro':'#8C877E'};
     this.PHOTO_IDS = new Set(['vela-bruma','vela-niebla','portavela-cilindro','portavela-trio','bandeja-organica','bandeja-rect','florero-tubo','florero-bombe','posavasos-cuarteto','posavasos-terrazo','sahumerio-lineal','sahumerio-cuenco']);
     this.NO_PHOTO_IMG = 'data:image/svg+xml,'+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="400" height="500"><rect width="100%" height="100%" fill="#EFEEEA"/><text x="50%" y="50%" font-family="sans-serif" font-size="22" fill="#9a958c" text-anchor="middle" dominant-baseline="middle">Sin imagen</text></svg>');
@@ -1641,47 +1647,10 @@ class Component extends DCLogic {
 
   // ============================================================
   // UTILIDADES
+  // (fmt/hex/slug/emptyNP/catLabel/stock/toast/estilos -> js/core/utils.js;
+  //  scroll/gestos/drag/swipe/crop -> js/core/gestures.js; lo que queda
+  //  aca es especifico de fotos/slots, se muda en la etapa de images.js)
   // ============================================================
-  fmt(n){ return '$'+Number(n||0).toLocaleString('es-AR'); }
-  hex(name,p){ return (p&&p.colorHex&&p.colorHex[name])||this.HEX[name]||'#B6B1A8'; }
-  slug(s){ return String(s).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,''); }
-  emptyNP(){ return {name:'',category:'',price:'',stock:'',shortDesc:'',sku:'',colorsList:[],colorDraft:'',colorDraftHex:'#B6B1A8',aromasList:[],aromaDraft:'',photoName:'',stockMap:{},stockTouched:false}; }
-  forceScroll(getTarget){
-    let cancelled=false;
-    const cancel=()=>{ cancelled=true; cleanup(); };
-    const cleanup=()=>{ ['wheel','touchstart','touchmove','pointerdown'].forEach(evt=>window.removeEventListener(evt,cancel)); };
-    ['wheel','touchstart','touchmove','pointerdown'].forEach(evt=>window.addEventListener(evt,cancel,{passive:true}));
-    const apply=(y)=>{
-      window.scrollTo(0,y);
-      if(document.scrollingElement) document.scrollingElement.scrollTop=y;
-      document.documentElement.scrollTop=y;
-      document.body.scrollTop=y;
-    };
-    const run=(frames)=>{
-      let n=0;
-      const tick=()=>{
-        if(cancelled) return;
-        try{ const y=getTarget(); if(y!=null) apply(y); }catch(e){}
-        n++;
-        if(n<frames) requestAnimationFrame(tick);
-      };
-      tick();
-    };
-    run(45);
-    setTimeout(cleanup,800);
-  }
-  scrollTop(){ this.forceScroll(()=>0); }
-  stop=e=>{ if(e&&e.stopPropagation) e.stopPropagation(); };
-  getProduct(id){ return this.state.products.find(x=>x.id===id); }
-  getCat(id){ return this.state.categories.find(c=>c.id===id); }
-  catLabel(id){ const c=this.getCat(id); return c?c.label:id; }
-  isScented(p){ return !!(p&&p.scents&&p.scents.length); }
-  // Build unified per-color (and per-color×aroma) stock from legacy fields.
-  colorKeys(p){ return (p&&p.colors&&p.colors.length)?p.colors:['']; }
-  variantQty(p,color,scent){ const cs=p.cstock||{}; if(this.isScented(p)){ return (cs[color]&&cs[color][scent])||0; } return cs[color]||0; }
-  colorStock(p,color){ const cs=p.cstock||{}; if(this.isScented(p)){ const m=cs[color]||{}; return p.scents.reduce((a,s)=>a+(m[s]||0),0); } return cs[color]||0; }
-  totalStock(p){ if(!p) return 0; return this.colorKeys(p).reduce((a,c)=>a+this.colorStock(p,c),0); }
-  stockFor(id,color,scent){ const p=this.getProduct(id); if(!p) return 0; if(color==null){ if(this.isScented(p)){ return this.colorKeys(p).reduce((a,c)=>a+((p.cstock[c]&&p.cstock[c][scent])||0),0); } return this.totalStock(p); } return this.variantQty(p,color,scent); }
   mainSlot(id){ return 'ec-prod-'+id; }
   colorSlot(id,color){ return 'ec-prdc-'+id+'__'+this.slug(color); }
   isFilled(slotId,seedHasSrc){ if(this.state.filled[slotId]) return true; return !!seedHasSrc; }
@@ -2087,52 +2056,6 @@ class Component extends DCLogic {
     }
   }
 
-  // ---- SEO: title/meta/canonical/JSON-LD dinámicos según la vista actual ----
-  updateSeo(){
-    try{
-      const s=this.state;
-      const base='https://esenciaconcreta.com.ar';
-      let title='Esencia Concreta — Piezas de hormigón hechas a mano en Rafaela';
-      let desc='Velas, floreros, portavelas, bandejas y posavasos de hormigón hechos a mano en Rafaela, Santa Fe.';
-      let path='/';
-      let product=null;
-      if(s.view==='catalog'){ title='Catálogo — Esencia Concreta'; desc='Explorá todas nuestras piezas de hormigón hechas a mano: velas, floreros, portavelas y más.'; path='/catalogo'; }
-      else if(s.view==='product'&&s.productId){
-        const p=this.getProduct(s.productId);
-        if(p){ product=p; title=p.name+' — Esencia Concreta'; desc=p.shortDesc||'Pieza artesanal de hormigón hecha a mano en Rafaela.'; path='/producto/'+encodeURIComponent(p.id); }
-      }
-      else if(s.view==='about'){ title='Conocenos — Esencia Concreta'; desc='Conocé el oficio detrás de Esencia Concreta.'; path='/conocenos'; }
-      else if(s.view==='contact'){ title='Contacto — Esencia Concreta'; desc='WhatsApp, Instagram y ubicación de Esencia Concreta en Rafaela, Santa Fe.'; path='/contacto'; }
-      else if(s.view==='checkout'){ title='Finalizar compra — Esencia Concreta'; path='/checkout'; }
-      else if(s.view==='confirm'){ title='Pedido confirmado — Esencia Concreta'; path='/confirmacion'; }
-      else if(s.view==='admin'){ title='Panel de administración — Esencia Concreta'; path='/admin'; }
-      const key=title+'|'+path;
-      if(this._seoKey===key) return;
-      this._seoKey=key;
-      document.title=title;
-      const setMeta=(sel,attr,val)=>{ const el=document.querySelector(sel); if(el) el.setAttribute(attr,val); };
-      setMeta('meta[name="description"]','content',desc);
-      setMeta('meta[property="og:title"]','content',title);
-      setMeta('meta[property="og:description"]','content',desc);
-      setMeta('meta[property="og:url"]','content',base+path);
-      setMeta('meta[name="twitter:title"]','content',title);
-      setMeta('meta[name="twitter:description"]','content',desc);
-      setMeta('link[rel="canonical"]','href',base+path);
-      let ld=document.getElementById('ec-product-jsonld');
-      if(product){
-        if(!ld){ ld=document.createElement('script'); ld.type='application/ld+json'; ld.id='ec-product-jsonld'; document.head.appendChild(ld); }
-        ld.textContent=JSON.stringify({
-          '@context':'https://schema.org','@type':'Product',
-          name:product.name, description:product.shortDesc||product.longDesc||'',
-          sku:product.sku||undefined, image:this.realPhotoUrl(product)||undefined,
-          offers:{'@type':'Offer',priceCurrency:'ARS',price:product.price,
-            availability:this.totalStock(product)>0?'https://schema.org/InStock':'https://schema.org/OutOfStock',
-            url:base+path}
-        });
-      } else if(ld){ ld.remove(); }
-    }catch(e){ console.error('updateSeo failed',e); }
-  }
-
   // ============================================================
   // AUTENTICACIÓN (Supabase Auth + rol admin)
   // ============================================================
@@ -2187,7 +2110,6 @@ class Component extends DCLogic {
   // ============================================================
   // STOCK — helpers de escritura remota compartidos por productos y ventas
   // ============================================================
-  debounce(key,fn,ms=600){ clearTimeout(this._debounceT[key]); this._debounceT[key]=setTimeout(fn,ms); }
   async recordStockMovement(productId,color,scent,type,delta,reason){
     try{ await supabaseClient.from('stock_movements').insert({product_id:productId,color_name:color,aroma_name:scent||null,movement_type:type,quantity:delta,reason:reason||null,performed_by:this.state.authUser?this.state.authUser.id:null}); }
     catch(e){ console.error('stock_movements insert failed',e); }
@@ -2251,60 +2173,7 @@ class Component extends DCLogic {
       this.setState({categories,products,aromas});
     }catch(e){ console.error('Supabase loadCatalog exception',e); this.showToast('No se pudo conectar con la base de datos'); }
   }
-  scrollCat=(dir)=>{ const el=document.getElementById('ec-cat-scroll'); if(el) el.scrollBy({left:dir*Math.max(220,el.clientWidth*0.8),behavior:'smooth'}); };
-  setupGestures(){
-    let el=null,startX=0,startScroll=0,dragging=false,moved=false;
-    const down=e=>{ if(e.pointerType==='touch') return; const t=e.target.closest&&e.target.closest('.ec-dragscroll'); if(!t) return; el=t; startX=e.clientX; startScroll=t.scrollLeft; dragging=true; moved=false; el.style.cursor='grabbing'; };
-    const move=e=>{ if(!dragging||!el) return; const dx=e.clientX-startX; if(Math.abs(dx)>4) moved=true; el.scrollLeft=startScroll-dx; };
-    const up=()=>{ if(dragging&&el) el.style.cursor=''; if(dragging&&moved){ const blk=ev=>{ ev.stopPropagation(); ev.preventDefault(); window.removeEventListener('click',blk,true); }; window.addEventListener('click',blk,true); setTimeout(()=>window.removeEventListener('click',blk,true),60); } dragging=false; el=null; };
-    // swipe (product gallery + hero carousel)
-    let sx=0,sy=0,swActive=false,swKind=null;
-    const sdown=e=>{ const g=e.target.closest&&e.target.closest('.ec-swipe'); const h=e.target.closest&&e.target.closest('.ec-hero-swipe'); if(!g&&!h) return; sx=e.clientX; sy=e.clientY; swActive=true; swKind=g?'gallery':'hero'; };
-    const sup=e=>{ if(!swActive) return; swActive=false; const dx=e.clientX-sx, dy=e.clientY-sy; if(Math.abs(dx)<=40||Math.abs(dx)<=Math.abs(dy)) return;
-      if(swKind==='gallery'&&this._galLen>1) this.galleryStep(dx<0?1:-1,this._galLen);
-      else if(swKind==='hero'&&this._heroLen>1){ const n=this._heroLen; this.setState(s=>({heroIndex:((s.heroIndex+(dx<0?1:-1))%n+n)%n})); this.startHero(); }
-    };
-    this._gd=e=>{ down(e); sdown(e); }; this._gm=move; this._gu=e=>{ up(e); sup(e); };
-    document.addEventListener('pointerdown',this._gd); document.addEventListener('pointermove',this._gm); document.addEventListener('pointerup',this._gu); document.addEventListener('pointercancel',this._gu);
-  }
-  loadFilled(){ try{ fetch('/.image-slots.state.json',{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{ if(j&&typeof j==='object'){ const f={...this.state.filled}; let ch=false; for(const id in j){ const v=j[id]; const has=v&&(typeof v==='string'?v:(v.u)); if(has&&!f[id]){ f[id]=true; ch=true; } } if(ch) this.setState({filled:f}); } }).catch(()=>{}); }catch(e){} }
   componentWillUnmount(){ [this._heroT,this._scanT].forEach(t=>t&&clearInterval(t)); [this._toastT,this._closeT,this._navT].forEach(t=>t&&clearTimeout(t)); if(this._gd){ document.removeEventListener('pointerdown',this._gd); document.removeEventListener('pointermove',this._gm); document.removeEventListener('pointerup',this._gu); document.removeEventListener('pointercancel',this._gu); } if(this._popHandler) window.removeEventListener('popstate',this._popHandler); if(this._cropD){ document.removeEventListener('pointerdown',this._cropD); document.removeEventListener('pointermove',this._cropM); document.removeEventListener('pointerup',this._cropU); document.removeEventListener('pointercancel',this._cropU); } }
-  setupCropGestures(){
-    let mode=null,startX=0,startY=0,rect0=null,cw=0,ch=0;
-    const down=e=>{
-      if(!this.state.cropModal) return;
-      const handle=e.target.closest&&e.target.closest('[data-crop-handle]');
-      const mover=e.target.closest&&e.target.closest('[data-crop-move]');
-      if(!handle&&!mover) return;
-      e.preventDefault(); e.stopPropagation();
-      const wrap=document.getElementById('ec-crop-imgwrap'); if(!wrap) return;
-      cw=wrap.clientWidth; ch=wrap.clientHeight;
-      mode=handle?handle.getAttribute('data-crop-handle'):'move';
-      startX=e.clientX; startY=e.clientY; rect0={...this.state.cropModal.rect};
-    };
-    const move=e=>{
-      if(!mode) return;
-      const dxPct=(e.clientX-startX)/cw*100, dyPct=(e.clientY-startY)/ch*100;
-      let {x,y,w,h}=rect0;
-      if(mode==='move'){ x=rect0.x+dxPct; y=rect0.y+dyPct; }
-      else{
-        if(mode.indexOf('w')>=0){ x=rect0.x+dxPct; w=rect0.w-dxPct; }
-        if(mode.indexOf('e')>=0){ w=rect0.w+dxPct; }
-        if(mode.indexOf('n')>=0){ y=rect0.y+dyPct; h=rect0.h-dyPct; }
-        if(mode.indexOf('s')>=0){ h=rect0.h+dyPct; }
-      }
-      x=Math.max(0,Math.min(100,x)); y=Math.max(0,Math.min(100,y));
-      w=Math.max(8,Math.min(100-x,w)); h=Math.max(8,Math.min(100-y,h));
-      this.setState({cropModal:{...this.state.cropModal,rect:{x,y,w,h}}});
-    };
-    const up=()=>{ mode=null; };
-    this._cropD=down; this._cropM=move; this._cropU=up;
-    document.addEventListener('pointerdown',this._cropD);
-    document.addEventListener('pointermove',this._cropM);
-    document.addEventListener('pointerup',this._cropU);
-    document.addEventListener('pointercancel',this._cropU);
-  }
-  scanSlots(){ try{ const present={}, filledNow={}; document.querySelectorAll('image-slot').forEach(el=>{ if(!el.id) return; present[el.id]=true; if(el.hasAttribute('data-filled')) filledNow[el.id]=true; }); const cur=this.state.filled||{}; const next=Object.assign({},cur); let changed=false; for(const id in present){ const f=!!filledNow[id]; if((!!cur[id])!==f){ if(f) next[id]=true; else delete next[id]; changed=true; } } if(changed) this.setState({filled:next}); }catch(e){} }
   startHero(){ if(this._heroT) clearInterval(this._heroT); this._heroT=setInterval(()=>{ if(this.state.view==='home'){ const n=this.state.products.filter(p=>p.featured).length||this.state.products.length||1; this.setState(s=>({heroIndex:(s.heroIndex+1)%n})); } },8000); }
   setHero(i){ this.setState({heroIndex:i}); this.startHero(); }
   heroPrev=()=>{ const n=this._heroLen||1; this.setState(s=>({heroIndex:(s.heroIndex-1+n)%n})); this.startHero(); };
@@ -2660,14 +2529,6 @@ class Component extends DCLogic {
     const { error:e2 } = await supabaseClient.from('products').update({featured_order:posA}).eq('id',b.id);
     if(e1||e2) this.showToast('Error al guardar el orden');
   };
-
-  // styles
-  chipStyle(a){ const b='cursor:pointer;border-radius:999px;padding:7px 14px;font-size:12.5px;letter-spacing:.01em;transition:all .2s;flex:0 0 auto;white-space:nowrap;'; return a?b+'background:#232220;color:#FAF9F6;border:1px solid #232220':b+'background:transparent;color:#56534c;border:1px solid rgba(35,34,32,.16)'; }
-  scentChipStyle(a){ const b='cursor:pointer;border-radius:999px;padding:8px 16px;font-size:13px;letter-spacing:.01em;transition:all .2s;'; return a?b+'background:#232220;color:#FAF9F6;border:1px solid #232220':b+'background:transparent;color:#56534c;border:1px solid rgba(35,34,32,.16)'; }
-  swatchStyle(hex,sel){ return 'width:38px;height:38px;border-radius:999px;cursor:pointer;background:'+hex+';transition:box-shadow .2s;'+(sel?'box-shadow:inset 0 0 0 2px #FAF9F6,0 0 0 2px #232220;':'box-shadow:inset 0 0 0 1px rgba(35,34,32,.14);'); }
-  fulCardStyle(a){ const b='display:flex;align-items:center;gap:14px;cursor:pointer;border-radius:14px;padding:16px 18px;transition:all .2s;background:#fff;'; return b+(a?'border:1.5px solid #232220;':'border:1.5px solid rgba(35,34,32,.12);'); }
-  pillBtn(a){ const b='cursor:pointer;border-radius:999px;padding:11px 22px;font-size:14px;transition:all .2s;'; return a?b+'background:transparent;color:#56534c;border:1px solid rgba(35,34,32,.18)':b+'background:#232220;color:#FAF9F6;border:1px solid #232220'; }
-  tabStyle(a){ const b='cursor:pointer;border-radius:999px;padding:10px 18px;font-size:13.5px;letter-spacing:.01em;transition:all .2s;display:inline-flex;align-items:center;'; return a?b+'background:#232220;color:#FAF9F6;border:1px solid #232220':b+'background:#fff;color:#56534c;border:1px solid rgba(35,34,32,.14)'; }
 
   renderVals(){
     const s=this.state;
