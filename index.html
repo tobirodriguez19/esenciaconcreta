@@ -2310,9 +2310,9 @@ class Component extends DCLogic {
       });
     }
   };
-  scrollToId=(id,offset)=>{ const el=document.getElementById(id); if(!el) return; const y=el.getBoundingClientRect().top+window.scrollY-offset; this.forceScroll(()=>y); };
+  scrollToId=(id,offset)=>{ const el=document.getElementById(id); if(!el) return; const y=el.getBoundingClientRect().top+window.scrollY-offset; try{ window.scrollTo({top:y,left:0,behavior:'smooth'}); }catch(e){ window.scrollTo(0,y); } };
   verProceso=()=>{ this.navigate('/conocenos'); this.setState({view:'about'}); this.scrollTop(); };
-  verContacto=()=>{ if(this.state.view!=='about'){ this.navigate('/conocenos'); this.setState({view:'about'}); setTimeout(()=>this.scrollToId('about-contacto',70),600);} else this.scrollToId('about-contacto',70); };
+  verContacto=()=>{ if(this.state.view!=='about'){ this.navigate('/conocenos'); this.setState({view:'about'}); this.scrollTop(); setTimeout(()=>this.scrollToId('about-contacto',70),650);} else this.scrollToId('about-contacto',70); };
   setCatColor(id,color){ this.setState({catalogColors:{...this.state.catalogColors,[id]:color}}); }
   openProduct(id){ const p=this.getProduct(id); const fromCat=this.state.view==='catalog'; this.navigate('/producto/'+encodeURIComponent(id)); this.setState({view:'product',productId:id,detailColor:p?(this.state.catalogColors[id]||(p.colors[0]||null)):null,detailScent:this.isScented(p)?p.scents[0]:null,detailQty:1,galleryIndex:0,catalogScroll:fromCat?(window.scrollY||0):this.state.catalogScroll,lastCatalogProductId:fromCat?id:this.state.lastCatalogProductId}); this.scrollTop(); }
   setGallery(i){ this.setState({galleryIndex:i}); }
