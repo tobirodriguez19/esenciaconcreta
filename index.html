@@ -57,6 +57,7 @@
 <script src="/js/core/utils.js"></script>
 <script src="/js/core/gestures.js"></script>
 <script src="/js/core/seo.js"></script>
+<script src="/js/auth.js"></script>
 </helmet>
 <meta name="ext-resource-dependency" content="uploads/products/bandeja-organica.jpg">
 <meta name="ext-resource-dependency" content="uploads/products/bandeja-rect.jpg">
@@ -1603,7 +1604,7 @@ class Component extends DCLogic {
     super(props);
     // Métodos compartidos, definidos en js/core/*.js (ver <helmet>) y mezclados acá
     // antes de armar el estado inicial, porque emptyNP()/parseRoute() ya se usan abajo.
-    Object.assign(this, EC.utils(this), EC.gestures(this), EC.seo(this));
+    Object.assign(this, EC.utils(this), EC.gestures(this), EC.seo(this), EC.auth(this));
     this.HEX = {'Arena':'#D8CBB6','Cemento':'#B6B1A8','Blanco':'#EFEDE7','Carbón':'#2A2926','Negro':'#2A2926','Terrazo claro':'#D6CFC2','Terrazo oscuro':'#8C877E'};
     this.PHOTO_IDS = new Set(['vela-bruma','vela-niebla','portavela-cilindro','portavela-trio','bandeja-organica','bandeja-rect','florero-tubo','florero-bombe','posavasos-cuarteto','posavasos-terrazo','sahumerio-lineal','sahumerio-cuenco']);
     this.NO_PHOTO_IMG = 'data:image/svg+xml,'+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="400" height="500"><rect width="100%" height="100%" fill="#EFEEEA"/><text x="50%" y="50%" font-family="sans-serif" font-size="22" fill="#9a958c" text-anchor="middle" dominant-baseline="middle">Sin imagen</text></svg>');
@@ -2057,20 +2058,8 @@ class Component extends DCLogic {
   }
 
   // ============================================================
-  // AUTENTICACIÓN (Supabase Auth + rol admin)
+  // AUTENTICACIÓN → js/auth.js
   // ============================================================
-  async initAuth(){
-    const { data } = await supabaseClient.auth.getSession();
-    await this.applySession(data.session);
-    supabaseClient.auth.onAuthStateChange((_event,session)=>{ this.applySession(session); });
-  }
-  async applySession(session){
-    if(!session){ this.setState({authUser:null,authRole:null,authChecked:true}); return; }
-    const { data,error } = await supabaseClient.from('profiles').select('role').eq('id',session.user.id).single();
-    const role=error?null:(data&&data.role);
-    this.setState({authUser:session.user,authRole:role,authChecked:true});
-    if(role==='admin'){ this.loadSales(); this.loadInactive(); }
-  }
   async loadSales(){
     const { data,error } = await supabaseClient.from('sales')
       .select('id,channel,total,payment_method,pay_status,delivery_status,cancelled,address,notes,seen,created_at,customers(name,last_name),sale_items(product_id,product_name,color_name,aroma_name,quantity,unit_price)')
@@ -2098,15 +2087,6 @@ class Component extends DCLogic {
       inactiveAromas:aQ.error?[]:aQ.data.map(a=>a.name)
     });
   }
-  onAuthEmail=e=>this.setState({authEmail:e.target.value,authError:''});
-  onAuthPassword=e=>this.setState({authPassword:e.target.value,authError:''});
-  doLogin=async()=>{
-    const { error } = await supabaseClient.auth.signInWithPassword({email:this.state.authEmail,password:this.state.authPassword});
-    if(error){ this.setState({authError:'Email o contraseña incorrectos'}); return; }
-    this.setState({authPassword:'',authError:''});
-  };
-  doLogout=async()=>{ await supabaseClient.auth.signOut(); this.navigate('/'); this.setState({view:'home'}); };
-
   // ============================================================
   // STOCK — helpers de escritura remota compartidos por productos y ventas
   // ============================================================
