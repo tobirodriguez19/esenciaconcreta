@@ -3,6 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="./supabase-config.js"></script>
 <script src="./support.js"></script>
 </head>
 <body>
@@ -448,15 +450,19 @@
       <section style="max-width:1200px;margin:0 auto;padding:clamp(24px,4vw,48px) clamp(14px,5vw,56px) clamp(56px,8vw,100px)">
         <div style="font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:#9a958c;margin-bottom:10px">Panel privado</div>
         <h1 style="font-family:Newsreader,serif;font-weight:400;font-size:clamp(26px,4vw,44px);margin:0 0 22px;letter-spacing:-.01em">Administración</h1>
-        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:30px">
-          <sc-for list="{{ adminTabs }}" as="t" hint-placeholder-count="5">
-            <button onClick="{{ t.go }}" style="{{ t.style }}">
-              {{ t.label }}
-              <sc-if value="{{ t.showBadge }}" hint-placeholder-val="{{ false }}">
-                <span style="display:inline-flex;align-items:center;justify-content:center;min-width:18px;height:18px;padding:0 5px;border-radius:999px;background:#d6442e;color:#fff;font-size:11px;font-weight:600;margin-left:7px">{{ t.badge }}</span>
-              </sc-if>
-            </button>
-          </sc-for>
+        <sc-if value="{{ adminAuthed }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:30px;align-items:center;justify-content:space-between">
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <sc-for list="{{ adminTabs }}" as="t" hint-placeholder-count="5">
+              <button onClick="{{ t.go }}" style="{{ t.style }}">
+                {{ t.label }}
+                <sc-if value="{{ t.showBadge }}" hint-placeholder-val="{{ false }}">
+                  <span style="display:inline-flex;align-items:center;justify-content:center;min-width:18px;height:18px;padding:0 5px;border-radius:999px;background:#d6442e;color:#fff;font-size:11px;font-weight:600;margin-left:7px">{{ t.badge }}</span>
+                </sc-if>
+              </button>
+            </sc-for>
+          </div>
+          <button onClick="{{ doLogout }}" style="background:none;border:1px solid rgba(35,34,32,.16);color:#56534c;cursor:pointer;border-radius:999px;padding:9px 16px;font-size:13px" style-hover="background:rgba(35,34,32,.05)">Cerrar sesión</button>
         </div>
 
         <!-- ===== PRODUCTOS ===== -->
@@ -496,6 +502,9 @@
                 <label style="display:flex;flex-direction:column;gap:6px;font-size:12px;color:#6a665e">Stock inicial
                   <input value="{{ np.stock }}" onChange="{{ onNPStock }}" placeholder="10" style="border:1px solid rgba(35,34,32,.16);border-radius:10px;padding:10px 12px;font-size:14px;outline:none" style-focus="border-color:#232220">
                 </label>
+                <label style="display:flex;flex-direction:column;gap:6px;font-size:12px;color:#6a665e">SKU <span style="color:#a8a298">(opcional)</span>
+                  <input value="{{ np.sku }}" onChange="{{ onNPSku }}" placeholder="EC-VEL-003" style="border:1px solid rgba(35,34,32,.16);border-radius:10px;padding:10px 12px;font-size:14px;outline:none" style-focus="border-color:#232220">
+                </label>
               </div>
               <label style="display:flex;flex-direction:column;gap:6px;font-size:12px;color:#6a665e;margin-bottom:13px">Colores <span style="color:#a8a298">(separados por coma)</span>
                 <input value="{{ np.colors }}" onChange="{{ onNPColors }}" placeholder="Cemento, Arena" style="border:1px solid rgba(35,34,32,.16);border-radius:10px;padding:10px 12px;font-size:14px;outline:none" style-focus="border-color:#232220">
@@ -521,16 +530,19 @@
                     
                   </div>
                   <div style="flex:1 1 180px;min-width:150px;display:flex;flex-direction:column;gap:8px">
-                    <input value="{{ p.name }}" onChange="{{ p.onName }}" style="width:100%;border:1px solid transparent;border-radius:8px;padding:5px 8px;font-size:16px;color:#232220;background:#FAF9F6;font-family:Newsreader,serif;outline:none" style-focus="border-color:rgba(35,34,32,.2)">
-                    <select value="{{ p.category }}" onChange="{{ p.onCategory }}" style="border:1px solid rgba(35,34,32,.14);border-radius:8px;padding:6px 8px;font-size:13px;outline:none;background:#fff;color:#56534c;max-width:200px">
+                    <input value="{{ p.name }}" onChange="{{ p.onName }}" disabled="{{ p.notEditing }}" style="width:100%;border:1px solid transparent;border-radius:8px;padding:5px 8px;font-size:16px;color:#232220;background:#FAF9F6;font-family:Newsreader,serif;outline:none" style-focus="border-color:rgba(35,34,32,.2)">
+                    <select value="{{ p.category }}" onChange="{{ p.onCategory }}" disabled="{{ p.notEditing }}" style="border:1px solid rgba(35,34,32,.14);border-radius:8px;padding:6px 8px;font-size:13px;outline:none;background:#fff;color:#56534c;max-width:200px">
                       <sc-for list="{{ catOptions }}" as="o" hint-placeholder-count="6"><option value="{{ o.id }}">{{ o.label }}</option></sc-for>
                     </select>
+                    <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:#9a958c">SKU
+                      <input value="{{ p.sku }}" onChange="{{ p.onSku }}" disabled="{{ p.notEditing }}" placeholder="Sin SKU" style="border:1px solid rgba(35,34,32,.12);border-radius:7px;padding:4px 8px;font-size:12px;color:#56534c;outline:none;width:110px" style-focus="border-color:rgba(35,34,32,.3)">
+                    </div>
                   </div>
                   <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">
                     <label style="display:flex;flex-direction:column;gap:5px;font-size:11px;letter-spacing:.04em;text-transform:uppercase;color:#9a958c">Precio
                       <div style="display:flex;align-items:center;border:1px solid rgba(35,34,32,.16);border-radius:9px;overflow:hidden;background:#fff">
                         <span style="padding:0 2px 0 10px;color:#9a958c;font-size:14px">$</span>
-                        <input value="{{ p.price }}" onChange="{{ p.onPrice }}" style="border:none;outline:none;width:82px;padding:9px 10px 9px 4px;font-size:14px;color:#232220;background:transparent">
+                        <input value="{{ p.price }}" onChange="{{ p.onPrice }}" disabled="{{ p.notEditing }}" style="border:none;outline:none;width:82px;padding:9px 10px 9px 4px;font-size:14px;color:#232220;background:transparent">
                       </div>
                     </label>
                     <div style="display:flex;flex-direction:column;gap:5px;font-size:11px;letter-spacing:.04em;text-transform:uppercase;color:#9a958c">Stock
@@ -562,8 +574,10 @@
                         <div style="aspect-ratio:4/5;border-radius:10px;overflow:hidden;background:#EFEEEA;border:1px solid rgba(35,34,32,.08);margin-bottom:5px">
                           <image-slot id="{{ p.mainSlot }}" src="{{ p.mainSrc }}" shape="rect" placeholder="Soltá una foto"></image-slot>
                         </div>
-                        <div style="display:flex;gap:12px">
-                          <button onClick="{{ p.onChangeMain }}" style="background:none;border:none;cursor:pointer;font-size:11px;color:#6a665e;padding:0" style-hover="color:#232220">Cambiar</button>
+                        <div style="display:flex;gap:12px;align-items:center">
+                          <label style="background:none;border:none;cursor:pointer;font-size:11px;color:#6a665e;padding:0" style-hover="color:#232220">Subir foto
+                            <input type="file" accept="image/jpeg,image/png,image/webp" onChange="{{ p.onUploadMain }}" style="display:none">
+                          </label>
                           <button onClick="{{ p.onClearMain }}" style="background:none;border:none;cursor:pointer;font-size:11px;color:#b3ada3;padding:0" style-hover="color:#b3261e">Quitar</button>
                         </div>
                       </div>
@@ -575,9 +589,10 @@
                   <div style="margin-top:14px;padding-top:14px;border-top:1px solid rgba(35,34,32,.07)">
                     <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:12px">
                       <div style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#9a958c">Colores y stock</div>
-                      <div style="display:flex;align-items:center;gap:6px;border:1px dashed rgba(35,34,32,.2);border-radius:999px;padding:4px 5px 4px 12px">
-                        <input value="{{ p.colorDraft }}" onChange="{{ p.onColorDraft }}" placeholder="Agregar color" style="border:none;outline:none;background:transparent;font-size:13px;width:104px;color:#232220">
-                        <button onClick="{{ p.onAddColor }}" style="background:#232220;color:#FAF9F6;border:none;cursor:pointer;border-radius:999px;width:28px;height:28px;font-size:16px;line-height:1" style-hover="background:#3a3833">+</button>
+                      <div style="display:flex;align-items:center;gap:6px;border:1px dashed rgba(35,34,32,.2);border-radius:999px;padding:4px 5px 4px 10px">
+                        <input type="color" value="{{ p.colorHexDraft }}" onChange="{{ p.onColorHexDraft }}" style="border:none;outline:none;background:transparent;width:24px;height:24px;padding:0;cursor:pointer;flex-shrink:0">
+                        <input value="{{ p.colorDraft }}" onChange="{{ p.onColorDraft }}" placeholder="Agregar color" style="border:none;outline:none;background:transparent;font-size:13px;width:96px;color:#232220">
+                        <button onClick="{{ p.onAddColor }}" style="background:#232220;color:#FAF9F6;border:none;cursor:pointer;border-radius:999px;width:28px;height:28px;font-size:16px;line-height:1;flex-shrink:0" style-hover="background:#3a3833">+</button>
                       </div>
                     </div>
                     <div style="display:flex;flex-direction:column;gap:10px">
@@ -586,7 +601,7 @@
                           <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:8px">
                             <div style="display:flex;align-items:center;gap:8px;flex:1;min-width:0">
                               <sc-if value="{{ v.hasColor }}" hint-placeholder-val="{{ true }}">
-                                <span style="width:13px;height:13px;border-radius:999px;box-shadow:inset 0 0 0 1px rgba(35,34,32,.14);background:{{ v.hex }};flex-shrink:0"></span>
+                                <input type="color" value="{{ v.hex }}" onChange="{{ v.onHex }}" title="Color de {{ v.name }}" style="width:18px;height:18px;padding:0;border:none;outline:none;background:transparent;cursor:pointer;flex-shrink:0;border-radius:999px;overflow:hidden">
                                 <input value="{{ v.name }}" onChange="{{ v.onRename }}" style="border:1px solid transparent;background:transparent;font-size:14px;font-weight:600;color:#232220;outline:none;border-radius:6px;padding:3px 6px;min-width:0;max-width:170px" style-focus="border-color:rgba(35,34,32,.2);background:#fff">
                               </sc-if>
                               <sc-if value="{{ v.noColor }}" hint-placeholder-val="{{ false }}">
@@ -643,6 +658,12 @@
                         </div>
                       </sc-for>
                     </div>
+                  </div>
+
+                  <!-- GUARDAR / CANCELAR -->
+                  <div style="margin-top:16px;padding-top:14px;border-top:1px solid rgba(35,34,32,.07);display:flex;gap:10px;justify-content:flex-end">
+                    <button onClick="{{ p.onCancelDraft }}" style="background:transparent;color:#56534c;border:1px solid rgba(35,34,32,.18);cursor:pointer;border-radius:999px;padding:11px 22px;font-size:14px" style-hover="background:rgba(35,34,32,.05)">Cancelar</button>
+                    <button onClick="{{ p.onSaveDraft }}" style="background:#232220;color:#FAF9F6;border:none;cursor:pointer;border-radius:999px;padding:11px 26px;font-size:14px" style-hover="background:#3a3833">Guardar cambios</button>
                   </div>
                 </div>
                 </sc-if>
@@ -993,6 +1014,21 @@
           </div>
         </div>
         </sc-if>
+        </sc-if>
+        <sc-if value="{{ adminNeedsLogin }}" hint-placeholder-val="{{ false }}">
+          <div style="max-width:380px;margin:20px auto 60px;background:#fff;border:1px solid rgba(35,34,32,.1);border-radius:16px;padding:32px 28px">
+            <div style="font-family:Newsreader,serif;font-size:22px;margin-bottom:6px">Acceso administrador</div>
+            <div style="font-size:13px;color:#6a665e;margin-bottom:20px">Iniciá sesión para gestionar la tienda.</div>
+            <div style="display:flex;flex-direction:column;gap:12px">
+              <input type="email" value="{{ authEmail }}" onChange="{{ onAuthEmail }}" placeholder="Email" style="border:1px solid rgba(35,34,32,.16);border-radius:10px;padding:12px 14px;font-size:14px;outline:none" style-focus="border-color:#232220">
+              <input type="password" value="{{ authPassword }}" onChange="{{ onAuthPassword }}" placeholder="Contraseña" style="border:1px solid rgba(35,34,32,.16);border-radius:10px;padding:12px 14px;font-size:14px;outline:none" style-focus="border-color:#232220">
+              <sc-if value="{{ authError }}" hint-placeholder-val="{{ '' }}">
+                <div style="color:#b3261e;font-size:13px">{{ authError }}</div>
+              </sc-if>
+              <button onClick="{{ doLogin }}" style="background:#232220;color:#FAF9F6;border:none;cursor:pointer;border-radius:999px;padding:13px;font-size:14px" style-hover="background:#3a3833">Ingresar</button>
+            </div>
+          </div>
+        </sc-if>
       </section>
     </div>
     </sc-if>
@@ -1028,7 +1064,6 @@
       </div>
       <div style="border-top:1px solid rgba(255,255,255,.08);padding:22px 0;display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;align-items:center;font-size:12.5px;color:#6f6a60">
         <span>© 2026 Esencia Concreta · Hecho a mano en Rafaela</span>
-        <button onClick="{{ goAdmin }}" style="background:none;border:1px solid rgba(255,255,255,.16);color:#8d877c;cursor:pointer;border-radius:999px;padding:6px 14px;font-size:12px;letter-spacing:.04em;transition:all .25s" style-hover="border-color:rgba(255,255,255,.45);color:#FAF9F6">Admin</button>
       </div>
     </div>
   </footer>
@@ -1328,34 +1363,17 @@
 </x-dc>
 <script type="text/x-dc" data-dc-script>
 class Component extends DCLogic {
+  // ============================================================
+  // ESTADO INICIAL
+  // ============================================================
   constructor(props){
     super(props);
     this.HEX = {'Arena':'#D8CBB6','Cemento':'#B6B1A8','Blanco':'#EFEDE7','Carbón':'#2A2926','Negro':'#2A2926','Terrazo claro':'#D6CFC2','Terrazo oscuro':'#8C877E'};
     this.PHOTO_IDS = new Set(['vela-bruma','vela-niebla','portavela-cilindro','portavela-trio','bandeja-organica','bandeja-rect','florero-tubo','florero-bombe','posavasos-cuarteto','posavasos-terrazo','sahumerio-lineal','sahumerio-cuenco']);
-    const cats=[{id:'velas',label:'Velas',hasAroma:true},{id:'bandejas',label:'Bandejas',hasAroma:false},{id:'portavelas',label:'Portavelas',hasAroma:false},{id:'floreros',label:'Floreros',hasAroma:false},{id:'posavasos',label:'Posavasos',hasAroma:false},{id:'portasahumerios',label:'Portasahumerios',hasAroma:false}];
-    const seed=[
-      {id:'vela-bruma',category:'velas',name:'Vela Bruma',price:9900,featured:true,shortDesc:'Vela de soja, aroma sándalo. 40h de luz cálida.',longDesc:'Cera de soja 100% natural con mecha de algodón. Vaso de hormigón reutilizable. Aproximadamente 40 horas de combustión limpia.',colors:['Arena','Cemento','Blanco'],scents:['Sándalo','Lavanda','Vainilla','Coco'],scentStock:{'Sándalo':4,'Lavanda':3,'Vainilla':3,'Coco':2}},
-      {id:'vela-niebla',category:'velas',name:'Vela Doble Mecha Niebla',price:14500,featured:false,shortDesc:'Dos mechas, encendido parejo.',longDesc:'Doble mecha para un encendido uniforme y mayor difusión del aroma. Cera de soja en vaso de hormigón macizo de gran formato.',colors:['Cemento','Carbón'],scents:['Vainilla y cedro','Capuchino','Verbena','Limón'],scentStock:{'Vainilla y cedro':2,'Capuchino':2,'Verbena':2,'Limón':2}},
-      {id:'portavela-cilindro',category:'portavelas',name:'Portavela Cilíndrico',price:7200,featured:true,stock:20,shortDesc:'Hormigón pulido para vela de té.',longDesc:'Cilindro de hormigón pulido pensado para velas de té. Peso justo para una base estable y tacto suave tras el lijado a mano.',colors:['Cemento','Arena','Negro']},
-      {id:'portavela-trio',category:'portavelas',name:'Set Portavelas Trío',price:16800,featured:false,stock:6,shortDesc:'Tres alturas en hormigón.',longDesc:'Tres portavelas de distintas alturas para armar composiciones equilibradas. Acabado mate sellado a mano.',colors:['Cemento','Arena']},
-      {id:'bandeja-organica',category:'bandejas',name:'Bandeja Orgánica',price:13900,featured:true,stock:10,shortDesc:'Forma orgánica en cemento.',longDesc:'Bandeja de bordes orgánicos en hormigón fino. Ideal como vaciabolsillos u organizador. Sellada para resistir el uso diario.',colors:['Cemento','Arena','Blanco']},
-      {id:'bandeja-rect',category:'bandejas',name:'Bandeja Rectangular Minimal',price:11500,featured:false,stock:9,shortDesc:'Líneas rectas y limpias.',longDesc:'Bandeja rectangular de líneas puras, pensada para perfumes, velas o el ritual del café. Hormigón macizo con base antideslizante.',colors:['Cemento','Negro']},
-      {id:'florero-tubo',category:'floreros',name:'Florero Tubo',price:15900,featured:true,stock:7,shortDesc:'Hormigón con tubo de vidrio interior.',longDesc:'Florero escultórico de hormigón con tubo de vidrio interior extraíble. Para una flor única o un ramo pequeño y seco.',colors:['Cemento','Arena']},
-      {id:'florero-bombe',category:'floreros',name:'Florero Bombé',price:18900,featured:false,stock:5,shortDesc:'Silueta redondeada y generosa.',longDesc:'Silueta bombé de presencia escultórica para el centro de la mesa. Interior sellado, apto para agua y flores frescas.',colors:['Cemento','Blanco']},
-      {id:'posavasos-cuarteto',category:'posavasos',name:'Posavasos Cuarteto',price:8900,featured:true,stock:15,shortDesc:'Set x4 en hormigón con base de corcho.',longDesc:'Juego de cuatro posavasos de hormigón con base de corcho que protege tus superficies. Absorben la humedad y suman textura.',colors:['Cemento','Arena','Negro']},
-      {id:'posavasos-terrazo',category:'posavasos',name:'Posavasos Terrazo',price:10500,featured:false,stock:11,shortDesc:'Set x4 con detalle terrazo.',longDesc:'Cuatro posavasos con incrustaciones tipo terrazo: ninguno es igual al otro. Sellados y con base de corcho.',colors:['Terrazo claro','Terrazo oscuro']},
-      {id:'sahumerio-lineal',category:'portasahumerios',name:'Portasahumerio Lineal',price:6900,featured:true,stock:18,shortDesc:'Base de hormigón para varillas.',longDesc:'Base lineal de hormigón con canal que recoge la ceniza de las varillas. Minimalista y estable para tu ritual diario.',colors:['Cemento','Arena']},
-      {id:'sahumerio-cuenco',category:'portasahumerios',name:'Portasahumerio Cuenco',price:8500,featured:false,stock:9,shortDesc:'Cuenco con orificio central.',longDesc:'Cuenco de hormigón con orificio central, compatible con varillas y conos de incienso. La forma contiene la ceniza con prolijidad.',colors:['Cemento','Negro']}
-    ];
-    const aromaSeed=['Sándalo','Lavanda','Vainilla','Coco','Vainilla y cedro','Capuchino','Verbena','Limón'];
-    const salesSeed=[
-      {seq:1,channel:'online',customer:'Lucía Rodríguez',items:[{id:'vela-bruma',name:'Vela Bruma',color:'Arena',scent:'Lavanda',qty:2,price:9900}],total:19800,method:'transferencia',payStatus:'pagado',delivery:'entregado',cancelled:false,date:'12/06/2026',address:'Mitre 850, Rafaela',notes:'',seen:true},
-      {seq:2,channel:'presencial',customer:'Mostrador',items:[{id:'bandeja-organica',name:'Bandeja Orgánica',color:'Cemento',scent:null,qty:1,price:13900},{id:'posavasos-cuarteto',name:'Posavasos Cuarteto',color:'Cemento',scent:null,qty:1,price:8900}],total:22800,method:'efectivo',payStatus:'pagado',delivery:'entregado',cancelled:false,date:'18/06/2026',address:'',notes:'',seen:true},
-      {seq:3,channel:'online',customer:'Martina González',items:[{id:'vela-bruma',name:'Vela Bruma',color:'Cemento',scent:'Vainilla',qty:1,price:9900},{id:'florero-tubo',name:'Florero Tubo',color:'Cemento',scent:null,qty:1,price:15900}],total:25800,method:'transferencia',payStatus:'pendiente',delivery:'pendiente',cancelled:false,date:'24/06/2026',address:'Belgrano 1234, Rafaela',notes:'Entregar después de las 18h.',seen:false}
-    ];
+    const cats=[];
     this.state={
-      view:'home', adminTab:'productos', productId:null,
-      categories:cats, products:seed.map(p=>this.normStock(p,cats)), aromas:aromaSeed, sales:salesSeed, saleSeq:4,
+      view:(typeof location!=='undefined'&&location.hash==='#admin')?'admin':'home', adminTab:'productos', productId:null,
+      categories:cats, products:[], aromas:[], sales:[],
       featuredOrder:['vela-bruma','portavela-cilindro','bandeja-organica','florero-tubo','posavasos-cuarteto','sahumerio-lineal'],
       config:{shipping:5000,alias:'esencia.concreta',cbu:'0000003100093421750001',titular:'María Pérez',whatsapp:'5493492583885'},
       oficio:{eyebrow:'El oficio',title:'Hecho artesanalmente',body:'Cada pieza nace de una mezcla precisa de cemento, agua y pigmento natural. Moldeada, curada y lijada a mano, una por una. No hay dos iguales: las pequeñas variaciones son la firma del oficio.',steps:[{title:'Mezcla & moldeado',desc:'Dosificamos el hormigón y lo vertimos en moldes propios.'},{title:'Curado & lijado',desc:'Reposo de 48 horas y lijado manual hasta el tacto justo.'},{title:'Sellado a mano',desc:'Hidrolaca protectora que realza la textura del cemento.'}]},
@@ -1368,22 +1386,27 @@ class Component extends DCLogic {
       form:{nombre:'',apellido:'',telefono:'',email:'',direccion:''},
       fulfillment:'retiro', payment:'transferencia',
       heroIndex:0,
-      stockEditId:null, aromaModalProduct:null, aromaSearch:'', colorDrafts:{},
+      stockEditId:null, aromaModalProduct:null, aromaSearch:'',
+      editingProductId:null, productDraft:null, draftColorInput:'', draftColorHex:'#B6B1A8',
       prodAdding:false, newProduct:this.emptyNP(),
       catAdding:false, newCat:{label:'',hasAroma:true},
       newAroma:'', aromaEdits:{}, aromaEditName:null,
       saleAdding:false, salePick:{id:'',color:'',scent:'',qty:1}, saleDraft:{customer:'',payment:'efectivo',items:[]},
       saleDetailSeq:null,
       vSearch:'', vPay:'todos', vDel:'todos', vType:'todos', vSort:'recientes',
-      confirm:null, filled:{}, toast:null
+      confirm:null, filled:{}, toast:null,
+      authUser:null, authRole:null, authChecked:false, authEmail:'', authPassword:'', authError:''
     };
-    this._toastT=null; this._closeT=null; this._heroT=null; this._navT=null; this._scanT=null;
+    this._toastT=null; this._closeT=null; this._heroT=null; this._navT=null; this._scanT=null; this._debounceT={};
   }
 
+  // ============================================================
+  // UTILIDADES
+  // ============================================================
   fmt(n){ return '$'+Number(n||0).toLocaleString('es-AR'); }
-  hex(name){ return this.HEX[name]||'#B6B1A8'; }
+  hex(name,p){ return (p&&p.colorHex&&p.colorHex[name])||this.HEX[name]||'#B6B1A8'; }
   slug(s){ return String(s).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,''); }
-  emptyNP(){ return {name:'',category:'velas',price:'',colors:'',stock:'',shortDesc:''}; }
+  emptyNP(){ return {name:'',category:'velas',price:'',colors:'',stock:'',shortDesc:'',sku:''}; }
   scrollTop(){ const go=()=>{ try{ window.scrollTo(0,0); }catch(e){} }; go(); requestAnimationFrame(()=>{ go(); requestAnimationFrame(go); }); }
   stop=e=>{ if(e&&e.stopPropagation) e.stopPropagation(); };
   getProduct(id){ return this.state.products.find(x=>x.id===id); }
@@ -1393,7 +1416,6 @@ class Component extends DCLogic {
   isScentedCat(catId,scents){ const c=(this.state?this.state.categories:null)||this._cats; const cat=(c||[]).find(x=>x.id===catId); return !!(cat&&cat.hasAroma&&scents&&scents.length); }
   isScented(p){ return !!(p&&this.catHasAroma(p.category)&&p.scents&&p.scents.length); }
   // Build unified per-color (and per-color×aroma) stock from legacy fields.
-  normStock(p,cats){ const cat=(cats||[]).find(c=>c.id===p.category); const scented=!!(cat&&cat.hasAroma&&p.scents&&p.scents.length); const keys=(p.colors&&p.colors.length)?p.colors:['']; const n=keys.length; const cstock={}; if(scented){ keys.forEach((col,ci)=>{ cstock[col]={}; p.scents.forEach(sc=>{ const v=(p.scentStock&&p.scentStock[sc])||0; const base=Math.floor(v/n); cstock[col][sc]=base+(ci===0?(v-base*n):0); }); }); } else { const total=p.stock||0; const base=Math.floor(total/n); keys.forEach((col,ci)=>{ cstock[col]=base+(ci===0?(total-base*n):0); }); } const np={...p,colors:p.colors||[],cstock,photoSlots:p.photoSlots||{}}; delete np.scentStock; delete np.stock; delete np.photoCounts; return np; }
   colorKeys(p){ return (p&&p.colors&&p.colors.length)?p.colors:['']; }
   variantQty(p,color,scent){ const cs=p.cstock||{}; if(this.isScented(p)){ return (cs[color]&&cs[color][scent])||0; } return cs[color]||0; }
   colorStock(p,color){ const cs=p.cstock||{}; if(this.isScented(p)){ const m=cs[color]||{}; return p.scents.reduce((a,s)=>a+(m[s]||0),0); } return cs[color]||0; }
@@ -1406,9 +1428,10 @@ class Component extends DCLogic {
   photoBase(id,color){ return color?this.colorSlot(id,color):this.mainSlot(id); }
   // Explicit per-color photo arrays of stable slot ids (true add/remove, no gaps).
   photoSlotIds(p,color){ const k=color||'_'; const arr=p.photoSlots&&p.photoSlots[k]; if(arr&&arr.length) return arr.slice(); return [this.photoBase(p.id,color)]; }
-  photoSeedSrc(p,sid,color){ return (sid===this.mainSlot(p.id)&&!color&&this.PHOTO_IDS.has(p.id))?('uploads/products/'+p.id+'.jpg'):''; }
+  photoUrlFor(p,color){ const list=(p.photos||[]).filter(ph=>color?ph.color_name===color:!ph.color_name); if(list.length) return list[list.length-1].url; if(!color&&this.PHOTO_IDS.has(p.id)) return 'uploads/products/'+p.id+'.jpg'; return ''; }
+  photoSeedSrc(p,sid,color){ return (sid===this.mainSlot(p.id)&&!color)?this.photoUrlFor(p):''; }
   filledPhotos(p,color){ return this.photoSlotIds(p,color).filter(sid=>this.isFilled(sid, !!this.photoSeedSrc(p,sid,color))); }
-  firstPhoto(p,color){ const own=this.filledPhotos(p,color); if(own.length) return {slot:own[0],src:''}; const main=this.mainSlot(p.id); const seed=this.PHOTO_IDS.has(p.id)?('uploads/products/'+p.id+'.jpg'):''; if(this.isFilled(main,!!seed)) return {slot:main,src:seed}; const keys=this.colorKeys(p).filter(Boolean); for(const k of keys){ const f=this.filledPhotos(p,k); if(f.length) return {slot:f[0],src:''}; } return {slot:main,src:seed}; }
+  firstPhoto(p,color){ const own=this.filledPhotos(p,color); if(own.length) return {slot:own[0],src:''}; const main=this.mainSlot(p.id); const seed=this.photoUrlFor(p); if(this.isFilled(main,!!seed)) return {slot:main,src:seed}; const keys=this.colorKeys(p).filter(Boolean); for(const k of keys){ const f=this.filledPhotos(p,k); if(f.length) return {slot:f[0],src:''}; } return {slot:main,src:seed}; }
   addPhoto(pid,color){ const p=this.getProduct(pid); const k=color||'_'; const cur=this.photoSlotIds(p,color); const nid=this.photoBase(pid,color)+'__'+Math.random().toString(36).slice(2,7); const photoSlots={...(p.photoSlots||{})}; photoSlots[k]=[...cur,nid]; this.updateProduct(pid,{photoSlots}); }
   removePhotoSlot(pid,color,slotId){ const p=this.getProduct(pid); const k=color||'_'; const cur=this.photoSlotIds(p,color); const next=cur.filter(x=>x!==slotId); const photoSlots={...(p.photoSlots||{})}; photoSlots[k]=next; this.clearPhoto(slotId); this.updateProduct(pid,{photoSlots}); }
   salesUnits(id){ let n=0; this.state.sales.forEach(s=>{ if(s.cancelled) return; s.items.forEach(i=>{ if(i.id===id) n+=i.qty; }); }); return n; }
@@ -1420,18 +1443,309 @@ class Component extends DCLogic {
   openPhotoModal(pid,color){ this.setState({photoModal:{pid,color:color||null}}); }
   closePhotoModal=()=>this.setState({photoModal:null});
 
-  toggleExpand(id){ this.setState({expanded:{...this.state.expanded,[id]:!this.state.expanded[id]}}); }
+  // ============================================================
+  // PRODUCTOS — edición con borrador local (Guardar/Cancelar)
+  // Nada se escribe en Supabase hasta saveProductDraft().
+  // ============================================================
+  toggleExpand(id){ if(this.state.expanded[id]) this.cancelEditProduct(id); else this.startEditProduct(id); }
+  buildDraft(p){
+    return {
+      name:p.name, shortDesc:p.shortDesc||'', longDesc:p.longDesc||'', price:p.price, sku:p.sku||'', category:p.category,
+      colors:(p.colors||[]).map(name=>({orig:name,name,hex:(p.colorHex&&p.colorHex[name])||''})),
+      scents:(p.scents||[]).slice(),
+      cstock:JSON.parse(JSON.stringify(p.cstock||{}))
+    };
+  }
+  startEditProduct(id){
+    const p=this.getProduct(id); if(!p) return;
+    this.setState({expanded:{...this.state.expanded,[id]:true}, editingProductId:id, productDraft:this.buildDraft(p), draftColorInput:'', draftColorHex:'#B6B1A8'});
+  }
+  cancelEditProduct(id){
+    this.setState({editingProductId:null, productDraft:null, expanded:{...this.state.expanded,[id]:false}, descModalProduct:null, aromaModalProduct:null});
+  }
+  setDraftField(key,v){ this.setState({productDraft:{...this.state.productDraft,[key]:v}}); }
+  onDraftColorInput=e=>this.setState({draftColorInput:e.target.value});
+  onDraftColorHex=e=>this.setState({draftColorHex:e.target.value});
+  addDraftColor=()=>{
+    const name=(this.state.draftColorInput||'').trim(); if(!name) return;
+    const d=this.state.productDraft;
+    if(d.colors.some(c=>c.name.toLowerCase()===name.toLowerCase())){ this.showToast('Ese color ya existe'); return; }
+    const colors=[...d.colors,{orig:null,name,hex:this.state.draftColorHex}];
+    const cstock={...d.cstock}; cstock[name]=d.scents.length?d.scents.reduce((o,sc)=>{o[sc]=0;return o;},{}):0;
+    this.setState({productDraft:{...d,colors,cstock},draftColorInput:'',draftColorHex:'#B6B1A8'});
+  };
+  renameDraftColor=(idx,name)=>{
+    const d=this.state.productDraft; if(!name||!name.trim()) return; const old=d.colors[idx].name;
+    const colors=d.colors.map((c,i)=>i===idx?{...c,name}:c);
+    const cstock={...d.cstock}; if(old in cstock){ cstock[name]=cstock[old]; if(name!==old) delete cstock[old]; }
+    this.setState({productDraft:{...d,colors,cstock}});
+  };
+  setDraftColorHex=(idx,hex)=>{ const d=this.state.productDraft; const colors=d.colors.map((c,i)=>i===idx?{...c,hex}:c); this.setState({productDraft:{...d,colors}}); };
+  removeDraftColor=(idx)=>{
+    const d=this.state.productDraft; if(d.colors.length<=1){ this.showToast('El producto necesita al menos un color'); return; }
+    const name=d.colors[idx].name; const colors=d.colors.filter((_,i)=>i!==idx);
+    const cstock={...d.cstock}; delete cstock[name];
+    this.setState({productDraft:{...d,colors,cstock}});
+  };
+  draftAdjustVariant=(color,scent,delta)=>{
+    const d=this.state.productDraft; const cstock=JSON.parse(JSON.stringify(d.cstock)); const scented=d.scents.length>0;
+    if(scented){ if(!cstock[color]||typeof cstock[color]!=='object') cstock[color]={}; cstock[color][scent]=Math.max(0,(cstock[color][scent]||0)+delta); }
+    else { cstock[color]=Math.max(0,(typeof cstock[color]==='number'?cstock[color]:0)+delta); }
+    this.setState({productDraft:{...d,cstock}});
+  };
+  draftSetVariant=(color,scent,v)=>{
+    const n=Math.max(0,parseInt(String(v).replace(/\D/g,''),10)||0);
+    const d=this.state.productDraft; const cstock=JSON.parse(JSON.stringify(d.cstock)); const scented=d.scents.length>0;
+    if(scented){ if(!cstock[color]||typeof cstock[color]!=='object') cstock[color]={}; cstock[color][scent]=n; } else { cstock[color]=n; }
+    this.setState({productDraft:{...d,cstock}});
+  };
+  draftAssignAroma=(name)=>{
+    const d=this.state.productDraft; if(d.scents.indexOf(name)>=0) return;
+    const scents=[...d.scents,name]; const cstock=JSON.parse(JSON.stringify(d.cstock));
+    d.colors.forEach(c=>{ if(!cstock[c.name]||typeof cstock[c.name]!=='object') cstock[c.name]={}; if(!(name in cstock[c.name])) cstock[c.name][name]=0; });
+    this.setState({productDraft:{...d,scents,cstock}});
+  };
+  draftRemoveAroma=(name)=>{
+    const d=this.state.productDraft; const scents=d.scents.filter(s=>s!==name); const cstock=JSON.parse(JSON.stringify(d.cstock));
+    d.colors.forEach(c=>{ if(cstock[c.name]&&typeof cstock[c.name]==='object') delete cstock[c.name][name]; });
+    this.setState({productDraft:{...d,scents,cstock}});
+  };
+  saveProductDraft=async()=>{
+    const id=this.state.editingProductId; const d=this.state.productDraft; const orig=this.getProduct(id);
+    if(!id||!d||!orig) return;
+    if(!d.name.trim()){ this.showToast('Poné un nombre'); return; }
+    if(!d.colors.length){ this.showToast('El producto necesita al menos un color'); return; }
+    try{
+      const price=parseInt(String(d.price).replace(/\D/g,''),10)||0;
+      const { error:pErr } = await supabaseClient.from('products').update({name:d.name.trim(),short_desc:d.shortDesc,long_desc:d.longDesc,price,sku:d.sku||null,category_id:d.category}).eq('id',id);
+      if(pErr) throw pErr;
+
+      const origColors=orig.colors||[];
+      for(const oc of origColors){
+        if(!d.colors.some(c=>c.orig===oc)){
+          await supabaseClient.from('product_colors').delete().eq('product_id',id).eq('color_name',oc);
+          await supabaseClient.from('stock').delete().eq('product_id',id).eq('color_name',oc);
+        }
+      }
+      for(let i=0;i<d.colors.length;i++){
+        const c=d.colors[i];
+        if(c.orig===null){
+          await supabaseClient.from('product_colors').insert({product_id:id,color_name:c.name,hex_value:c.hex||null,sort_order:i});
+          const rows=d.scents.length
+            ? d.scents.map(sc=>({product_id:id,color_name:c.name,aroma_name:sc,quantity:(d.cstock[c.name]&&d.cstock[c.name][sc])||0}))
+            : [{product_id:id,color_name:c.name,aroma_name:null,quantity:(typeof d.cstock[c.name]==='number'?d.cstock[c.name]:0)}];
+          await supabaseClient.from('stock').insert(rows);
+        } else {
+          const patch={sort_order:i, hex_value:c.hex||null};
+          if(c.orig!==c.name) patch.color_name=c.name;
+          await supabaseClient.from('product_colors').update(patch).eq('product_id',id).eq('color_name',c.orig);
+          if(c.orig!==c.name) await supabaseClient.from('stock').update({color_name:c.name}).eq('product_id',id).eq('color_name',c.orig);
+        }
+      }
+
+      const origScents=orig.scents||[];
+      for(const os of origScents){
+        if(d.scents.indexOf(os)<0){
+          await supabaseClient.from('product_aromas').delete().eq('product_id',id).eq('aroma_name',os);
+          await supabaseClient.from('stock').delete().eq('product_id',id).eq('aroma_name',os);
+        }
+      }
+      for(let i=0;i<d.scents.length;i++){
+        const sc=d.scents[i];
+        if(origScents.indexOf(sc)<0){
+          await supabaseClient.from('product_aromas').insert({product_id:id,aroma_name:sc,sort_order:i});
+          const rows=d.colors.map(c=>({product_id:id,color_name:c.name,aroma_name:sc,quantity:(d.cstock[c.name]&&d.cstock[c.name][sc])||0}));
+          await supabaseClient.from('stock').insert(rows);
+        }
+      }
+
+      const scentedDraft=d.scents.length>0;
+      for(const c of d.colors){
+        if(scentedDraft){
+          for(const sc of d.scents){
+            const draftQty=(d.cstock[c.name]&&d.cstock[c.name][sc])||0;
+            const origHasColor=c.orig&&orig.cstock&&orig.cstock[c.orig]&&typeof orig.cstock[c.orig]==='object';
+            if(!origHasColor||origScents.indexOf(sc)<0) continue; // brand-new color/aroma combo, already inserted above
+            const origQty=orig.cstock[c.orig][sc]||0;
+            if(draftQty!==origQty){ await this.upsertStockRemote(id,c.name,sc,draftQty); await this.recordStockMovement(id,c.name,sc,'ajuste',draftQty-origQty,'Edición de producto'); }
+          }
+        } else {
+          const draftQty=typeof d.cstock[c.name]==='number'?d.cstock[c.name]:0;
+          if(!c.orig) continue; // brand-new color, already inserted above
+          const origQty=typeof orig.cstock[c.orig]==='number'?orig.cstock[c.orig]:0;
+          if(draftQty!==origQty){ await this.upsertStockRemote(id,c.name,null,draftQty); await this.recordStockMovement(id,c.name,null,'ajuste',draftQty-origQty,'Edición de producto'); }
+        }
+      }
+
+      this.setState({editingProductId:null,productDraft:null,expanded:{...this.state.expanded,[id]:false},descModalProduct:null,aromaModalProduct:null});
+      await this.loadCatalog();
+      this.showToast('Cambios guardados');
+    }catch(e){ console.error('saveProductDraft failed',e); this.showToast('Error al guardar: '+(e&&e.message?e.message:'')); }
+  };
   openDescModal(id){ this.setState({descModalProduct:id}); }
   closeDescModal=()=>this.setState({descModalProduct:null});
-  setShortDesc(id,v){ this.updateProduct(id,{shortDesc:v}); }
-  setLongDesc(id,v){ this.updateProduct(id,{longDesc:v}); }
+  // LEGACY: changePhoto/clearPhoto/addPhoto/removePhotoSlot drive <image-slot>'s
+  // built-in upload UI (per-color photo album, "El oficio" photo, category photos).
+  // That UI only works inside the original design tool ("omelette") — outside it,
+  // window.omelette.writeFile doesn't exist, so these calls are inert in production.
+  // Kept because the buttons that call them are still visible in the admin panel;
+  // removing the buttons is a product decision, not cleanup. The main product photo
+  // (uploadProductPhoto / removeStoragePhoto, below) is the real, working upload path.
   changePhoto(slotId){ try{ const el=document.getElementById(slotId); if(!el) return; const inp=el.shadowRoot&&el.shadowRoot.querySelector('input[type=file]'); if(inp){ inp.click(); } else if(typeof el.click==='function'){ el.click(); } }catch(e){} }
   clearPhoto(slotId){ try{ const el=document.getElementById(slotId); if(!el) return; const btn=el.shadowRoot&&el.shadowRoot.querySelector('[data-act=clear]'); if(btn){ btn.click(); setTimeout(()=>this.scanSlots(),60); } else { const f={...this.state.filled}; delete f[slotId]; this.setState({filled:f}); } }catch(e){} }
-  featuredPhoto(p){ const main=this.mainSlot(p.id); const seedSrc=this.PHOTO_IDS.has(p.id)?('uploads/products/'+p.id+'.jpg'):''; if(this.state.filled[main]||seedSrc) return {slot:main,src:seedSrc}; const keys=this.colorKeys(p).filter(Boolean); for(const k of keys){ const f=this.filledPhotos(p,k); if(f.length) return {slot:f[0],src:''}; } const gen=this.filledPhotos(p,null); if(gen.length) return {slot:gen[0],src:''}; return {slot:main,src:seedSrc}; }
+  // ============================================================
+  // IMÁGENES (Supabase Storage) — subida real usada por el admin
+  // ============================================================
+  sanitizeFileName(name){
+    const dot=name.lastIndexOf('.');
+    const ext=(dot>=0?name.slice(dot+1):'jpg').toLowerCase().replace(/[^a-z0-9]/g,'')||'jpg';
+    const noAccents=(dot>=0?name.slice(0,dot):name).toLowerCase().normalize('NFD').split('').filter(ch=>{ const c=ch.codePointAt(0); return c<768||c>879; }).join('');
+    const base=noAccents.replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,'').slice(0,40);
+    return (base||'foto')+'-'+Date.now()+'-'+Math.random().toString(36).slice(2,6)+'.'+ext;
+  }
+  storagePathFromUrl(url){ const marker='/product-photos/'; const i=(url||'').indexOf(marker); return i>=0?url.slice(i+marker.length):null; }
+  async uploadProductPhoto(productId,color,file){
+    const okTypes=['image/jpeg','image/jpg','image/png','image/webp'];
+    if(!file||okTypes.indexOf(file.type)<0){ this.showToast('Formato no permitido. Usá JPG, PNG o WEBP'); return; }
+    const maxBytes=5*1024*1024;
+    if(file.size>maxBytes){ this.showToast('La imagen no puede superar 5MB'); return; }
+    const path=productId+'/'+(color?this.slug(color):'general')+'/'+this.sanitizeFileName(file.name);
+    const { error:upErr } = await supabaseClient.storage.from('product-photos').upload(path,file,{cacheControl:'3600',upsert:false,contentType:file.type});
+    if(upErr){ this.showToast('Error al subir imagen: '+upErr.message); return; }
+    const { data:pub } = supabaseClient.storage.from('product-photos').getPublicUrl(path);
+    const { error:insErr } = await supabaseClient.from('product_photos').insert({product_id:productId,color_name:color||null,url:pub.publicUrl,sort_order:Date.now()});
+    if(insErr){ this.showToast('La imagen se subió pero no se pudo guardar el registro: '+insErr.message); return; }
+    await this.loadCatalog();
+    this.showToast('Foto actualizada');
+  }
+  async removeStoragePhoto(productId,color){
+    const p=this.getProduct(productId);
+    const list=(p.photos||[]).filter(ph=>color?ph.color_name===color:!ph.color_name);
+    if(!list.length){ this.showToast('No hay foto subida para quitar'); return; }
+    const last=list[list.length-1];
+    await supabaseClient.from('product_photos').delete().eq('id',last.id);
+    const path=this.storagePathFromUrl(last.url);
+    if(path) await supabaseClient.storage.from('product-photos').remove([path]);
+    await this.loadCatalog();
+    this.showToast('Foto eliminada');
+  }
+  featuredPhoto(p){ const main=this.mainSlot(p.id); const seedSrc=this.photoUrlFor(p); if(this.state.filled[main]||seedSrc) return {slot:main,src:seedSrc}; const keys=this.colorKeys(p).filter(Boolean); for(const k of keys){ const f=this.filledPhotos(p,k); if(f.length) return {slot:f[0],src:''}; } const gen=this.filledPhotos(p,null); if(gen.length) return {slot:gen[0],src:''}; return {slot:main,src:seedSrc}; }
   updateProduct(id,patch){ this.setState({products:this.state.products.map(p=>p.id===id?{...p,...patch}:p)}); }
   applyStock(products,items,sign){ return products.map(p=>{ const its=items.filter(i=>i.id===p.id); if(!its.length) return p; const cs=JSON.parse(JSON.stringify(p.cstock||{})); const cols=p.colors||[]; its.forEach(i=>{ const col=i.color&&cols.indexOf(i.color)>=0?i.color:(cols[0]||'Cemento'); if(this.isScented(p)&&i.scent){ if(!cs[col]||typeof cs[col]!=='object') cs[col]={}; cs[col][i.scent]=Math.max(0,(cs[col][i.scent]||0)+sign*i.qty); } else { const cur=(typeof cs[col]==='number')?cs[col]:0; cs[col]=Math.max(0,cur+sign*i.qty); } }); return {...p,cstock:cs}; }); }
 
-  componentDidMount(){ this.startHero(); this.loadFilled(); this.scanSlots(); this._scanT=setInterval(()=>this.scanSlots(),1200); this.setupGestures(); }
+  // ============================================================
+  // CICLO DE VIDA
+  // ============================================================
+  componentDidMount(){ this.startHero(); this.loadFilled(); this.scanSlots(); this._scanT=setInterval(()=>this.scanSlots(),1200); this.setupGestures(); this.loadCatalog(); this.initAuth(); }
+
+  // ============================================================
+  // AUTENTICACIÓN (Supabase Auth + rol admin)
+  // ============================================================
+  async initAuth(){
+    const { data } = await supabaseClient.auth.getSession();
+    await this.applySession(data.session);
+    supabaseClient.auth.onAuthStateChange((_event,session)=>{ this.applySession(session); });
+  }
+  async applySession(session){
+    if(!session){ this.setState({authUser:null,authRole:null,authChecked:true}); return; }
+    const { data,error } = await supabaseClient.from('profiles').select('role').eq('id',session.user.id).single();
+    const role=error?null:(data&&data.role);
+    this.setState({authUser:session.user,authRole:role,authChecked:true});
+    if(role==='admin') this.loadSales();
+  }
+  async loadSales(){
+    const { data,error } = await supabaseClient.from('sales')
+      .select('id,channel,total,payment_method,pay_status,delivery_status,cancelled,address,notes,seen,created_at,customers(name,last_name),sale_items(product_id,product_name,color_name,aroma_name,quantity,unit_price)')
+      .order('created_at',{ascending:false});
+    if(error){ console.error('loadSales error',error); this.showToast('No se pudieron cargar las ventas'); return; }
+    const sales=data.map(row=>({
+      seq:row.id, channel:row.channel,
+      customer:(row.customers?((row.customers.name||'')+' '+(row.customers.last_name||'')).trim():'')||'Mostrador',
+      items:(row.sale_items||[]).map(it=>({id:it.product_id,name:it.product_name||it.product_id,color:it.color_name,scent:it.aroma_name,qty:it.quantity,price:it.unit_price})),
+      total:row.total, method:row.payment_method, payStatus:row.pay_status, delivery:row.delivery_status,
+      cancelled:row.cancelled, date:new Date(row.created_at).toLocaleDateString('es-AR'),
+      address:row.address||'', notes:row.notes||'', seen:row.seen
+    }));
+    this.setState({sales});
+  }
+  onAuthEmail=e=>this.setState({authEmail:e.target.value,authError:''});
+  onAuthPassword=e=>this.setState({authPassword:e.target.value,authError:''});
+  doLogin=async()=>{
+    const { error } = await supabaseClient.auth.signInWithPassword({email:this.state.authEmail,password:this.state.authPassword});
+    if(error){ this.setState({authError:'Email o contraseña incorrectos'}); return; }
+    this.setState({authPassword:'',authError:''});
+  };
+  doLogout=async()=>{ await supabaseClient.auth.signOut(); this.setState({view:'home'}); };
+
+  // ============================================================
+  // STOCK — helpers de escritura remota compartidos por productos y ventas
+  // ============================================================
+  debounce(key,fn,ms=600){ clearTimeout(this._debounceT[key]); this._debounceT[key]=setTimeout(fn,ms); }
+  async recordStockMovement(productId,color,scent,type,delta,reason){
+    try{ await supabaseClient.from('stock_movements').insert({product_id:productId,color_name:color,aroma_name:scent||null,movement_type:type,quantity:delta,reason:reason||null,performed_by:this.state.authUser?this.state.authUser.id:null}); }
+    catch(e){ console.error('stock_movements insert failed',e); }
+  }
+  async upsertStockRemote(productId,color,scent,quantity){
+    let q=supabaseClient.from('stock').select('id').eq('product_id',productId).eq('color_name',color);
+    q=scent?q.eq('aroma_name',scent):q.is('aroma_name',null);
+    const { data,error:selErr } = await q;
+    if(selErr){ console.error(selErr); return false; }
+    if(data&&data.length){ const { error } = await supabaseClient.from('stock').update({quantity}).eq('id',data[0].id); if(error){ console.error(error); return false; } }
+    else { const { error } = await supabaseClient.from('stock').insert({product_id:productId,color_name:color,aroma_name:scent||null,quantity}); if(error){ console.error(error); return false; } }
+    return true;
+  }
+  async updateProductRemote(id,patch){
+    const dbPatch={};
+    if('name' in patch) dbPatch.name=patch.name;
+    if('category' in patch) dbPatch.category_id=patch.category;
+    if('price' in patch) dbPatch.price=patch.price;
+    if('sku' in patch) dbPatch.sku=patch.sku;
+    if('shortDesc' in patch) dbPatch.short_desc=patch.shortDesc;
+    if('longDesc' in patch) dbPatch.long_desc=patch.longDesc;
+    if('featured' in patch) dbPatch.featured=patch.featured;
+    if('active' in patch) dbPatch.active=patch.active;
+    const { error } = await supabaseClient.from('products').update(dbPatch).eq('id',id);
+    if(error){ console.error(error); this.showToast('Error al guardar: '+error.message); }
+  }
+  // ============================================================
+  // CARGA DE CATÁLOGO (SUPABASE)
+  // ============================================================
+  async loadCatalog(){
+    try{
+      const [catsQ,prodQ,colorsQ,aromasQ,prodAromasQ,stockQ,photosQ]=await Promise.all([
+        supabaseClient.from('categories').select('id,label,has_aroma'),
+        supabaseClient.from('products').select('id,category_id,sku,name,short_desc,long_desc,price,featured').eq('active',true),
+        supabaseClient.from('product_colors').select('product_id,color_name,hex_value,sort_order').order('sort_order'),
+        supabaseClient.from('aromas').select('name'),
+        supabaseClient.from('product_aromas').select('product_id,aroma_name,sort_order').order('sort_order'),
+        supabaseClient.from('stock').select('product_id,color_name,aroma_name,quantity'),
+        supabaseClient.from('product_photos').select('id,product_id,color_name,url,sort_order').order('sort_order')
+      ]);
+      const err=[catsQ,prodQ,colorsQ,aromasQ,prodAromasQ,stockQ,photosQ].map(r=>r.error).find(Boolean);
+      if(err){ console.error('Supabase loadCatalog error',err); this.showToast('No se pudo cargar el catálogo'); return; }
+      const categories=catsQ.data.map(c=>({id:c.id,label:c.label,hasAroma:c.has_aroma}));
+      const catById={}; categories.forEach(c=>catById[c.id]=c);
+      const colorsByProduct={}; const colorHexByProduct={}; colorsQ.data.forEach(r=>{ (colorsByProduct[r.product_id]=colorsByProduct[r.product_id]||[]).push(r.color_name); if(r.hex_value){ (colorHexByProduct[r.product_id]=colorHexByProduct[r.product_id]||{})[r.color_name]=r.hex_value; } });
+      const aromasByProduct={}; prodAromasQ.data.forEach(r=>{ (aromasByProduct[r.product_id]=aromasByProduct[r.product_id]||[]).push(r.aroma_name); });
+      const stockByProduct={}; stockQ.data.forEach(r=>{ (stockByProduct[r.product_id]=stockByProduct[r.product_id]||[]).push(r); });
+      const photosByProduct={}; photosQ.data.forEach(r=>{ (photosByProduct[r.product_id]=photosByProduct[r.product_id]||[]).push(r); });
+      const products=prodQ.data.map(p=>{
+        const cat=catById[p.category_id];
+        const colors=colorsByProduct[p.id]||[];
+        const scents=(cat&&cat.hasAroma)?(aromasByProduct[p.id]||[]):[];
+        const scented=!!(cat&&cat.hasAroma&&scents.length);
+        const cstock={}; colors.forEach(col=>{ cstock[col]=scented?{}:0; });
+        (stockByProduct[p.id]||[]).forEach(r=>{
+          if(!(r.color_name in cstock)) cstock[r.color_name]=scented?{}:0;
+          if(scented&&r.aroma_name) cstock[r.color_name][r.aroma_name]=r.quantity;
+          else if(!scented) cstock[r.color_name]=r.quantity;
+        });
+        return {id:p.id,sku:p.sku,category:p.category_id,name:p.name,price:p.price,featured:p.featured,shortDesc:p.short_desc,longDesc:p.long_desc,colors,scents,cstock,photoSlots:{},photos:photosByProduct[p.id]||[],colorHex:colorHexByProduct[p.id]||{}};
+      });
+      const aromas=aromasQ.data.map(a=>a.name);
+      this.setState({categories,products,aromas});
+    }catch(e){ console.error('Supabase loadCatalog exception',e); this.showToast('No se pudo conectar con la base de datos'); }
+  }
   scrollCat=(dir)=>{ const el=document.getElementById('ec-cat-scroll'); if(el) el.scrollBy({left:dir*Math.max(220,el.clientWidth*0.8),behavior:'smooth'}); };
   setupGestures(){
     let el=null,startX=0,startScroll=0,dragging=false,moved=false;
@@ -1456,7 +1770,18 @@ class Component extends DCLogic {
   openCatWith(cat){ this.setState({view:'catalog',filter:cat}); this.scrollTop(); };
   setFilter(cat){ this.setState({filter:cat}); }
   goAdmin=()=>{ this.setState({view:'admin'}); this.scrollTop(); };
-  goAdminTab(tab){ if(tab==='ventas') this.setState({sales:this.state.sales.map(s=>({...s,seen:true}))}); this.setState({adminTab:tab}); }
+  goAdminTab=(tab)=>{
+    this.setState({adminTab:tab});
+    if(tab==='ventas'){
+      this.loadSales().then(()=>{
+        const unseenIds=this.state.sales.filter(s=>!s.seen&&!s.cancelled).map(s=>s.seq);
+        if(unseenIds.length){
+          this.setState({sales:this.state.sales.map(s=>({...s,seen:true}))});
+          supabaseClient.from('sales').update({seen:true}).in('id',unseenIds).then(({error})=>{ if(error) console.error('mark seen failed',error); });
+        }
+      });
+    }
+  };
   verProceso=()=>{ const go=()=>{ const el=document.getElementById('ec-proceso'); if(el) window.scrollTo({top:el.getBoundingClientRect().top+window.scrollY-60,behavior:'smooth'}); }; if(this.state.view!=='home'){ this.setState({view:'home'}); setTimeout(go,80);} else go(); };
   verContacto=()=>{ const go=()=>{ const el=document.querySelector('footer'); if(el) window.scrollTo({top:el.getBoundingClientRect().top+window.scrollY-20,behavior:'smooth'}); }; if(this.state.view!=='home'){ this.setState({view:'home'}); setTimeout(go,80);} else go(); };
   setCatColor(id,color){ this.setState({catalogColors:{...this.state.catalogColors,[id]:color}}); }
@@ -1490,6 +1815,9 @@ class Component extends DCLogic {
   goCatalogFromCart=()=>{ this.closeCart(); this.goCatalog(); };
   goCheckout=()=>{ if(!this.state.cart.length){ this.showToast('Tu carrito está vacío'); return; } this.closeCart(); this.setState({view:'checkout'}); this.scrollTop(); };
 
+  // ============================================================
+  // VENTAS — checkout público (RPC create_order) y datos de pago
+  // ============================================================
   // checkout
   onNombre=e=>this.setState({form:{...this.state.form,nombre:e.target.value}});
   onApellido=e=>this.setState({form:{...this.state.form,apellido:e.target.value}});
@@ -1500,51 +1828,86 @@ class Component extends DCLogic {
   selEnvio=()=>this.setState({fulfillment:'envio'});
   selTransfer=()=>this.setState({payment:'transferencia'});
   selEfectivo=()=>this.setState({payment:'efectivo'});
-  buildLines(){ return this.state.cart.map(it=>{ const p=this.getProduct(it.id); const total=p.price*it.qty; return {key:it.key,id:it.id,color:it.color,scent:it.scent||null,name:p.name,qty:it.qty,total,priceFmt:this.fmt(p.price),lineFmt:this.fmt(total),slotId:'ec-prod-'+p.id,img:this.PHOTO_IDS.has(p.id)?('uploads/products/'+p.id+'.jpg'):'',meta:it.scent?(it.color+' · '+it.scent):('Color · '+it.color),inc:()=>this.incLine(it.key),dec:()=>this.decLine(it.key),remove:()=>this.removeLine(it.key)}; }); }
-  placeOrder=()=>{ const f=this.state.form; if(!f.nombre||!f.email){ this.showToast('Completá tu nombre y email'); return; } if(this.state.fulfillment==='envio'&&!f.direccion){ this.showToast('Ingresá tu dirección de envío'); return; } const lines=this.buildLines(); const subtotal=lines.reduce((a,l)=>a+l.total,0); const shipping=this.state.fulfillment==='envio'?(this.state.config.shipping||0):0; const total=subtotal+shipping; const seq=this.state.saleSeq; const isTransfer=this.state.payment==='transferencia'; const order={code:'#'+String(seq).padStart(2,'0'),name:f.nombre,totalFmt:this.fmt(total),isTransfer,isEfectivo:!isTransfer,deliveryWord:this.state.fulfillment==='envio'?'el envío':'el retiro',items:lines.map(l=>({name:l.name,meta:l.meta,qty:l.qty,lineFmt:this.fmt(l.total)}))}; const saleItems=lines.map(l=>({id:l.id,name:l.name,color:l.color,scent:l.scent,qty:l.qty,price:this.getProduct(l.id).price})); const record={seq,channel:'online',customer:(f.nombre+' '+f.apellido).trim(),email:f.email,phone:f.telefono,items:saleItems,total,method:this.state.payment,payStatus:'pendiente',delivery:'pendiente',cancelled:false,date:new Date().toLocaleDateString('es-AR'),address:this.state.fulfillment==='envio'?f.direccion:'',notes:'',seen:false}; const products=this.applyStock(this.state.products,saleItems,-1); this.setState({products,order,view:'confirm',cart:[],sales:[record,...this.state.sales],saleSeq:seq+1}); this.scrollTop(); };
+  buildLines(){ return this.state.cart.map(it=>{ const p=this.getProduct(it.id); const total=p.price*it.qty; return {key:it.key,id:it.id,color:it.color,scent:it.scent||null,name:p.name,qty:it.qty,total,priceFmt:this.fmt(p.price),lineFmt:this.fmt(total),slotId:'ec-prod-'+p.id,img:this.photoUrlFor(p),meta:it.scent?(it.color+' · '+it.scent):('Color · '+it.color),inc:()=>this.incLine(it.key),dec:()=>this.decLine(it.key),remove:()=>this.removeLine(it.key)}; }); }
+  placeOrder=async()=>{
+    const f=this.state.form;
+    if(!f.nombre||!f.email){ this.showToast('Completá tu nombre y email'); return; }
+    if(this.state.fulfillment==='envio'&&!f.direccion){ this.showToast('Ingresá tu dirección de envío'); return; }
+    const lines=this.buildLines();
+    const subtotal=lines.reduce((a,l)=>a+l.total,0);
+    const shipping=this.state.fulfillment==='envio'?(this.state.config.shipping||0):0;
+    const total=subtotal+shipping;
+    const address=this.state.fulfillment==='envio'?f.direccion:'';
+    const items=this.state.cart.map(it=>({product_id:it.id,color_name:it.color,aroma_name:it.scent||null,quantity:it.qty,unit_price:this.getProduct(it.id).price}));
+    const { data,error } = await supabaseClient.rpc('create_order',{
+      p_customer:{name:f.nombre,last_name:f.apellido,email:f.email,phone:f.telefono,address},
+      p_items:items, p_channel:'online', p_payment_method:this.state.payment,
+      p_pay_status:'pendiente', p_delivery_status:'pendiente', p_address:address, p_notes:'', p_seen:false
+    });
+    if(error){ this.showToast(/sin stock/i.test(error.message)?error.message:'No se pudo procesar el pedido'); return; }
+    if(shipping>0) await supabaseClient.from('sales').update({total}).eq('id',data.sale_id);
+    const isTransfer=this.state.payment==='transferencia';
+    const order={code:'#'+String(data.sale_id).padStart(2,'0'),name:f.nombre,totalFmt:this.fmt(total),isTransfer,isEfectivo:!isTransfer,deliveryWord:this.state.fulfillment==='envio'?'el envío':'el retiro',items:lines.map(l=>({name:l.name,meta:l.meta,qty:l.qty,lineFmt:this.fmt(l.total)}))};
+    const products=this.applyStock(this.state.products,this.state.cart,-1);
+    this.setState({products,order,view:'confirm',cart:[]});
+    this.scrollTop();
+  };
   sendReceipt=()=>{ const num=String((this.state.config&&this.state.config.whatsapp)||'').replace(/\D/g,''); const url='https://wa.me/'+num; try{ window.open(url,'_blank','noopener'); }catch(e){ window.location.href=url; } };
   backToShop=()=>{ this.setState({order:null,view:'home'}); this.scrollTop(); };
 
-  // admin products
+  // ============================================================
+  // PRODUCTOS — alta y borrado
+  // ============================================================
   setNP(patch){ this.setState({newProduct:{...this.state.newProduct,...patch}}); }
   toggleProdAdding=()=>this.setState({prodAdding:!this.state.prodAdding,newProduct:this.emptyNP()});
-  addProduct=()=>{ const np=this.state.newProduct; const name=(np.name||'').trim(); if(!name){ this.showToast('Poné un nombre'); return; } const price=parseInt(String(np.price).replace(/\D/g,''),10)||0; const colors=(np.colors||'').split(',').map(s=>s.trim()).filter(Boolean); let id=this.slug(name); if(!id) id='prod-'+Date.now(); if(this.state.products.some(p=>p.id===id)) id=id+'-'+Math.floor(Math.random()*999); const sd=(np.shortDesc||'').trim(); const prod=this.normStock({id,category:np.category||'velas',name,price,featured:false,shortDesc:sd||'Pieza artesanal de hormigón.',longDesc:sd||'Pieza artesanal hecha a mano en hormigón.',colors:colors,stock:Math.max(0,parseInt(np.stock,10)||0)},this.state.categories); this.setState({products:[prod,...this.state.products],newProduct:this.emptyNP(),prodAdding:false}); this.showToast(name+' · creado'); };
-  setName(id,v){ this.updateProduct(id,{name:v}); }
-  setCategory(id,v){ this.updateProduct(id,{category:v}); }
-  setPrice(id,v){ const n=parseInt(String(v).replace(/\D/g,''),10); this.updateProduct(id,{price:isNaN(n)?0:n}); }
-  deleteProduct(id){ const p=this.getProduct(id); this.askConfirm({title:'Eliminar producto',message:'¿Seguro que querés eliminar "'+(p?p.name:'')+'"? Esta acción no se puede deshacer.',yesLabel:'Eliminar',danger:true,onYes:()=>{ this.setState({products:this.state.products.filter(x=>x.id!==id),cart:this.state.cart.filter(c=>c.id!==id)}); this.showToast('Producto eliminado'); }}); }
+  addProduct=async()=>{
+    const np=this.state.newProduct; const name=(np.name||'').trim();
+    if(!name){ this.showToast('Poné un nombre'); return; }
+    const price=parseInt(String(np.price).replace(/\D/g,''),10)||0;
+    let colors=(np.colors||'').split(',').map(s=>s.trim()).filter(Boolean);
+    if(!colors.length) colors=['Cemento'];
+    let id=this.slug(name); if(!id) id='prod-'+Date.now();
+    if(this.state.products.some(p=>p.id===id)) id=id+'-'+Math.floor(Math.random()*999);
+    const sd=(np.shortDesc||'').trim();
+    const sku=(np.sku||'').trim()||('AUTO-'+Date.now().toString().slice(-6));
+    const { error:prodErr } = await supabaseClient.from('products').insert({id,sku,category_id:np.category||'velas',name,short_desc:sd||'Pieza artesanal de hormigón.',long_desc:sd||'Pieza artesanal hecha a mano en hormigón.',price,featured:false,active:true});
+    if(prodErr){ this.showToast('Error al crear producto: '+prodErr.message); return; }
+    await supabaseClient.from('product_colors').insert(colors.map((c,i)=>({product_id:id,color_name:c,sort_order:i})));
+    const total=Math.max(0,parseInt(np.stock,10)||0); const n=colors.length; const base=Math.floor(total/n);
+    const stockRows=colors.map((c,i)=>({product_id:id,color_name:c,aroma_name:null,quantity:base+(i===0?(total-base*n):0)}));
+    await supabaseClient.from('stock').insert(stockRows);
+    await Promise.all(stockRows.map(r=>this.recordStockMovement(id,r.color_name,null,'entrada',r.quantity,'Alta de producto')));
+    this.setState({newProduct:this.emptyNP(),prodAdding:false});
+    await this.loadCatalog();
+    this.showToast(name+' · creado');
+  };
+  deleteProduct(id){ const p=this.getProduct(id); this.askConfirm({title:'Eliminar producto',message:'¿Seguro que querés eliminar "'+(p?p.name:'')+'"? Esta acción no se puede deshacer.',yesLabel:'Eliminar',danger:true,onYes:async()=>{ const { error } = await supabaseClient.from('products').delete().eq('id',id); if(error){ this.showToast('Error al eliminar: '+error.message); return; } this.setState({products:this.state.products.filter(x=>x.id!==id),cart:this.state.cart.filter(c=>c.id!==id)}); this.showToast('Producto eliminado'); }}); }
   toggleStockEdit(id){ this.setState({stockEditId:this.state.stockEditId===id?null:id}); }
-  // unified variant stock adjusters (per color, and per aroma within color)
-  adjustVariant(id,color,scent,delta){ const p=this.getProduct(id); const cs=JSON.parse(JSON.stringify(p.cstock||{})); if(this.isScented(p)){ if(!cs[color]||typeof cs[color]!=='object') cs[color]={}; cs[color][scent]=Math.max(0,(cs[color][scent]||0)+delta); } else { const cur=(typeof cs[color]==='number')?cs[color]:0; cs[color]=Math.max(0,cur+delta); } this.updateProduct(id,{cstock:cs}); }
-  setVariant(id,color,scent,v){ const n=Math.max(0,parseInt(String(v).replace(/\D/g,''),10)||0); const p=this.getProduct(id); const cs=JSON.parse(JSON.stringify(p.cstock||{})); if(this.isScented(p)){ if(!cs[color]||typeof cs[color]!=='object') cs[color]={}; cs[color][scent]=n; } else { cs[color]=n; } this.updateProduct(id,{cstock:cs}); }
-  // colors ABM
-  setColorDraft(id,v){ this.setState({colorDrafts:{...this.state.colorDrafts,[id]:v}}); }
-  addColor(id){ const v=(this.state.colorDrafts[id]||'').trim(); if(!v) return; const p=this.getProduct(id); if((p.colors||[]).some(c=>c.toLowerCase()===v.toLowerCase())){ this.showToast('Ese color ya existe'); return; } const cs=JSON.parse(JSON.stringify(p.cstock||{})); cs[v]=this.isScented(p)?(p.scents||[]).reduce((o,sc)=>{o[sc]=0;return o;},{}):0; this.updateProduct(id,{colors:[...(p.colors||[]),v],cstock:cs}); this.setColorDraft(id,''); }
-  renameColor(id,oldName,v){ v=(v||'').trim()||oldName; const p=this.getProduct(id); const cs=JSON.parse(JSON.stringify(p.cstock||{})); if(oldName in cs){ cs[v]=cs[oldName]; delete cs[oldName]; } this.updateProduct(id,{colors:(p.colors||[]).map(c=>c===oldName?v:c),cstock:cs}); }
-  removeColor(id,name){ const p=this.getProduct(id); if((p.colors||[]).length<=1){ this.showToast('El producto necesita al menos un color'); return; } this.askConfirm({title:'Quitar color',message:'¿Quitar el color "'+name+'" de este producto? Se perderá su stock.',yesLabel:'Quitar',danger:true,onYes:()=>{ const pp=this.getProduct(id); const cs=JSON.parse(JSON.stringify(pp.cstock||{})); delete cs[name]; this.updateProduct(id,{colors:(pp.colors||[]).filter(c=>c!==name),cstock:cs}); }}); }
   // aroma modal
   openAromaModal(id){ this.setState({aromaModalProduct:id,aromaSearch:''}); }
   closeAromaModal=()=>this.setState({aromaModalProduct:null,aromaSearch:''});
   onAromaSearch=e=>this.setState({aromaSearch:e.target.value});
-  assignAroma(id,name){ const p=this.getProduct(id); const scents=(p.scents||[]).slice(); if(scents.indexOf(name)<0) scents.push(name); const cs=JSON.parse(JSON.stringify(p.cstock||{})); (p.colors||[]).forEach(col=>{ if(!cs[col]||typeof cs[col]!=='object') cs[col]={}; if(!(name in cs[col])) cs[col][name]=0; }); this.updateProduct(id,{scents,cstock:cs}); }
-  removeAromaFromProduct(id,name){ this.askConfirm({title:'Quitar aroma',message:'¿Quitar el aroma "'+name+'" de este producto? Se perderá su stock en todos los colores.',yesLabel:'Quitar',danger:true,onYes:()=>{ const p=this.getProduct(id); const scents=(p.scents||[]).filter(s=>s!==name); const cs=JSON.parse(JSON.stringify(p.cstock||{})); (p.colors||[]).forEach(col=>{ if(cs[col]&&typeof cs[col]==='object') delete cs[col][name]; }); this.updateProduct(id,{scents,cstock:cs}); }}); }
 
-  // admin categories
+  // ============================================================
+  // CATEGORÍAS
+  // ============================================================
   toggleCatAdding=()=>this.setState({catAdding:!this.state.catAdding,newCat:{label:'',hasAroma:true}});
   setNCat(patch){ this.setState({newCat:{...this.state.newCat,...patch}}); }
-  addCategory=()=>{ const label=(this.state.newCat.label||'').trim(); if(!label){ this.showToast('Poné un nombre'); return; } let id=this.slug(label); if(!id) id='cat-'+Date.now(); if(this.state.categories.some(c=>c.id===id)) id=id+'-'+Math.floor(Math.random()*999); this.setState({categories:[...this.state.categories,{id,label,hasAroma:!!this.state.newCat.hasAroma}],catAdding:false,newCat:{label:'',hasAroma:true}}); this.showToast(label+' · categoría creada'); };
-  setCatLabel(id,v){ this.setState({categories:this.state.categories.map(c=>c.id===id?{...c,label:v}:c)}); }
-  toggleCatAroma(id){ this.setState({categories:this.state.categories.map(c=>c.id===id?{...c,hasAroma:!c.hasAroma}:c)}); }
-  deleteCategory(id){ const c=this.getCat(id); const n=this.state.products.filter(p=>p.category===id).length; if(n>0){ this.showToast('No se puede: hay '+n+' productos en esa categoría'); return; } this.askConfirm({title:'Eliminar categoría',message:'¿Eliminar la categoría "'+(c?c.label:'')+'"?',yesLabel:'Eliminar',danger:true,onYes:()=>{ this.setState({categories:this.state.categories.filter(x=>x.id!==id)}); this.showToast('Categoría eliminada'); }}); }
+  addCategory=async()=>{ const label=(this.state.newCat.label||'').trim(); if(!label){ this.showToast('Poné un nombre'); return; } let id=this.slug(label); if(!id) id='cat-'+Date.now(); if(this.state.categories.some(c=>c.id===id)) id=id+'-'+Math.floor(Math.random()*999); const hasAroma=!!this.state.newCat.hasAroma; const { error } = await supabaseClient.from('categories').insert({id,label,has_aroma:hasAroma}); if(error){ this.showToast('Error al crear categoría: '+error.message); return; } this.setState({categories:[...this.state.categories,{id,label,hasAroma}],catAdding:false,newCat:{label:'',hasAroma:true}}); this.showToast(label+' · categoría creada'); };
+  setCatLabel(id,v){ this.setState({categories:this.state.categories.map(c=>c.id===id?{...c,label:v}:c)}); this.debounce('catlabel:'+id,()=>supabaseClient.from('categories').update({label:v}).eq('id',id)); }
+  toggleCatAroma=async(id)=>{ const cat=this.getCat(id); const next=!cat.hasAroma; this.setState({categories:this.state.categories.map(c=>c.id===id?{...c,hasAroma:next}:c)}); await supabaseClient.from('categories').update({has_aroma:next}).eq('id',id); };
+  deleteCategory(id){ const c=this.getCat(id); const n=this.state.products.filter(p=>p.category===id).length; if(n>0){ this.showToast('No se puede: hay '+n+' productos en esa categoría'); return; } this.askConfirm({title:'Eliminar categoría',message:'¿Eliminar la categoría "'+(c?c.label:'')+'"?',yesLabel:'Eliminar',danger:true,onYes:async()=>{ const { error } = await supabaseClient.from('categories').delete().eq('id',id); if(error){ this.showToast('No se pudo eliminar: '+error.message); return; } this.setState({categories:this.state.categories.filter(x=>x.id!==id)}); this.showToast('Categoría eliminada'); }}); }
 
-  // admin aromas
+  // ============================================================
+  // AROMAS (catálogo)
+  // ============================================================
   setNewAroma=e=>this.setState({newAroma:e.target.value});
-  addAroma=()=>{ const name=(this.state.newAroma||'').trim(); if(!name) return; if(this.state.aromas.some(a=>a.toLowerCase()===name.toLowerCase())){ this.showToast('Ese aroma ya existe'); return; } this.setState({aromas:[name,...this.state.aromas],newAroma:''}); this.showToast(name+' · aroma agregado'); };
+  addAroma=async()=>{ const name=(this.state.newAroma||'').trim(); if(!name) return; if(this.state.aromas.some(a=>a.toLowerCase()===name.toLowerCase())){ this.showToast('Ese aroma ya existe'); return; } const { error } = await supabaseClient.from('aromas').insert({name}); if(error){ this.showToast('Error al crear aroma: '+error.message); return; } this.setState({aromas:[name,...this.state.aromas],newAroma:''}); this.showToast(name+' · aroma agregado'); };
   startAromaEdit(name){ this.setState({aromaEditName:name,aromaEdits:{...this.state.aromaEdits,[name]:name}}); }
   cancelAromaEdit(name){ const edits={...this.state.aromaEdits}; delete edits[name]; this.setState({aromaEditName:null,aromaEdits:edits}); }
   setAromaEdit(name,v){ this.setState({aromaEdits:{...this.state.aromaEdits,[name]:v}}); }
-  saveAromaName(oldName){ const v=(this.state.aromaEdits[oldName]!=null?this.state.aromaEdits[oldName]:oldName).trim(); const edits={...this.state.aromaEdits}; delete edits[oldName]; if(!v||v===oldName){ this.setState({aromaEdits:edits,aromaEditName:null}); return; } if(this.state.aromas.some(a=>a.toLowerCase()===v.toLowerCase())){ this.showToast('Ese aroma ya existe'); return; } const aromas=this.state.aromas.map(a=>a===oldName?v:a); const products=this.state.products.map(p=>{ if(!p.scents||p.scents.indexOf(oldName)<0) return p; const scents=p.scents.map(x=>x===oldName?v:x); const cs=p.cstock?JSON.parse(JSON.stringify(p.cstock)):null; if(cs){ for(const col in cs){ if(cs[col]&&typeof cs[col]==='object'&&oldName in cs[col]){ cs[col][v]=cs[col][oldName]; delete cs[col][oldName]; } } } return {...p,scents,cstock:cs||p.cstock}; }); this.setState({aromas,products,aromaEdits:edits,aromaEditName:null}); this.showToast('Aroma actualizado'); }
-  deleteAroma(name){ const used=this.state.products.filter(p=>(p.scents||[]).indexOf(name)>=0); if(used.length>0){ this.showToast('No se puede eliminar: está en '+used.length+' producto(s)'); return; } const msg=used.length?('Este aroma está en '+used.length+' producto(s): '+used.map(p=>p.name).join(', ')+'. Si lo eliminás, dejará de verse en esos productos.'):'¿Eliminar este aroma del catálogo?'; this.askConfirm({title:'Eliminar aroma',message:msg,yesLabel:'Eliminar',danger:true,onYes:()=>{ const aromas=this.state.aromas.filter(a=>a!==name); const products=this.state.products.map(p=>{ if(!p.scents||p.scents.indexOf(name)<0) return p; const scents=p.scents.filter(s=>s!==name); const m={...(p.scentStock||{})}; delete m[name]; return {...p,scents,scentStock:m}; }); this.setState({aromas,products}); this.showToast('Aroma eliminado'); }}); }
+  saveAromaName=async(oldName)=>{ const v=(this.state.aromaEdits[oldName]!=null?this.state.aromaEdits[oldName]:oldName).trim(); const edits={...this.state.aromaEdits}; delete edits[oldName]; if(!v||v===oldName){ this.setState({aromaEdits:edits,aromaEditName:null}); return; } if(this.state.aromas.some(a=>a.toLowerCase()===v.toLowerCase())){ this.showToast('Ese aroma ya existe'); return; } const { error } = await supabaseClient.from('aromas').update({name:v}).eq('name',oldName); if(error){ this.showToast('Error al renombrar: '+error.message); return; } await this.loadCatalog(); this.setState(s=>({aromas:s.aromas.map(a=>a===v?v:a),aromaEdits:edits,aromaEditName:null})); this.showToast('Aroma actualizado'); };
+  deleteAroma(name){ const used=this.state.products.filter(p=>(p.scents||[]).indexOf(name)>=0); if(used.length>0){ this.showToast('No se puede eliminar: está en '+used.length+' producto(s)'); return; } this.askConfirm({title:'Eliminar aroma',message:'¿Eliminar este aroma del catálogo?',yesLabel:'Eliminar',danger:true,onYes:async()=>{ const { error } = await supabaseClient.from('aromas').delete().eq('name',name); if(error){ this.showToast('No se pudo eliminar: '+error.message); return; } this.setState({aromas:this.state.aromas.filter(a=>a!==name)}); this.showToast('Aroma eliminado'); }}); }
 
   // config
   setCfg(patch){ this.setState({config:{...this.state.config,...patch}}); }
@@ -1568,11 +1931,50 @@ class Component extends DCLogic {
   addSaleItem=()=>{ const sp=this.state.salePick; if(!sp.id){ this.showToast('Elegí un producto'); return; } const p=this.getProduct(sp.id); const scent=this.isScented(p)?sp.scent:null; const color=sp.color||(p.colors[0]||''); const avail=this.stockFor(sp.id,color,scent); if(avail<=0){ this.showToast('Sin stock de esa variante'); return; } const qty=Math.min(sp.qty,avail); const items=[...this.state.saleDraft.items,{id:sp.id,color,scent:scent||null,qty}]; this.setState({saleDraft:{...this.state.saleDraft,items},salePick:{id:'',color:'',scent:'',qty:1}}); this.showToast(p.name+' · agregado'); };
   removeSaleItem(idx){ this.setState({saleDraft:{...this.state.saleDraft,items:this.state.saleDraft.items.filter((_,i)=>i!==idx)}}); }
   setSaleDraft(patch){ this.setState({saleDraft:{...this.state.saleDraft,...patch}}); }
-  registerSale=()=>{ const d=this.state.saleDraft; if(!d.items.length){ this.showToast('Agregá al menos un producto'); return; } const items=d.items.map(it=>{ const p=this.getProduct(it.id); return {id:it.id,name:p.name,color:it.color,scent:it.scent,qty:it.qty,price:p.price}; }); const total=items.reduce((a,i)=>a+i.price*i.qty,0); const seq=this.state.saleSeq; const cust=((d.nombre||'')+' '+(d.apellido||'')).trim()||'Mostrador'; const record={seq,channel:'presencial',customer:cust,items,total,method:d.method,payStatus:d.payStatus,delivery:d.delivery,cancelled:false,date:new Date().toLocaleDateString('es-AR'),address:'',notes:'',seen:true}; const products=this.applyStock(this.state.products,items,-1); this.setState({products,sales:[record,...this.state.sales],saleSeq:seq+1,saleAdding:false,salePick:{id:'',color:'',scent:'',qty:1},saleDraft:this.emptySaleDraft()}); this.showToast('Venta registrada · stock actualizado'); };
+  registerSale=async()=>{
+    const d=this.state.saleDraft;
+    if(!d.items.length){ this.showToast('Agregá al menos un producto'); return; }
+    const items=d.items.map(it=>({product_id:it.id,color_name:it.color,aroma_name:it.scent||null,quantity:it.qty,unit_price:this.getProduct(it.id).price}));
+    const { data,error } = await supabaseClient.rpc('create_order',{
+      p_customer:{name:d.nombre||'Mostrador',last_name:d.apellido||'',email:null,phone:null,address:null},
+      p_items:items, p_channel:'presencial', p_payment_method:d.method,
+      p_pay_status:d.payStatus, p_delivery_status:d.delivery, p_address:null, p_notes:null, p_seen:true
+    });
+    if(error){ this.showToast(/sin stock/i.test(error.message)?error.message:'Error al registrar la venta'); return; }
+    const products=this.applyStock(this.state.products,d.items,-1);
+    this.setState({products,saleAdding:false,salePick:{id:'',color:'',scent:'',qty:1},saleDraft:this.emptySaleDraft()});
+    await this.loadSales();
+    this.showToast('Venta registrada · stock actualizado');
+  };
 
-  setSaleField(seq,field,value){ this.setState({sales:this.state.sales.map(s=>{ if(s.seq!==seq) return s; if(field==='pago') return {...s,payStatus:value}; if(field==='metodo') return {...s,method:value}; if(field==='entrega') return {...s,delivery:value}; return s; })}); this.showToast('Venta actualizada'); }
-  cancelSale(seq){ const s=this.state.sales.find(x=>x.seq===seq); if(!s||s.cancelled) return; this.askConfirm({title:'Cancelar venta',message:'¿Cancelar la venta '+('#'+String(seq).padStart(2,'0'))+'? Se repondrá el stock de los productos.',yesLabel:'Cancelar venta',danger:true,onYes:()=>{ const products=this.applyStock(this.state.products,s.items,1); this.setState({products,sales:this.state.sales.map(x=>x.seq===seq?{...x,cancelled:true}:x)}); this.showToast('Venta cancelada · stock repuesto'); }}); }
-  undoCancel(seq){ const s=this.state.sales.find(x=>x.seq===seq); if(!s||!s.cancelled) return; const products=this.applyStock(this.state.products,s.items,-1); this.setState({products,sales:this.state.sales.map(x=>x.seq===seq?{...x,cancelled:false}:x)}); this.showToast('Cancelación deshecha · stock descontado'); }
+  setSaleField=async(seq,field,value)=>{
+    const col=field==='pago'?'pay_status':field==='metodo'?'payment_method':field==='entrega'?'delivery_status':null;
+    if(!col) return;
+    const localKey=field==='pago'?'payStatus':field==='metodo'?'method':'delivery';
+    this.setState({sales:this.state.sales.map(s=>s.seq===seq?{...s,[localKey]:value}:s)});
+    const { error } = await supabaseClient.from('sales').update({[col]:value}).eq('id',seq);
+    if(error){ this.showToast('Error al guardar: '+error.message); return; }
+    this.showToast('Venta actualizada');
+  };
+  cancelSale(seq){ const s=this.state.sales.find(x=>x.seq===seq); if(!s||s.cancelled) return; this.askConfirm({title:'Cancelar venta',message:'¿Cancelar la venta '+('#'+String(seq).padStart(2,'0'))+'? Se repondrá el stock de los productos.',yesLabel:'Cancelar venta',danger:true,onYes:async()=>{
+    const { error:e1 } = await supabaseClient.rpc('adjust_sale_stock',{p_sale_id:seq,p_sign:1});
+    if(e1){ this.showToast('Error: '+e1.message); return; }
+    const { error:e2 } = await supabaseClient.from('sales').update({cancelled:true}).eq('id',seq);
+    if(e2){ this.showToast('Error: '+e2.message); return; }
+    const products=this.applyStock(this.state.products,s.items,1);
+    this.setState({products,sales:this.state.sales.map(x=>x.seq===seq?{...x,cancelled:true}:x)});
+    this.showToast('Venta cancelada · stock repuesto');
+  }}); }
+  undoCancel=async(seq)=>{
+    const s=this.state.sales.find(x=>x.seq===seq); if(!s||!s.cancelled) return;
+    const { error:e1 } = await supabaseClient.rpc('adjust_sale_stock',{p_sale_id:seq,p_sign:-1});
+    if(e1){ this.showToast('Error: '+e1.message); return; }
+    const { error:e2 } = await supabaseClient.from('sales').update({cancelled:false}).eq('id',seq);
+    if(e2){ this.showToast('Error: '+e2.message); return; }
+    const products=this.applyStock(this.state.products,s.items,-1);
+    this.setState({products,sales:this.state.sales.map(x=>x.seq===seq?{...x,cancelled:false}:x)});
+    this.showToast('Cancelación deshecha · stock descontado');
+  };
   openSaleDetail(seq){ this.setState({saleDetailSeq:seq}); }
   closeSaleDetail=()=>this.setState({saleDetailSeq:null});
 
@@ -1582,7 +1984,20 @@ class Component extends DCLogic {
   addSaleEditItem=()=>{ const sp=this.state.salePick; if(!sp.id){ this.showToast('Elegí un producto'); return; } const p=this.getProduct(sp.id); const scent=this.isScented(p)?sp.scent:null; const color=sp.color||(p.colors[0]||''); const items=[...this.state.saleEditItems,{id:sp.id,color,scent:scent||null,qty:sp.qty}]; this.setState({saleEditItems:items,salePick:{id:'',color:'',scent:'',qty:1}}); this.showToast(p.name+' · agregado'); };
   removeSaleEditItem(idx){ this.setState({saleEditItems:this.state.saleEditItems.filter((_,i)=>i!==idx)}); }
   setSaleEditQty(idx,delta){ this.setState({saleEditItems:this.state.saleEditItems.map((it,i)=>i===idx?{...it,qty:Math.max(1,it.qty+delta)}:it)}); }
-  saveSaleEdit=()=>{ const seq=this.state.saleEditSeq; const old=this.state.sales.find(x=>x.seq===seq); if(!old){ this.closeSaleEdit(); return; } const items=this.state.saleEditItems.map(it=>{ const p=this.getProduct(it.id); return {id:it.id,name:p.name,color:it.color,scent:it.scent||null,qty:it.qty,price:p.price}; }); if(!items.length){ this.showToast('La venta necesita al menos un producto'); return; } const total=items.reduce((a,i)=>a+i.price*i.qty,0); let products=this.state.products; if(!old.cancelled){ products=this.applyStock(products,old.items,1); products=this.applyStock(products,items,-1); } this.setState({products,sales:this.state.sales.map(x=>x.seq===seq?{...x,items,total}:x)}); this.showToast('Venta actualizada · stock ajustado'); this.closeSaleEdit(); };
+  saveSaleEdit=async()=>{
+    const seq=this.state.saleEditSeq; const old=this.state.sales.find(x=>x.seq===seq);
+    if(!old){ this.closeSaleEdit(); return; }
+    if(!this.state.saleEditItems.length){ this.showToast('La venta necesita al menos un producto'); return; }
+    const items=this.state.saleEditItems.map(it=>({product_id:it.id,color_name:it.color,aroma_name:it.scent||null,quantity:it.qty,unit_price:this.getProduct(it.id).price}));
+    const { data,error } = await supabaseClient.rpc('edit_sale_items',{p_sale_id:seq,p_items:items});
+    if(error){ this.showToast('Error al guardar: '+error.message); return; }
+    let products=this.state.products;
+    if(!old.cancelled){ products=this.applyStock(products,old.items,1); products=this.applyStock(products,this.state.saleEditItems,-1); }
+    const displayItems=this.state.saleEditItems.map(it=>{ const p=this.getProduct(it.id); return {id:it.id,name:p.name,color:it.color,scent:it.scent||null,qty:it.qty,price:p.price}; });
+    this.setState({products,sales:this.state.sales.map(x=>x.seq===seq?{...x,items:displayItems,total:data.total}:x)});
+    this.showToast('Venta actualizada · stock ajustado');
+    this.closeSaleEdit();
+  };
 
   // El Oficio (home) editable from admin
   setOficio(patch){ this.setState({oficio:{...this.state.oficio,...patch}}); }
@@ -1600,7 +2015,7 @@ class Component extends DCLogic {
   onVType=e=>this.setState({vType:e.target.value});
   onVSort=e=>this.setState({vSort:e.target.value});
 
-  toggleFeatured(id){ const p=this.getProduct(id); const willFeature=!p.featured; let fo=this.state.featuredOrder.filter(x=>x!==id); if(willFeature) fo=[...fo,id]; this.updateProduct(id,{featured:willFeature}); this.setState({featuredOrder:fo}); }
+  toggleFeatured(id){ const p=this.getProduct(id); const willFeature=!p.featured; let fo=this.state.featuredOrder.filter(x=>x!==id); if(willFeature) fo=[...fo,id]; this.updateProduct(id,{featured:willFeature}); this.setState({featuredOrder:fo}); this.updateProductRemote(id,{featured:willFeature}); }
   moveFeatured(id,dir){ const fo=this.state.featuredOrder.slice(); const i=fo.indexOf(id); if(i<0) return; const j=i+dir; if(j<0||j>=fo.length) return; const t=fo[i]; fo[i]=fo[j]; fo[j]=t; this.setState({featuredOrder:fo}); }
 
   // styles
@@ -1614,7 +2029,7 @@ class Component extends DCLogic {
   renderVals(){
     const s=this.state;
     const cartQtyMap={}; s.cart.forEach(c=>{ cartQtyMap[c.id]=(cartQtyMap[c.id]||0)+c.qty; });
-    const dec=p=>{ const scents=this.isScented(p)?p.scents:[]; const stock=this.totalStock(p); const cols=p.colors||[]; const userColor=s.catalogColors[p.id]; const catColor=cols.length?(userColor||cols[0]):null; const fp=userColor?this.firstPhoto(p,userColor):this.featuredPhoto(p); const cq=cartQtyMap[p.id]||0; return {...p,scents,stock,featured:!!p.featured,categoryLabel:this.catLabel(p.category),priceFmt:this.fmt(p.price),slotId:this.mainSlot(p.id),img:this.PHOTO_IDS.has(p.id)?('uploads/products/'+p.id+'.jpg'):'',catImgSlot:fp.slot,catImgSrc:fp.src,cartQty:cq,inCart:cq>0,soldOut:stock<=0,stockLabel:stock>5?'En stock':(stock>0?('Últimas '+stock+' unidades'):'Sin stock'),stockColor:stock>5?'#6a665e':(stock>0?'#a8742e':'#b3261e'),colorDots:cols.map(n=>({name:n,hex:this.hex(n)})),colorBtns:cols.map(n=>({name:n,set:()=>this.setCatColor(p.id,n),style:'width:18px;height:18px;border-radius:999px;cursor:pointer;background:'+this.hex(n)+';transition:box-shadow .2s;'+(n===catColor?'box-shadow:inset 0 0 0 2px #fff,0 0 0 2px #232220;':'box-shadow:inset 0 0 0 1px rgba(35,34,32,.18);')}))}; };
+    const dec=p=>{ const scents=this.isScented(p)?p.scents:[]; const stock=this.totalStock(p); const cols=p.colors||[]; const userColor=s.catalogColors[p.id]; const catColor=cols.length?(userColor||cols[0]):null; const fp=userColor?this.firstPhoto(p,userColor):this.featuredPhoto(p); const cq=cartQtyMap[p.id]||0; return {...p,scents,stock,featured:!!p.featured,categoryLabel:this.catLabel(p.category),priceFmt:this.fmt(p.price),slotId:this.mainSlot(p.id),img:this.photoUrlFor(p),catImgSlot:fp.slot,catImgSrc:fp.src,cartQty:cq,inCart:cq>0,soldOut:stock<=0,stockLabel:stock>5?'En stock':(stock>0?('Últimas '+stock+' unidades'):'Sin stock'),stockColor:stock>5?'#6a665e':(stock>0?'#a8742e':'#b3261e'),colorDots:cols.map(n=>({name:n,hex:this.hex(n,p)})),colorBtns:cols.map(n=>({name:n,set:()=>this.setCatColor(p.id,n),style:'width:18px;height:18px;border-radius:999px;cursor:pointer;background:'+this.hex(n,p)+';transition:box-shadow .2s;'+(n===catColor?'box-shadow:inset 0 0 0 2px #fff,0 0 0 2px #232220;':'box-shadow:inset 0 0 0 1px rgba(35,34,32,.18);')}))}; };
     const decoded=s.products.map(dec);
     const byId=id=>decoded.find(p=>p.id===id);
 
@@ -1633,7 +2048,7 @@ class Component extends DCLogic {
 
     // selected product (color photo fallback)
     let selectedProduct=null;
-    if(s.productId){ const base=byId(s.productId); if(base){ const hasColors=base.colors.length>0; const col=hasColors?(s.detailColor||base.colors[0]):null; const hasScents=base.scents.length>0; const sc=hasScents?(s.detailScent||base.scents[0]):null; const selStock=this.stockFor(base.id,col,sc); let gp=this.filledPhotos(base,col); if(!gp.length){ const g=this.filledPhotos(base,null); if(g.length) gp=g; } if(!gp.length&&hasColors){ for(const k of base.colors){ const f=this.filledPhotos(base,k); if(f.length){ gp=f; break; } } } const photos=gp.length?gp.map(sid=>({slot:sid,src:''})):[{slot:this.mainSlot(base.id),src:(this.PHOTO_IDS.has(base.id)?('uploads/products/'+base.id+'.jpg'):'')}]; const gi=Math.min(Math.max(0,s.galleryIndex),photos.length-1); const cur=photos[gi]; this._galLen=photos.length; selectedProduct={...base,selColor:col,selScent:sc,hasScents,hasColors,gallerySlot:cur.slot,gallerySrc:cur.src,galleryPhotos:photos.map(p=>({slot:p.slot,src:p.src})),galleryShift:'translateX(-'+(gi*100)+'%)',galleryHasNav:photos.length>1,galleryDots:photos.map((_,i)=>({style:'width:'+(i===gi?'22px':'7px')+';height:7px;border-radius:999px;border:none;cursor:pointer;padding:0;transition:all .3s ease;background:'+(i===gi?'#232220':'rgba(35,34,32,.25)'),go:()=>this.setGallery(i)})),galleryPrev:()=>this.galleryStep(-1,photos.length),galleryNext:()=>this.galleryStep(1,photos.length),stockLabel:selStock>5?'En stock':(selStock>0?('Últimas '+selStock+' unidades'):'Sin stock'),stockColor:selStock>5?'#6a665e':(selStock>0?'#a8742e':'#b3261e'),addLabel:selStock<=0?'Sin stock':'Agregar al carrito',colorOptions:base.colors.map(n=>{ const cstk=this.colorStock(base,n); return {name:n,hex:this.hex(n),cstk,style:this.swatchStyle(this.hex(n),n===col)+(cstk<=0?'opacity:.4;':''),set:()=>this.setDetailColor(n)}; }).sort((a,b)=>(a.cstk<=0?1:0)-(b.cstk<=0?1:0)),scentOptions:base.scents.map(n=>{ const st=this.stockFor(base.id,col,n); return {name:n,st,label:st>0?n:(n+' · sin stock'),style:this.scentChipStyle(n===sc)+(st<=0?'opacity:.45;':''),set:()=>this.setDetailScent(n)}; }).sort((a,b)=>(a.st<=0?1:0)-(b.st<=0?1:0))}; } }
+    if(s.productId){ const base=byId(s.productId); if(base){ const hasColors=base.colors.length>0; const col=hasColors?(s.detailColor||base.colors[0]):null; const hasScents=base.scents.length>0; const sc=hasScents?(s.detailScent||base.scents[0]):null; const selStock=this.stockFor(base.id,col,sc); let gp=this.filledPhotos(base,col); if(!gp.length){ const g=this.filledPhotos(base,null); if(g.length) gp=g; } if(!gp.length&&hasColors){ for(const k of base.colors){ const f=this.filledPhotos(base,k); if(f.length){ gp=f; break; } } } const photos=gp.length?gp.map(sid=>({slot:sid,src:''})):[{slot:this.mainSlot(base.id),src:this.photoUrlFor(base)}]; const gi=Math.min(Math.max(0,s.galleryIndex),photos.length-1); const cur=photos[gi]; this._galLen=photos.length; selectedProduct={...base,selColor:col,selScent:sc,hasScents,hasColors,gallerySlot:cur.slot,gallerySrc:cur.src,galleryPhotos:photos.map(p=>({slot:p.slot,src:p.src})),galleryShift:'translateX(-'+(gi*100)+'%)',galleryHasNav:photos.length>1,galleryDots:photos.map((_,i)=>({style:'width:'+(i===gi?'22px':'7px')+';height:7px;border-radius:999px;border:none;cursor:pointer;padding:0;transition:all .3s ease;background:'+(i===gi?'#232220':'rgba(35,34,32,.25)'),go:()=>this.setGallery(i)})),galleryPrev:()=>this.galleryStep(-1,photos.length),galleryNext:()=>this.galleryStep(1,photos.length),stockLabel:selStock>5?'En stock':(selStock>0?('Últimas '+selStock+' unidades'):'Sin stock'),stockColor:selStock>5?'#6a665e':(selStock>0?'#a8742e':'#b3261e'),addLabel:selStock<=0?'Sin stock':'Agregar al carrito',colorOptions:base.colors.map(n=>{ const cstk=this.colorStock(base,n); return {name:n,hex:this.hex(n,base),cstk,style:this.swatchStyle(this.hex(n,base),n===col)+(cstk<=0?'opacity:.4;':''),set:()=>this.setDetailColor(n)}; }).sort((a,b)=>(a.cstk<=0?1:0)-(b.cstk<=0?1:0)),scentOptions:base.scents.map(n=>{ const st=this.stockFor(base.id,col,n); return {name:n,st,label:st>0?n:(n+' · sin stock'),style:this.scentChipStyle(n===sc)+(st<=0?'opacity:.45;':''),set:()=>this.setDetailScent(n)}; }).sort((a,b)=>(a.st<=0?1:0)-(b.st<=0?1:0))}; } }
 
     const lines=this.buildLines();
     const cartCount=this.cartCount();
@@ -1654,33 +2069,55 @@ class Component extends DCLogic {
       const uiKeys=(p.colors&&p.colors.length)?p.colors:[''];
       const missing=uiKeys.filter(c=>this.filledPhotos(p,c||null).length===0).map(c=>c||'general');
       const warn=missing.length>0;
-      return {...p, catAroma, scentCount:p.scents.length,
+      const isEditing=s.editingProductId===p.id;
+      const d=isEditing?s.productDraft:null;
+      // While editing, colors/aromas/stock render from the local draft (nothing written to
+      // Supabase until "Guardar cambios"). Collapsed/non-editing rows keep reading the live product.
+      const vColorEntries=isEditing?d.colors:(p.colors||[]).map(name=>({orig:name,name,hex:(p.colorHex&&p.colorHex[name])||''}));
+      const vScents=isEditing?d.scents:p.scents;
+      const vCstock=isEditing?d.cstock:p.cstock;
+      const vScented=catAroma&&vScents.length>0;
+      const vColorKeys=vColorEntries.length?vColorEntries.map(c=>c.name):[''];
+      const draftColorTotal=(cs,color,scented)=>{ if(scented){ const m=cs[color]||{}; return vScents.reduce((a,sc)=>a+(m[sc]||0),0); } return (typeof cs[color]==='number')?cs[color]:0; };
+      return {...p, catAroma, scentCount:vScents.length, isEditing, notEditing:!isEditing,
         cardBorder:warn?'rgba(214,138,46,.4)':'rgba(35,34,32,.07)', cardAccent:warn?'#e0922e':'transparent',
         warn, warnMsg: warn?('Falta foto: '+missing.join(', ')):'',
-        expanded:!!s.expanded[p.id], expandLabel:s.expanded[p.id]?'Cerrar':'Editar', onToggleExpand:()=>this.toggleExpand(p.id),
+        expanded:!!s.expanded[p.id], expandLabel:s.expanded[p.id]?'Cancelar':'Editar', onToggleExpand:()=>this.toggleExpand(p.id),
         onOpenDesc:()=>this.openDescModal(p.id),
-        onName:e=>this.setName(p.id,e.target.value), onCategory:e=>this.setCategory(p.id,e.target.value), onPrice:e=>this.setPrice(p.id,e.target.value), onDelete:()=>this.deleteProduct(p.id),
+        name:isEditing?d.name:p.name, category:isEditing?d.category:p.category, price:isEditing?d.price:p.price, sku:isEditing?d.sku:p.sku,
+        onName:e=>this.setDraftField('name',e.target.value), onCategory:e=>this.setDraftField('category',e.target.value), onPrice:e=>this.setDraftField('price',e.target.value), onSku:e=>this.setDraftField('sku',e.target.value),
+        onDelete:()=>this.deleteProduct(p.id),
         hasColors:(p.colors||[]).length>0,
-        mainSlot:this.mainSlot(p.id), mainSrc:this.PHOTO_IDS.has(p.id)?('uploads/products/'+p.id+'.jpg'):'', onChangeMain:()=>this.changePhoto(this.mainSlot(p.id)), onClearMain:()=>this.clearPhoto(this.mainSlot(p.id)),
-        variantRows:this.colorKeys(p).map(c=>{ const color=c||null; const scented=catAroma&&p.scents.length>0; const filled=this.filledPhotos(p,color); const thumbs=filled.slice(0,3).map((sid,i,arr)=>({slotId:sid, src:this.photoSeedSrc(p,sid,color), style:'position:absolute;left:'+(i*15)+'px;top:0;width:58px;height:72px;border-radius:8px;overflow:hidden;background:#EFEEEA;border:1.5px solid #fff;box-shadow:0 3px 9px -3px rgba(0,0,0,.45);transform:rotate('+((i-(arr.length-1)/2)*8)+'deg);transform-origin:bottom center;z-index:'+(arr.length-i)})); return { key:c, name:color||'Stock', hasColor:!!color, noColor:!color, hex:color?this.hex(color):'#B6B1A8', scented, simple:!scented, colorTotal:this.colorStock(p,color||''),
-          canRemove:!!color&&(p.colors||[]).length>1, onRename:e=>this.renameColor(p.id,color,e.target.value), onRemove:()=>this.removeColor(p.id,color),
-          onMinus:()=>this.adjustVariant(p.id,color||'',null,-1), onPlus:()=>this.adjustVariant(p.id,color||'',null,1), onInput:e=>this.setVariant(p.id,color||'',null,e.target.value),
+        mainSlot:this.mainSlot(p.id), mainSrc:this.photoUrlFor(p),
+        onUploadMain:e=>{ const f=e.target.files&&e.target.files[0]; if(f) this.uploadProductPhoto(p.id,null,f); e.target.value=''; },
+        onClearMain:()=>this.removeStoragePhoto(p.id,null),
+        variantRows:vColorKeys.map((c,ci)=>{ const color=c||null; const entry=vColorEntries[ci]; const filled=this.filledPhotos(p,color); const thumbs=filled.slice(0,3).map((sid,i,arr)=>({slotId:sid, src:this.photoSeedSrc(p,sid,color), style:'position:absolute;left:'+(i*15)+'px;top:0;width:58px;height:72px;border-radius:8px;overflow:hidden;background:#EFEEEA;border:1.5px solid #fff;box-shadow:0 3px 9px -3px rgba(0,0,0,.45);transform:rotate('+((i-(arr.length-1)/2)*8)+'deg);transform-origin:bottom center;z-index:'+(arr.length-i)}));
+          return { key:c, name:color||'Stock', hasColor:!!color, noColor:!color, hex:color?(entry&&entry.hex)||this.hex(color,p):'#B6B1A8', scented:vScented, simple:!vScented,
+          colorTotal:isEditing?draftColorTotal(vCstock,color||'',vScented):this.colorStock(p,color||''),
+          canRemove:!!color&&vColorKeys.length>1, onRename:e=>this.renameDraftColor(ci,e.target.value), onHex:e=>this.setDraftColorHex(ci,e.target.value), onRemove:()=>this.removeDraftColor(ci),
+          onMinus:()=>this.draftAdjustVariant(color||'',null,-1), onPlus:()=>this.draftAdjustVariant(color||'',null,1), onInput:e=>this.draftSetVariant(color||'',null,e.target.value),
           photoThumbs:thumbs, photoCount:filled.length, hasPhotos:filled.length>0, noPhotos:filled.length===0, fanWidth:(filled.length?Math.min(3,filled.length):1)*15+44, onEditPhotos:()=>this.openPhotoModal(p.id,color),
-          scentRows:(scented?p.scents:[]).map(sc=>({name:sc,qty:this.variantQty(p,color||'',sc),onMinus:()=>this.adjustVariant(p.id,color||'',sc,-1),onPlus:()=>this.adjustVariant(p.id,color||'',sc,1),onInput:e=>this.setVariant(p.id,color||'',sc,e.target.value)})) }; }),
-        colorDraft:s.colorDrafts[p.id]||'', onColorDraft:e=>this.setColorDraft(p.id,e.target.value), onAddColor:()=>this.addColor(p.id),
-        openAromaModal:()=>this.openAromaModal(p.id)
+          scentRows:(vScented?vScents:[]).map(sc=>({name:sc,qty:(vCstock[color||'']&&vCstock[color||''][sc])||0,onMinus:()=>this.draftAdjustVariant(color||'',sc,-1),onPlus:()=>this.draftAdjustVariant(color||'',sc,1),onInput:e=>this.draftSetVariant(color||'',sc,e.target.value)})) }; }),
+        colorDraft:s.draftColorInput||'', onColorDraft:this.onDraftColorInput, colorHexDraft:s.draftColorHex||'#B6B1A8', onColorHexDraft:this.onDraftColorHex, onAddColor:this.addDraftColor,
+        openAromaModal:()=>this.openAromaModal(p.id),
+        onSaveDraft:this.saveProductDraft, onCancelDraft:()=>this.cancelEditProduct(p.id)
       };
     });
     const catOptions=s.categories.map(c=>({id:c.id,label:c.label}));
 
-    // aroma modal
+    // aroma modal — always operates on the draft (only reachable while editing a product)
     const amP=s.aromaModalProduct?this.getProduct(s.aromaModalProduct):null;
     let aromaModal={productName:'',rows:[],noRows:true,results:[],noResults:true,search:s.aromaSearch,onSearch:this.onAromaSearch};
-    if(amP){ const assigned=new Set(amP.scents||[]); const results=s.aromas.filter(a=>!assigned.has(a)&&a.toLowerCase().includes((s.aromaSearch||'').toLowerCase())).map(a=>({name:a,add:()=>this.assignAroma(amP.id,a)})); aromaModal={productName:amP.name, rows:(amP.scents||[]).map(n=>({name:n,total:this.stockFor(amP.id,null,n),onRemove:()=>this.removeAromaFromProduct(amP.id,n)})), noRows:(amP.scents||[]).length===0, results, noResults:results.length===0, search:s.aromaSearch, onSearch:this.onAromaSearch}; }
+    if(amP&&s.productDraft&&s.editingProductId===amP.id){
+      const d=s.productDraft; const assigned=new Set(d.scents||[]);
+      const results=s.aromas.filter(a=>!assigned.has(a)&&a.toLowerCase().includes((s.aromaSearch||'').toLowerCase())).map(a=>({name:a,add:()=>this.draftAssignAroma(a)}));
+      const totalFor=n=>d.colors.reduce((a,c)=>a+(((d.cstock[c.name]||{})[n])||0),0);
+      aromaModal={productName:amP.name, rows:(d.scents||[]).map(n=>({name:n,total:totalFor(n),onRemove:()=>this.draftRemoveAroma(n)})), noRows:(d.scents||[]).length===0, results, noResults:results.length===0, search:s.aromaSearch, onSearch:this.onAromaSearch};
+    }
 
     // photo modal (per color album)
     const pm=s.photoModal; let photoMod={open:false,productName:'',colorLabel:'',hasColor:false,hex:'#EFEEEA',photos:[],noPhotos:true,onAdd:()=>{}};
-    if(pm){ const pp=this.getProduct(pm.pid); if(pp){ const color=pm.color; const ids=this.photoSlotIds(pp,color); photoMod={open:true, productName:pp.name, colorLabel:color||'General', hasColor:!!color, hex:color?this.hex(color):'#EFEEEA', noPhotos:ids.length===0,
+    if(pm){ const pp=this.getProduct(pm.pid); if(pp){ const color=pm.color; const ids=this.photoSlotIds(pp,color); photoMod={open:true, productName:pp.name, colorLabel:color||'General', hasColor:!!color, hex:color?this.hex(color,pp):'#EFEEEA', noPhotos:ids.length===0,
       photos:ids.map(sid=>{ const seed=this.photoSeedSrc(pp,sid,color); const filled=this.isFilled(sid,!!seed); return {slotId:sid, src:seed, border:filled?'rgba(35,34,32,.08)':'rgba(214,138,46,.5)', onChangePhoto:()=>this.changePhoto(sid), onRemove:()=>this.removePhotoSlot(pp.id,color,sid)}; }),
       onAdd:()=>this.addPhoto(pp.id,color) }; } }
 
@@ -1708,7 +2145,7 @@ class Component extends DCLogic {
     // sale detail
     const sd=s.saleDetailSeq!=null?s.sales.find(x=>x.seq===s.saleDetailSeq):null;
     let saleDetail={code:'',channelLabel:'',channelStyle:'',date:'',customer:'',items:[],totalFmt:'',hasAddress:false,address:'',hasNotes:false,notes:''};
-    if(sd){ saleDetail={code:code(sd.seq),channelLabel:sd.channel==='online'?'Online':'Presencial',channelStyle:'display:inline-flex;align-items:center;font-size:11px;letter-spacing:.04em;border-radius:999px;padding:4px 11px;'+(sd.channel==='online'?'background:#E1E7EE;color:#3a5878':'background:#E6E2D8;color:#6a5c3e'),date:sd.date,customer:sd.customer,totalFmt:this.fmt(sd.total),hasAddress:!!sd.address,address:sd.address,hasNotes:!!sd.notes,notes:sd.notes,items:sd.items.map(i=>({name:i.name+(i.scent?(' '+i.scent):''),colorName:i.color||'',colorHex:i.color?this.hex(i.color):'',hasColor:!!i.color,qty:i.qty,unitFmt:this.fmt(i.price),subFmt:this.fmt(i.price*i.qty),slotId:'ec-prod-'+i.id,img:this.PHOTO_IDS.has(i.id)?('uploads/products/'+i.id+'.jpg'):''}))}; }
+    if(sd){ saleDetail={code:code(sd.seq),channelLabel:sd.channel==='online'?'Online':'Presencial',channelStyle:'display:inline-flex;align-items:center;font-size:11px;letter-spacing:.04em;border-radius:999px;padding:4px 11px;'+(sd.channel==='online'?'background:#E1E7EE;color:#3a5878':'background:#E6E2D8;color:#6a5c3e'),date:sd.date,customer:sd.customer,totalFmt:this.fmt(sd.total),hasAddress:!!sd.address,address:sd.address,hasNotes:!!sd.notes,notes:sd.notes,items:sd.items.map(i=>({name:i.name+(i.scent?(' '+i.scent):''),colorName:i.color||'',colorHex:i.color?this.hex(i.color,this.getProduct(i.id)):'',hasColor:!!i.color,qty:i.qty,unitFmt:this.fmt(i.price),subFmt:this.fmt(i.price*i.qty),slotId:'ec-prod-'+i.id,img:this.photoUrlFor(this.getProduct(i.id)||{id:i.id})}))}; }
 
     // sale builder (popup)
     const sp=s.salePick; const spProd=sp.id?this.getProduct(sp.id):null; const spScented=spProd?this.isScented(spProd):false;
@@ -1716,16 +2153,16 @@ class Component extends DCLogic {
     const spScent=spScented?(sp.scent||spProd.scents[0]):null;
     const sq=(s.saleSearch||'').toLowerCase().trim();
     const saleProductCards=decoded.filter(p=>!sq||p.name.toLowerCase().includes(sq)||this.catLabel(p.category).toLowerCase().includes(sq)).map(p=>({id:p.id,name:p.name,priceFmt:p.priceFmt,categoryLabel:p.categoryLabel,slotId:p.slotId,img:p.img,stock:p.stock,soldOut:p.stock<=0,pick:()=>this.pickSaleProduct(p.id)}));
-    const salePickColors=spProd?(spProd.colors||[]).map(c=>({id:c,label:c,stock:this.colorStock(spProd,c),hex:this.hex(c),selected:c===spColor,ring:c===spColor?'2px':'0px',pick:()=>this.onSalePickColorVal(c)})):[];
+    const salePickColors=spProd?(spProd.colors||[]).map(c=>({id:c,label:c,stock:this.colorStock(spProd,c),hex:this.hex(c,spProd),selected:c===spColor,ring:c===spColor?'2px':'0px',pick:()=>this.onSalePickColorVal(c)})):[];
     const salePickScents=spScented?spProd.scents.map(c=>({id:c,label:c+' ('+this.stockFor(spProd.id,spColor,c)+')'})):[];
     const spAvail=spProd?this.stockFor(sp.id,spColor,spScented?spScent:null):0;
-    const saleItems=s.saleDraft.items.map((it,idx)=>{ const p=this.getProduct(it.id); return {name:p.name,meta:(it.scent||''),colorName:it.color||'',colorHex:it.color?this.hex(it.color):'',hasColor:!!it.color,qty:it.qty,slotId:'ec-prod-'+it.id,img:this.PHOTO_IDS.has(it.id)?('uploads/products/'+it.id+'.jpg'):'',lineFmt:this.fmt(p.price*it.qty),remove:()=>this.removeSaleItem(idx)}; });
+    const saleItems=s.saleDraft.items.map((it,idx)=>{ const p=this.getProduct(it.id); return {name:p.name,meta:(it.scent||''),colorName:it.color||'',colorHex:it.color?this.hex(it.color,p):'',hasColor:!!it.color,qty:it.qty,slotId:'ec-prod-'+it.id,img:this.photoUrlFor(p),lineFmt:this.fmt(p.price*it.qty),remove:()=>this.removeSaleItem(idx)}; });
     const saleTotal=s.saleDraft.items.reduce((a,it)=>{ const p=this.getProduct(it.id); return a+p.price*it.qty; },0);
 
     // sale edit (existing sale)
     const seEditing=s.saleEditSeq!=null;
     const seSale=seEditing?s.sales.find(x=>x.seq===s.saleEditSeq):null;
-    const saleEditItems=s.saleEditItems.map((it,idx)=>{ const p=this.getProduct(it.id); return {name:p.name,meta:(it.scent||''),colorName:it.color||'',colorHex:it.color?this.hex(it.color):'',hasColor:!!it.color,qty:it.qty,slotId:'ec-prod-'+it.id,img:this.PHOTO_IDS.has(it.id)?('uploads/products/'+it.id+'.jpg'):'',lineFmt:this.fmt(p.price*it.qty),remove:()=>this.removeSaleEditItem(idx),inc:()=>this.setSaleEditQty(idx,1),dec:()=>this.setSaleEditQty(idx,-1)}; });
+    const saleEditItems=s.saleEditItems.map((it,idx)=>{ const p=this.getProduct(it.id); return {name:p.name,meta:(it.scent||''),colorName:it.color||'',colorHex:it.color?this.hex(it.color,p):'',hasColor:!!it.color,qty:it.qty,slotId:'ec-prod-'+it.id,img:this.photoUrlFor(p),lineFmt:this.fmt(p.price*it.qty),remove:()=>this.removeSaleEditItem(idx),inc:()=>this.setSaleEditQty(idx,1),dec:()=>this.setSaleEditQty(idx,-1)}; });
     const saleEditTotal=s.saleEditItems.reduce((a,it)=>{ const p=this.getProduct(it.id); return a+p.price*it.qty; },0);
 
     // El Oficio (home) — numbered steps
@@ -1743,6 +2180,8 @@ class Component extends DCLogic {
 
     return {
       isAdmin:s.view==='admin', isStore:s.view!=='admin',
+      adminAuthed:s.view==='admin'&&s.authRole==='admin', adminNeedsLogin:s.view==='admin'&&s.authRole!=='admin',
+      authEmail:s.authEmail, authPassword:s.authPassword, authError:s.authError, onAuthEmail:this.onAuthEmail, onAuthPassword:this.onAuthPassword, doLogin:this.doLogin, doLogout:this.doLogout,
       isHome:s.view==='home', isCatalog:s.view==='catalog', isProduct:s.view==='product'&&!!selectedProduct, isCheckout:s.view==='checkout', isConfirm:s.view==='confirm'&&!!s.order,
       cfg:s.config,
       goHome:this.goHome, goCatalog:this.goCatalog, goAdmin:this.goAdmin, verProceso:this.verProceso, verContacto:this.verContacto,
@@ -1771,16 +2210,16 @@ class Component extends DCLogic {
       prodSort:s.prodSort, onProdSort:e=>this.setState({prodSort:e.target.value}),
       prodCatOptions:[{id:'todas',label:'Todas las categorías'}].concat(s.categories.map(c=>({id:c.id,label:c.label}))),
       prodAdding:s.prodAdding, prodAddBtnLabel:s.prodAdding?'Cerrar':'+ Agregar producto', prodAddBtnStyle:this.pillBtn(s.prodAdding),
-      np:s.newProduct, onNPName:e=>this.setNP({name:e.target.value}), onNPPrice:e=>this.setNP({price:e.target.value}), onNPCat:e=>this.setNP({category:e.target.value}), onNPStock:e=>this.setNP({stock:e.target.value}), onNPColors:e=>this.setNP({colors:e.target.value}), onNPDesc:e=>this.setNP({shortDesc:e.target.value}), toggleProdAdding:this.toggleProdAdding, addProduct:this.addProduct,
+      np:s.newProduct, onNPName:e=>this.setNP({name:e.target.value}), onNPPrice:e=>this.setNP({price:e.target.value}), onNPCat:e=>this.setNP({category:e.target.value}), onNPStock:e=>this.setNP({stock:e.target.value}), onNPColors:e=>this.setNP({colors:e.target.value}), onNPDesc:e=>this.setNP({shortDesc:e.target.value}), onNPSku:e=>this.setNP({sku:e.target.value}), toggleProdAdding:this.toggleProdAdding, addProduct:this.addProduct,
       aromaModalOpen:!!amP, aromaModal, closeAromaModal:this.closeAromaModal,
       photoModalOpen:photoMod.open, photoMod, closePhotoModal:this.closePhotoModal,
-      descModalOpen:!!s.descModalProduct, descProduct:s.descModalProduct?(()=>{const dp=this.getProduct(s.descModalProduct);return {name:dp.name,shortDesc:dp.shortDesc||'',longDesc:dp.longDesc||'',onShort:e=>this.setShortDesc(dp.id,e.target.value),onLong:e=>this.setLongDesc(dp.id,e.target.value)};})():{name:'',shortDesc:'',longDesc:'',onShort:()=>{},onLong:()=>{}}, closeDescModal:this.closeDescModal,
+      descModalOpen:!!s.descModalProduct, descProduct:(s.descModalProduct&&s.productDraft&&s.editingProductId===s.descModalProduct)?(()=>{const dp=this.getProduct(s.descModalProduct);return {name:dp.name,shortDesc:s.productDraft.shortDesc||'',longDesc:s.productDraft.longDesc||'',onShort:e=>this.setDraftField('shortDesc',e.target.value),onLong:e=>this.setDraftField('longDesc',e.target.value)};})():{name:'',shortDesc:'',longDesc:'',onShort:()=>{},onLong:()=>{}}, closeDescModal:this.closeDescModal,
       adminCategories, adminCatCount:s.categories.length, catAdding:s.catAdding, catAddBtnLabel:s.catAdding?'Cerrar':'+ Agregar categoría', catAddBtnStyle:this.pillBtn(s.catAdding), ncat:s.newCat, onNCatLabel:e=>this.setNCat({label:e.target.value}), onNCatAroma:()=>this.setNCat({hasAroma:!s.newCat.hasAroma}), toggleCatAdding:this.toggleCatAdding, addCategory:this.addCategory,
       aromaList, aromaCount:s.aromas.length, newAroma:s.newAroma, onNewAroma:this.setNewAroma, addAroma:this.addAroma,
       onCfgShipping:this.onCfgShipping, onCfgTitular:this.onCfgTitular, onCfgAlias:this.onCfgAlias, onCfgCbu:this.onCfgCbu, onCfgWhatsapp:this.onCfgWhatsapp,
       adminSales, salesTotal:s.sales.length, hasSales:adminSales.length>0, noSales:adminSales.length===0,
       saleAdding:s.saleAdding, saleAddBtnLabel:s.saleAdding?'Cerrar':'+ Registrar venta presencial', saleAddBtnStyle:this.pillBtn(s.saleAdding), toggleSaleAdding:this.toggleSaleAdding,
-      salePick:sp, spActive:!!spProd, spInactive:!spProd, spName:spProd?spProd.name:'—', spPriceFmt:spProd?spProd.priceFmt:'—', spImg:spProd?(this.PHOTO_IDS.has(spProd.id)?('uploads/products/'+spProd.id+'.jpg'):''):'', spSlot:spProd?('ec-prod-'+spProd.id):'ec-sale-pick',
+      salePick:sp, spActive:!!spProd, spInactive:!spProd, spName:spProd?spProd.name:'—', spPriceFmt:spProd?spProd.priceFmt:'—', spImg:spProd?this.photoUrlFor(spProd):'', spSlot:spProd?('ec-prod-'+spProd.id):'ec-sale-pick',
       saleProductCards, saleSearch:s.saleSearch, onSaleSearch:e=>this.setState({saleSearch:e.target.value}), salePickHasColors:salePickColors.length>1, salePickColors, salePickHasScents:spScented, salePickScents, salePickColorVal:spColor, salePickScentVal:spScent, salePickQty:sp.qty,
       salePickStockLabel:spProd?('Disponible: '+spAvail+' de la variante elegida'):'—',
       clearSalePick:this.clearSalePick, onSalePickColor:this.onSalePickColor, onSalePickScent:this.onSalePickScent, onSalePickQty:this.onSalePickQty, incSalePickQty:this.incSalePickQty, decSalePickQty:this.decSalePickQty, addSaleItem:this.addSaleItem,
