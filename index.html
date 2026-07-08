@@ -196,7 +196,7 @@
         <div style="max-width:1240px;margin:0 auto;padding:clamp(44px,8vw,100px) clamp(20px,5vw,56px);display:flex;gap:clamp(28px,5vw,80px);align-items:center;flex-wrap:wrap">
           <div style="flex:1 1 300px;min-width:0;width:100%">
             <div style="aspect-ratio:5/6;max-width:440px;margin:0 auto;background:#DED9CF;border-radius:20px;overflow:hidden;box-shadow:0 40px 80px -56px rgba(35,34,32,.6)">
-              <image-slot id="ec-proceso-img" shape="rect" placeholder="Foto del proceso / taller"></image-slot>
+              <image-slot id="ec-proceso-img" src="{{ oficioImg }}" shape="rect" placeholder="Foto del proceso / taller"></image-slot>
             </div>
           </div>
           <div style="flex:1 1 300px;min-width:0">
@@ -706,6 +706,10 @@
                   <input type="checkbox" checked="{{ c.hasAroma }}" onChange="{{ c.onToggleAroma }}" style="accent-color:#232220;width:16px;height:16px">Aromas
                 </label>
                 <div style="font-size:13px;color:#9a958c;min-width:96px">{{ c.count }} productos</div>
+                <div style="display:flex;flex-direction:column;gap:3px">
+                  <button onClick="{{ c.onUp }}" aria-label="Subir" style="{{ c.upStyle }}">▲</button>
+                  <button onClick="{{ c.onDown }}" aria-label="Bajar" style="{{ c.downStyle }}">▼</button>
+                </div>
                 <button onClick="{{ c.onDelete }}" aria-label="Eliminar categoría" style="background:none;border:1px solid rgba(35,34,32,.14);color:#b3ada3;cursor:pointer;border-radius:10px;width:36px;height:36px;font-size:15px;transition:all .2s;display:flex;align-items:center;justify-content:center" style-hover="border-color:#b3261e;color:#b3261e">🗑</button>
               </div>
             </sc-for>
@@ -979,35 +983,50 @@
         <!-- ===== INICIO (El Oficio) ===== -->
         <sc-if value="{{ tabInicio }}" hint-placeholder-val="{{ false }}">
         <div>
-          <h2 style="font-family:Newsreader,serif;font-weight:400;font-size:24px;margin:0 0 8px">Sección «El Oficio»</h2>
-          <p style="font-size:13px;color:#8a857b;margin:0 0 18px;max-width:580px">Editá la foto y los textos del bloque «Hecho artesanalmente» que se muestra en la página de inicio.</p>
-          <div style="display:flex;gap:24px;flex-wrap:wrap;align-items:flex-start">
+          <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:14px;flex-wrap:wrap;margin-bottom:8px">
+            <div>
+              <h2 style="font-family:Newsreader,serif;font-weight:400;font-size:24px;margin:0 0 8px">Sección «El Oficio»</h2>
+              <p style="font-size:13px;color:#8a857b;margin:0;max-width:580px">Editá la foto y los textos del bloque «Hecho artesanalmente» que se muestra en la página de inicio.</p>
+            </div>
+            <sc-if value="{{ oficioEditing }}" hint-placeholder-val="{{ false }}">
+              <div style="display:flex;gap:10px;flex-shrink:0">
+                <button onClick="{{ cancelEditOficio }}" style="background:transparent;color:#56534c;border:1px solid rgba(35,34,32,.18);cursor:pointer;border-radius:999px;padding:11px 22px;font-size:14px" style-hover="background:rgba(35,34,32,.05)">Cancelar</button>
+                <button onClick="{{ saveOficioDraft }}" style="background:#232220;color:#FAF9F6;border:none;cursor:pointer;border-radius:999px;padding:11px 26px;font-size:14px" style-hover="background:#3a3833">Guardar cambios</button>
+              </div>
+            </sc-if>
+            <sc-if value="{{ oficioEditing }}" hint-placeholder-val="{{ true }}">
+              <button onClick="{{ startEditOficio }}" style="background:#F0EEE9;color:#232220;border:none;cursor:pointer;border-radius:999px;padding:11px 22px;font-size:14px;flex-shrink:0" style-hover="background:#232220;color:#FAF9F6">Editar</button>
+            </sc-if>
+          </div>
+          <div style="display:flex;gap:24px;flex-wrap:wrap;align-items:flex-start;margin-top:18px">
             <div style="flex:0 0 220px">
               <div style="aspect-ratio:5/6;border-radius:14px;overflow:hidden;background:#DED9CF;margin-bottom:8px">
-                <image-slot id="ec-proceso-img" shape="rect" placeholder="Foto del proceso / taller"></image-slot>
+                <image-slot id="ec-proceso-img" src="{{ oficioImg }}" shape="rect" placeholder="Foto del proceso / taller"></image-slot>
               </div>
-              <div style="display:flex;gap:14px">
-                <button onClick="{{ changeOficioPhoto }}" style="background:none;border:none;cursor:pointer;font-size:12px;color:#6a665e;padding:0" style-hover="color:#232220">Cambiar foto</button>
-                <button onClick="{{ clearOficioPhoto }}" style="background:none;border:none;cursor:pointer;font-size:12px;color:#b3ada3;padding:0" style-hover="color:#b3261e">Quitar</button>
+              <div style="display:flex;gap:14px;align-items:center">
+                <label style="background:none;border:none;cursor:pointer;font-size:12px;color:#6a665e;padding:0" style-hover="color:#232220">Subir foto
+                  <input type="file" accept="image/jpeg,image/png,image/webp" onChange="{{ onUploadOficioPhoto }}" style="display:none">
+                </label>
+                <button onClick="{{ onRemoveOficioPhoto }}" style="background:none;border:none;cursor:pointer;font-size:12px;color:#b3ada3;padding:0" style-hover="color:#b3261e">Quitar</button>
               </div>
             </div>
             <div style="flex:1 1 320px;min-width:260px;background:#fff;border:1px solid rgba(35,34,32,.07);border-radius:16px;padding:20px;display:flex;flex-direction:column;gap:14px">
               <label style="display:flex;flex-direction:column;gap:6px;font-size:12px;color:#6a665e">Antetítulo
-                <input value="{{ ofEyebrow }}" onChange="{{ onOfEyebrow }}" style="border:1px solid rgba(35,34,32,.16);border-radius:10px;padding:10px 12px;font-size:14px;outline:none" style-focus="border-color:#232220">
+                <input value="{{ ofEyebrow }}" onChange="{{ onOfEyebrow }}" disabled="{{ oficioNotEditing }}" style="border:1px solid rgba(35,34,32,.16);border-radius:10px;padding:10px 12px;font-size:14px;outline:none" style-focus="border-color:#232220">
               </label>
               <label style="display:flex;flex-direction:column;gap:6px;font-size:12px;color:#6a665e">Título
-                <input value="{{ ofTitle }}" onChange="{{ onOfTitle }}" style="border:1px solid rgba(35,34,32,.16);border-radius:10px;padding:10px 12px;font-size:15px;outline:none;font-family:Newsreader,serif" style-focus="border-color:#232220">
+                <input value="{{ ofTitle }}" onChange="{{ onOfTitle }}" disabled="{{ oficioNotEditing }}" style="border:1px solid rgba(35,34,32,.16);border-radius:10px;padding:10px 12px;font-size:15px;outline:none;font-family:Newsreader,serif" style-focus="border-color:#232220">
               </label>
               <label style="display:flex;flex-direction:column;gap:6px;font-size:12px;color:#6a665e">Párrafo
-                <textarea value="{{ ofBody }}" onChange="{{ onOfBody }}" style="border:1px solid rgba(35,34,32,.16);border-radius:10px;padding:10px 12px;font-size:14px;outline:none;min-height:96px;resize:vertical;font-family:inherit" style-focus="border-color:#232220"></textarea>
+                <textarea value="{{ ofBody }}" onChange="{{ onOfBody }}" disabled="{{ oficioNotEditing }}" style="border:1px solid rgba(35,34,32,.16);border-radius:10px;padding:10px 12px;font-size:14px;outline:none;min-height:96px;resize:vertical;font-family:inherit" style-focus="border-color:#232220"></textarea>
               </label>
               <div style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#9a958c;margin-top:4px">Pasos</div>
               <sc-for list="{{ ofSteps }}" as="st" hint-placeholder-count="3">
                 <div style="display:flex;gap:12px;align-items:flex-start;background:#FAF9F6;border:1px solid rgba(35,34,32,.08);border-radius:12px;padding:12px">
                   <span style="font-family:Newsreader,serif;font-size:20px;color:#8a857b;min-width:30px;padding-top:4px">{{ st.n }}</span>
                   <div style="flex:1;display:flex;flex-direction:column;gap:8px">
-                    <input value="{{ st.title }}" onChange="{{ st.onTitle }}" placeholder="Título del paso" style="border:1px solid rgba(35,34,32,.14);border-radius:8px;padding:8px 10px;font-size:14px;font-weight:600;outline:none" style-focus="border-color:#232220">
-                    <input value="{{ st.desc }}" onChange="{{ st.onDesc }}" placeholder="Descripción" style="border:1px solid rgba(35,34,32,.14);border-radius:8px;padding:8px 10px;font-size:13px;color:#56534c;outline:none" style-focus="border-color:#232220">
+                    <input value="{{ st.title }}" onChange="{{ st.onTitle }}" disabled="{{ oficioNotEditing }}" placeholder="Título del paso" style="border:1px solid rgba(35,34,32,.14);border-radius:8px;padding:8px 10px;font-size:14px;font-weight:600;outline:none" style-focus="border-color:#232220">
+                    <input value="{{ st.desc }}" onChange="{{ st.onDesc }}" disabled="{{ oficioNotEditing }}" placeholder="Descripción" style="border:1px solid rgba(35,34,32,.14);border-radius:8px;padding:8px 10px;font-size:13px;color:#56534c;outline:none" style-focus="border-color:#232220">
                   </div>
                 </div>
               </sc-for>
@@ -1058,8 +1077,8 @@
           <div style="font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:#6f6a60;margin-bottom:16px">Contacto</div>
           <div style="display:flex;flex-direction:column;gap:10px">
             <span style="font-size:14px;color:#b5b0a6">Rafaela, Santa Fe</span>
-            <span style="font-size:14px;color:#b5b0a6">hola@esenciaconcreta.com</span>
-            <span style="font-size:14px;color:#b5b0a6">Instagram · WhatsApp</span>
+            <span style="font-size:14px;color:#b5b0a6">WhatsApp: (3492)583885</span>
+            <span style="font-size:14px;color:#b5b0a6">Instagram: Esencia Concreta</span>
           </div>
         </div>
       </div>
@@ -1342,9 +1361,8 @@ class Component extends DCLogic {
     this.state={
       view:(typeof location!=='undefined'&&location.hash==='#admin')?'admin':'home', adminTab:'productos', productId:null,
       categories:cats, products:[], aromas:[], sales:[],
-      featuredOrder:['vela-bruma','portavela-cilindro','bandeja-organica','florero-tubo','posavasos-cuarteto','sahumerio-lineal'],
       config:{shipping:5000,alias:'esencia.concreta',cbu:'0000003100093421750001',titular:'María Pérez',whatsapp:'5493492583885'},
-      oficio:{eyebrow:'El oficio',title:'Hecho artesanalmente',body:'Cada pieza nace de una mezcla precisa de cemento, agua y pigmento natural. Moldeada, curada y lijada a mano, una por una. No hay dos iguales: las pequeñas variaciones son la firma del oficio.',steps:[{title:'Mezcla & moldeado',desc:'Dosificamos el hormigón y lo vertimos en moldes propios.'},{title:'Curado & lijado',desc:'Reposo de 48 horas y lijado manual hasta el tacto justo.'},{title:'Sellado a mano',desc:'Hidrolaca protectora que realza la textura del cemento.'}]},
+      oficio:{eyebrow:'',title:'',body:'',steps:[]}, oficioPhotoUrl:'', oficioEditing:false, oficioDraft:null,
       saleEditSeq:null, saleEditItems:[], saleSearch:'', photoModal:null,
       cart:[], cartMounted:false, cartOpen:false,
       navMounted:false, navOpen:false,
@@ -1627,7 +1645,7 @@ class Component extends DCLogic {
   // ============================================================
   // CICLO DE VIDA
   // ============================================================
-  componentDidMount(){ this.startHero(); this.loadFilled(); this.scanSlots(); this._scanT=setInterval(()=>this.scanSlots(),1200); this.setupGestures(); this.loadCatalog(); this.initAuth();
+  componentDidMount(){ this.startHero(); this.loadFilled(); this.scanSlots(); this._scanT=setInterval(()=>this.scanSlots(),1200); this.setupGestures(); this.loadCatalog(); this.initAuth(); this.loadSiteContent();
     this._hashHandler=()=>{ if(location.hash==='#admin') this.setState({view:'admin'}); };
     window.addEventListener('hashchange',this._hashHandler);
   }
@@ -1707,8 +1725,8 @@ class Component extends DCLogic {
   async loadCatalog(){
     try{
       const [catsQ,prodQ,colorsQ,aromasQ,prodAromasQ,stockQ,photosQ]=await Promise.all([
-        supabaseClient.from('categories').select('id,label,has_aroma,photo_url'),
-        supabaseClient.from('products').select('id,category_id,sku,name,short_desc,long_desc,price,featured').eq('active',true),
+        supabaseClient.from('categories').select('id,label,has_aroma,photo_url,sort_order').order('sort_order'),
+        supabaseClient.from('products').select('id,category_id,sku,name,short_desc,long_desc,price,featured,featured_order').eq('active',true),
         supabaseClient.from('product_colors').select('product_id,color_name,hex_value,sort_order').order('sort_order'),
         supabaseClient.from('aromas').select('name'),
         supabaseClient.from('product_aromas').select('product_id,aroma_name,sort_order').order('sort_order'),
@@ -1717,7 +1735,7 @@ class Component extends DCLogic {
       ]);
       const err=[catsQ,prodQ,colorsQ,aromasQ,prodAromasQ,stockQ,photosQ].map(r=>r.error).find(Boolean);
       if(err){ console.error('Supabase loadCatalog error',err); this.showToast('No se pudo cargar el catálogo'); return; }
-      const categories=catsQ.data.map(c=>({id:c.id,label:c.label,hasAroma:c.has_aroma,photoUrl:c.photo_url||''}));
+      const categories=catsQ.data.map(c=>({id:c.id,label:c.label,hasAroma:c.has_aroma,photoUrl:c.photo_url||'',sortOrder:c.sort_order}));
       const catById={}; categories.forEach(c=>catById[c.id]=c);
       const colorsByProduct={}; const colorHexByProduct={}; colorsQ.data.forEach(r=>{ (colorsByProduct[r.product_id]=colorsByProduct[r.product_id]||[]).push(r.color_name); if(r.hex_value){ (colorHexByProduct[r.product_id]=colorHexByProduct[r.product_id]||{})[r.color_name]=r.hex_value; } });
       const aromasByProduct={}; prodAromasQ.data.forEach(r=>{ (aromasByProduct[r.product_id]=aromasByProduct[r.product_id]||[]).push(r.aroma_name); });
@@ -1734,7 +1752,7 @@ class Component extends DCLogic {
           if(scented&&r.aroma_name) cstock[r.color_name][r.aroma_name]=r.quantity;
           else if(!scented) cstock[r.color_name]=r.quantity;
         });
-        return {id:p.id,sku:p.sku,category:p.category_id,name:p.name,price:p.price,featured:p.featured,shortDesc:p.short_desc,longDesc:p.long_desc,colors,scents,cstock,photoSlots:{},photos:photosByProduct[p.id]||[],colorHex:colorHexByProduct[p.id]||{}};
+        return {id:p.id,sku:p.sku,category:p.category_id,name:p.name,price:p.price,featured:p.featured,featuredPos:p.featured_order,shortDesc:p.short_desc,longDesc:p.long_desc,colors,scents,cstock,photoSlots:{},photos:photosByProduct[p.id]||[],colorHex:colorHexByProduct[p.id]||{}};
       });
       const aromas=aromasQ.data.map(a=>a.name);
       this.setState({categories,products,aromas});
@@ -1888,7 +1906,16 @@ class Component extends DCLogic {
   // ============================================================
   toggleCatAdding=()=>this.setState({catAdding:!this.state.catAdding,newCat:{label:'',hasAroma:true}});
   setNCat(patch){ this.setState({newCat:{...this.state.newCat,...patch}}); }
-  addCategory=async()=>{ const label=(this.state.newCat.label||'').trim(); if(!label){ this.showToast('Poné un nombre'); return; } let id=this.slug(label); if(!id) id='cat-'+Date.now(); if(this.state.categories.some(c=>c.id===id)) id=id+'-'+Math.floor(Math.random()*999); const hasAroma=!!this.state.newCat.hasAroma; const { error } = await supabaseClient.from('categories').insert({id,label,has_aroma:hasAroma}); if(error){ this.showToast('Error al crear categoría: '+error.message); return; } this.setState({categories:[...this.state.categories,{id,label,hasAroma}],catAdding:false,newCat:{label:'',hasAroma:true}}); this.showToast(label+' · categoría creada'); };
+  addCategory=async()=>{ const label=(this.state.newCat.label||'').trim(); if(!label){ this.showToast('Poné un nombre'); return; } let id=this.slug(label); if(!id) id='cat-'+Date.now(); if(this.state.categories.some(c=>c.id===id)) id=id+'-'+Math.floor(Math.random()*999); const hasAroma=!!this.state.newCat.hasAroma; const sortOrder=this.state.categories.reduce((m,c)=>Math.max(m,c.sortOrder||0),0)+1; const { error } = await supabaseClient.from('categories').insert({id,label,has_aroma:hasAroma,sort_order:sortOrder}); if(error){ this.showToast('Error al crear categoría: '+error.message); return; } this.setState({categories:[...this.state.categories,{id,label,hasAroma,sortOrder}],catAdding:false,newCat:{label:'',hasAroma:true}}); this.showToast(label+' · categoría creada'); };
+  moveCategory=async(id,dir)=>{
+    const list=this.state.categories.slice().sort((a,b)=>(a.sortOrder??0)-(b.sortOrder??0));
+    const i=list.findIndex(c=>c.id===id); if(i<0) return;
+    const j=i+dir; if(j<0||j>=list.length) return;
+    const a=list[i], b=list[j]; const posA=a.sortOrder??i, posB=b.sortOrder??j;
+    this.setState({categories:this.state.categories.map(c=>{ if(c.id===a.id) return {...c,sortOrder:posB}; if(c.id===b.id) return {...c,sortOrder:posA}; return c; })});
+    await supabaseClient.from('categories').update({sort_order:posB}).eq('id',a.id);
+    await supabaseClient.from('categories').update({sort_order:posA}).eq('id',b.id);
+  };
   setCatLabel(id,v){ this.setState({categories:this.state.categories.map(c=>c.id===id?{...c,label:v}:c)}); this.debounce('catlabel:'+id,()=>supabaseClient.from('categories').update({label:v}).eq('id',id)); }
   toggleCatAroma=async(id)=>{ const cat=this.getCat(id); const next=!cat.hasAroma; this.setState({categories:this.state.categories.map(c=>c.id===id?{...c,hasAroma:next}:c)}); await supabaseClient.from('categories').update({has_aroma:next}).eq('id',id); };
   deleteCategory(id){ const c=this.getCat(id); const n=this.state.products.filter(p=>p.category===id).length; if(n>0){ this.showToast('No se puede: hay '+n+' productos en esa categoría'); return; } this.askConfirm({title:'Eliminar categoría',message:'¿Eliminar la categoría "'+(c?c.label:'')+'"?',yesLabel:'Eliminar',danger:true,onYes:async()=>{ const { error } = await supabaseClient.from('categories').delete().eq('id',id); if(error){ this.showToast('No se pudo eliminar: '+error.message); return; } this.setState({categories:this.state.categories.filter(x=>x.id!==id)}); this.showToast('Categoría eliminada'); }}); }
@@ -1901,7 +1928,7 @@ class Component extends DCLogic {
   startAromaEdit(name){ this.setState({aromaEditName:name,aromaEdits:{...this.state.aromaEdits,[name]:name}}); }
   cancelAromaEdit(name){ const edits={...this.state.aromaEdits}; delete edits[name]; this.setState({aromaEditName:null,aromaEdits:edits}); }
   setAromaEdit(name,v){ this.setState({aromaEdits:{...this.state.aromaEdits,[name]:v}}); }
-  saveAromaName=async(oldName)=>{ const v=(this.state.aromaEdits[oldName]!=null?this.state.aromaEdits[oldName]:oldName).trim(); const edits={...this.state.aromaEdits}; delete edits[oldName]; if(!v||v===oldName){ this.setState({aromaEdits:edits,aromaEditName:null}); return; } if(this.state.aromas.some(a=>a.toLowerCase()===v.toLowerCase())){ this.showToast('Ese aroma ya existe'); return; } const { error } = await supabaseClient.from('aromas').update({name:v}).eq('name',oldName); if(error){ this.showToast('Error al renombrar: '+error.message); return; } await this.loadCatalog(); this.setState(s=>({aromas:s.aromas.map(a=>a===v?v:a),aromaEdits:edits,aromaEditName:null})); this.showToast('Aroma actualizado'); };
+  saveAromaName=async(oldName)=>{ const v=(this.state.aromaEdits[oldName]!=null?this.state.aromaEdits[oldName]:oldName).trim(); const edits={...this.state.aromaEdits}; delete edits[oldName]; if(!v||v===oldName){ this.setState({aromaEdits:edits,aromaEditName:null}); return; } if(this.state.aromas.some(a=>a.toLowerCase()===v.toLowerCase())){ this.showToast('Ese aroma ya existe'); return; } const { error } = await supabaseClient.from('aromas').update({name:v}).eq('name',oldName); if(error){ this.showToast('Error al renombrar: '+error.message); return; } await supabaseClient.from('stock').update({aroma_name:v}).eq('aroma_name',oldName); await this.loadCatalog(); this.setState(s=>({aromas:s.aromas.map(a=>a===v?v:a),aromaEdits:edits,aromaEditName:null})); this.showToast('Aroma actualizado'); };
   deleteAroma(name){ const used=this.state.products.filter(p=>(p.scents||[]).indexOf(name)>=0); if(used.length>0){ this.showToast('No se puede eliminar: está en '+used.length+' producto(s)'); return; } this.askConfirm({title:'Eliminar aroma',message:'¿Eliminar este aroma del catálogo?',yesLabel:'Eliminar',danger:true,onYes:async()=>{ const { error } = await supabaseClient.from('aromas').delete().eq('name',name); if(error){ this.showToast('No se pudo eliminar: '+error.message); return; } this.setState({aromas:this.state.aromas.filter(a=>a!==name)}); this.showToast('Aroma eliminado'); }}); }
 
   // config
@@ -1994,14 +2021,42 @@ class Component extends DCLogic {
     this.closeSaleEdit();
   };
 
-  // El Oficio (home) editable from admin
-  setOficio(patch){ this.setState({oficio:{...this.state.oficio,...patch}}); }
-  onOfEyebrow=e=>this.setOficio({eyebrow:e.target.value});
-  onOfTitle=e=>this.setOficio({title:e.target.value});
-  onOfBody=e=>this.setOficio({body:e.target.value});
-  setOficioStep(i,field,v){ const steps=this.state.oficio.steps.map((st,idx)=>idx===i?{...st,[field]:v}:st); this.setOficio({steps}); }
-  clearOficioPhoto=()=>this.clearPhoto('ec-proceso-img');
-  changeOficioPhoto=()=>this.changePhoto('ec-proceso-img');
+  // El Oficio (home) — contenido real en Supabase (site_content), editado con borrador local
+  async loadSiteContent(){
+    const { data,error } = await supabaseClient.from('site_content').select('*').eq('id',1).single();
+    if(error){ console.error('loadSiteContent error',error); return; }
+    this.setState({oficio:{eyebrow:data.oficio_eyebrow,title:data.oficio_title,body:data.oficio_body,steps:data.oficio_steps||[]},oficioPhotoUrl:data.oficio_photo_url||''});
+  }
+  startEditOficio=()=>this.setState({oficioEditing:true,oficioDraft:JSON.parse(JSON.stringify(this.state.oficio))});
+  cancelEditOficio=()=>this.setState({oficioEditing:false,oficioDraft:null});
+  setOficioDraftField(key,v){ this.setState({oficioDraft:{...this.state.oficioDraft,[key]:v}}); }
+  setOficioDraftStep(i,field,v){ const steps=this.state.oficioDraft.steps.map((st,idx)=>idx===i?{...st,[field]:v}:st); this.setState({oficioDraft:{...this.state.oficioDraft,steps}}); }
+  saveOficioDraft=async()=>{
+    const d=this.state.oficioDraft;
+    const { error } = await supabaseClient.from('site_content').update({oficio_eyebrow:d.eyebrow,oficio_title:d.title,oficio_body:d.body,oficio_steps:d.steps}).eq('id',1);
+    if(error){ this.showToast('Error al guardar: '+error.message); return; }
+    this.setState({oficio:d,oficioEditing:false,oficioDraft:null});
+    this.showToast('Cambios guardados');
+  };
+  async uploadOficioPhoto(file){
+    const okTypes=['image/jpeg','image/jpg','image/png','image/webp'];
+    if(!file||okTypes.indexOf(file.type)<0){ this.showToast('Formato no permitido. Usá JPG, PNG o WEBP'); return; }
+    if(file.size>5*1024*1024){ this.showToast('La imagen no puede superar 5MB'); return; }
+    const path='site/oficio/'+this.sanitizeFileName(file.name);
+    const { error:upErr } = await supabaseClient.storage.from('product-photos').upload(path,file,{cacheControl:'3600',upsert:false,contentType:file.type});
+    if(upErr){ this.showToast('Error al subir imagen: '+upErr.message); return; }
+    const { data:pub } = supabaseClient.storage.from('product-photos').getPublicUrl(path);
+    const { error:updErr } = await supabaseClient.from('site_content').update({oficio_photo_url:pub.publicUrl}).eq('id',1);
+    if(updErr){ this.showToast('La imagen se subió pero no se pudo guardar: '+updErr.message); return; }
+    this.setState({oficioPhotoUrl:pub.publicUrl});
+    this.showToast('Foto actualizada');
+  }
+  async removeOficioPhoto(){
+    const { error } = await supabaseClient.from('site_content').update({oficio_photo_url:null}).eq('id',1);
+    if(error){ this.showToast('Error al quitar: '+error.message); return; }
+    this.setState({oficioPhotoUrl:''});
+    this.showToast('Foto eliminada');
+  }
 
   // ventas filters
   onVSearch=e=>this.setState({vSearch:e.target.value});
@@ -2010,8 +2065,26 @@ class Component extends DCLogic {
   onVType=e=>this.setState({vType:e.target.value});
   onVSort=e=>this.setState({vSort:e.target.value});
 
-  toggleFeatured(id){ const p=this.getProduct(id); const willFeature=!p.featured; let fo=this.state.featuredOrder.filter(x=>x!==id); if(willFeature) fo=[...fo,id]; this.updateProduct(id,{featured:willFeature}); this.setState({featuredOrder:fo}); this.updateProductRemote(id,{featured:willFeature}); }
-  moveFeatured(id,dir){ const fo=this.state.featuredOrder.slice(); const i=fo.indexOf(id); if(i<0) return; const j=i+dir; if(j<0||j>=fo.length) return; const t=fo[i]; fo[i]=fo[j]; fo[j]=t; this.setState({featuredOrder:fo}); }
+  toggleFeatured=async(id)=>{
+    const p=this.getProduct(id); const willFeature=!p.featured;
+    let featuredPos=p.featuredPos;
+    if(willFeature){ const maxPos=this.state.products.reduce((m,x)=>x.featured?Math.max(m,x.featuredPos||0):m,0); featuredPos=maxPos+1; }
+    this.updateProduct(id,{featured:willFeature,featuredPos});
+    const { error } = await supabaseClient.from('products').update({featured:willFeature,featured_order:featuredPos}).eq('id',id);
+    if(error) this.showToast('Error al guardar: '+error.message);
+  };
+  moveFeatured=async(id,dir)=>{
+    const list=this.state.products.filter(p=>p.featured).sort((a,b)=>(a.featuredPos??1e9)-(b.featuredPos??1e9));
+    const i=list.findIndex(p=>p.id===id); if(i<0) return;
+    const j=i+dir; if(j<0||j>=list.length) return;
+    const a=list[i], b=list[j];
+    const posA=a.featuredPos??i, posB=b.featuredPos??j;
+    const products=this.state.products.map(p=>{ if(p.id===a.id) return {...p,featuredPos:posB}; if(p.id===b.id) return {...p,featuredPos:posA}; return p; });
+    this.setState({products});
+    const { error:e1 } = await supabaseClient.from('products').update({featured_order:posB}).eq('id',a.id);
+    const { error:e2 } = await supabaseClient.from('products').update({featured_order:posA}).eq('id',b.id);
+    if(e1||e2) this.showToast('Error al guardar el orden');
+  };
 
   // styles
   chipStyle(a){ const b='cursor:pointer;border-radius:999px;padding:9px 18px;font-size:13.5px;letter-spacing:.01em;transition:all .2s;'; return a?b+'background:#232220;color:#FAF9F6;border:1px solid #232220':b+'background:transparent;color:#56534c;border:1px solid rgba(35,34,32,.16)'; }
@@ -2029,16 +2102,17 @@ class Component extends DCLogic {
     const byId=id=>decoded.find(p=>p.id===id);
 
     // hero (featured products in chosen order)
-    const orderedFeatured=s.featuredOrder.map(id=>decoded.find(p=>p.id===id&&p.featured)).filter(Boolean);
+    const orderedFeatured=decoded.filter(p=>p.featured).sort((a,b)=>(a.featuredPos??1e9)-(b.featuredPos??1e9));
     const heroPool=(orderedFeatured.length?orderedFeatured:decoded).map(hp=>{ const aromasTxt=hp.scents.length?hp.scents.join(' · '):(hp.colors||[]).join(' · '); return {name:hp.name,aromasLabel:hp.scents.length?('Aromas: '+aromasTxt):hp.shortDesc,catUpper:(this.catLabel(hp.category)||'').toUpperCase(),priceFmt:hp.priceFmt,slotId:hp.slotId,img:hp.img,open:()=>this.openProduct(hp.id),openSimilar:()=>this.openCatWith(hp.category)}; });
     const hIdx=heroPool.length?(s.heroIndex%heroPool.length):0;
     const heroProduct=heroPool[hIdx]||null;
     const heroDots=heroPool.map((p,i)=>({go:()=>this.setHero(i),style:'width:'+(i===hIdx?'26px':'8px')+';height:8px;border-radius:999px;border:none;cursor:pointer;padding:0;transition:all .35s ease;background:'+(i===hIdx?'#232220':'rgba(35,34,32,.22)')}));
     const heroAnim=(s.heroIndex%2===0?'ecCrossA':'ecCrossB')+' .55s ease';
 
-    const categories=s.categories.map(c=>({id:c.id,label:c.label,slotId:'ec-cat-'+c.id,img:c.photoUrl||this.NO_PHOTO_IMG,open:()=>this.openCatWith(c.id)}));
+    const catsSorted=s.categories.slice().sort((a,b)=>(a.sortOrder??0)-(b.sortOrder??0));
+    const categories=catsSorted.map(c=>({id:c.id,label:c.label,slotId:'ec-cat-'+c.id,img:c.photoUrl||this.NO_PHOTO_IMG,open:()=>this.openCatWith(c.id)}));
     const catalog=s.filter==='todos'?decoded:decoded.filter(p=>p.category===s.filter);
-    const chips=[{id:'todos',label:'Todo'}].concat(s.categories.map(c=>({id:c.id,label:c.label}))).map(c=>({id:c.id,label:c.label,style:this.chipStyle(c.id===s.filter),set:()=>this.setFilter(c.id)}));
+    const chips=[{id:'todos',label:'Todo'}].concat(catsSorted.map(c=>({id:c.id,label:c.label}))).map(c=>({id:c.id,label:c.label,style:this.chipStyle(c.id===s.filter),set:()=>this.setFilter(c.id)}));
     decoded.forEach(p=>{ p.open=()=>this.openProduct(p.id); p.quickAdd=()=>this.quickAdd(p.id); });
 
     // selected product (color photo fallback)
@@ -2113,7 +2187,10 @@ class Component extends DCLogic {
     }
 
     // admin categories
-    const adminCategories=s.categories.map(c=>({id:c.id,label:c.label,hasAroma:c.hasAroma,slotId:'ec-cat-'+c.id,img:c.photoUrl||this.NO_PHOTO_IMG,count:s.products.filter(p=>p.category===c.id).length,
+    const catArrowStyle=dis=>'background:'+(dis?'#F4F2EC':'#F0EEE9')+';color:'+(dis?'#cfc8bc':'#232220')+';border:none;cursor:'+(dis?'default':'pointer')+';border-radius:6px;width:26px;height:18px;font-size:9px;line-height:1;padding:0;transition:all .2s';
+    const catsSortedForOrder=s.categories.slice().sort((a,b)=>(a.sortOrder??0)-(b.sortOrder??0));
+    const adminCategories=catsSortedForOrder.map((c,ci,arr)=>({id:c.id,label:c.label,hasAroma:c.hasAroma,slotId:'ec-cat-'+c.id,img:c.photoUrl||this.NO_PHOTO_IMG,count:s.products.filter(p=>p.category===c.id).length,
+      onUp:()=>this.moveCategory(c.id,-1), onDown:()=>this.moveCategory(c.id,1), upStyle:catArrowStyle(ci===0), downStyle:catArrowStyle(ci===arr.length-1),
       onUploadPhoto:e=>{ const f=e.target.files&&e.target.files[0]; if(f) this.uploadCategoryPhoto(c.id,f); e.target.value=''; },
       onRemovePhoto:()=>this.removeCategoryPhoto(c.id),
       onLabel:e=>this.setCatLabel(c.id,e.target.value),onToggleAroma:()=>this.toggleCatAroma(c.id),onDelete:()=>this.deleteCategory(c.id)}));
@@ -2161,11 +2238,12 @@ class Component extends DCLogic {
 
     // El Oficio (home) — numbered steps
     const oficio={eyebrow:s.oficio.eyebrow,title:s.oficio.title,body:s.oficio.body,steps:s.oficio.steps.map((st,i)=>({title:st.title,desc:st.desc,n:String(i+1).padStart(2,'0')}))};
+    const oficioImg=s.oficioPhotoUrl||this.NO_PHOTO_IMG;
 
     // destacados
     const starStyle=on=>'background:'+(on?'#232220':'#fff')+';color:'+(on?'#e7c66b':'#b8b2a8')+';border:1px solid '+(on?'#232220':'rgba(35,34,32,.16)')+';cursor:pointer;border-radius:999px;width:40px;height:40px;font-size:18px;flex-shrink:0;transition:all .2s';
     const arrowStyle=dis=>'background:'+(dis?'#F4F2EC':'#F0EEE9')+';color:'+(dis?'#cfc8bc':'#232220')+';border:none;cursor:'+(dis?'default':'pointer')+';border-radius:6px;width:26px;height:18px;font-size:9px;line-height:1;padding:0;transition:all .2s';
-    const featuredItems=s.featuredOrder.map(id=>decoded.find(p=>p.id===id&&p.featured)).filter(Boolean).map((p,i,arr)=>({...p,salesUnits:this.salesUnits(p.id),pos:i+1,starIcon:'★',starStyle:starStyle(true),onFeatured:()=>this.toggleFeatured(p.id),onUp:()=>this.moveFeatured(p.id,-1),onDown:()=>this.moveFeatured(p.id,1),upStyle:arrowStyle(i===0),downStyle:arrowStyle(i===arr.length-1)}));
+    const featuredItems=decoded.filter(p=>p.featured).sort((a,b)=>(a.featuredPos??1e9)-(b.featuredPos??1e9)).map((p,i,arr)=>({...p,salesUnits:this.salesUnits(p.id),pos:i+1,starIcon:'★',starStyle:starStyle(true),onFeatured:()=>this.toggleFeatured(p.id),onUp:()=>this.moveFeatured(p.id,-1),onDown:()=>this.moveFeatured(p.id,1),upStyle:arrowStyle(i===0),downStyle:arrowStyle(i===arr.length-1)}));
     const restItems=decoded.filter(p=>!p.featured).map(p=>({...p,salesUnits:this.salesUnits(p.id)})).sort((a,b)=>b.salesUnits-a.salesUnits).map(p=>({...p,starIcon:'☆',starStyle:starStyle(false),onFeatured:()=>this.toggleFeatured(p.id)}));
 
     const tabsDef=[['productos','Productos'],['categorias','Categorías'],['aromas','Aromas'],['ventas','Ventas'],['destacados','Destacados'],['inicio','Inicio']];
@@ -2194,9 +2272,15 @@ class Component extends DCLogic {
       placeOrder:this.placeOrder, order:s.order, sendReceipt:this.sendReceipt, backToShop:this.backToShop,
       adminTabs, tabProductos:s.adminTab==='productos', tabCategorias:s.adminTab==='categorias', tabAromas:s.adminTab==='aromas', tabVentas:s.adminTab==='ventas', tabDestacados:s.adminTab==='destacados', tabInicio:s.adminTab==='inicio',
       oficio,
-      ofEyebrow:s.oficio.eyebrow, ofTitle:s.oficio.title, ofBody:s.oficio.body, onOfEyebrow:this.onOfEyebrow, onOfTitle:this.onOfTitle, onOfBody:this.onOfBody,
-      ofSteps:s.oficio.steps.map((st,i)=>({title:st.title,desc:st.desc,n:String(i+1).padStart(2,'0'),onTitle:e=>this.setOficioStep(i,'title',e.target.value),onDesc:e=>this.setOficioStep(i,'desc',e.target.value)})),
-      changeOficioPhoto:this.changeOficioPhoto, clearOficioPhoto:this.clearOficioPhoto,
+      oficioImg,
+      oficioEditing:s.oficioEditing, oficioNotEditing:!s.oficioEditing, startEditOficio:this.startEditOficio, cancelEditOficio:this.cancelEditOficio, saveOficioDraft:this.saveOficioDraft,
+      ofEyebrow:s.oficioEditing?s.oficioDraft.eyebrow:s.oficio.eyebrow,
+      ofTitle:s.oficioEditing?s.oficioDraft.title:s.oficio.title,
+      ofBody:s.oficioEditing?s.oficioDraft.body:s.oficio.body,
+      onOfEyebrow:e=>this.setOficioDraftField('eyebrow',e.target.value), onOfTitle:e=>this.setOficioDraftField('title',e.target.value), onOfBody:e=>this.setOficioDraftField('body',e.target.value),
+      ofSteps:(s.oficioEditing?s.oficioDraft.steps:s.oficio.steps).map((st,i)=>({title:st.title,desc:st.desc,n:String(i+1).padStart(2,'0'),onTitle:e=>this.setOficioDraftStep(i,'title',e.target.value),onDesc:e=>this.setOficioDraftStep(i,'desc',e.target.value)})),
+      onUploadOficioPhoto:e=>{ const f=e.target.files&&e.target.files[0]; if(f) this.uploadOficioPhoto(f); e.target.value=''; },
+      onRemoveOficioPhoto:()=>this.removeOficioPhoto(),
       saleEditOpen:seEditing, saleEditItems, saleEditHasItems:s.saleEditItems.length>0, saleEditTotalFmt:this.fmt(saleEditTotal), saleEditCode:seSale?code(seSale.seq):'', saleEditCustomer:seSale?seSale.customer:'', closeSaleEdit:this.closeSaleEdit, addSaleEditItem:this.addSaleEditItem, saveSaleEdit:this.saveSaleEdit,
       adminProducts, adminProductCount:s.products.length, catOptions,
       prodSearch:s.prodSearch, onProdSearch:e=>this.setState({prodSearch:e.target.value}),
