@@ -54,7 +54,8 @@
 <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;0,6..72,500;1,6..72,400&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet">
 <style>
   *{box-sizing:border-box}
-  html,body{margin:0;padding:0;overflow-x:hidden;max-width:100%}
+  html,body{margin:0;padding:0;overflow-x:hidden;max-width:100%;overflow-anchor:none}
+  *{overflow-anchor:none}
   body{background:#FAF9F6;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
   input,button,textarea,select{font-family:inherit}
   ::selection{background:#232220;color:#FAF9F6}
@@ -421,6 +422,50 @@
           </div>
         </sc-if>
       </section></div>
+    </sc-if>
+
+    <!-- ===================== CONOCENOS ===================== -->
+    <sc-if value="{{ isAbout }}" hint-placeholder-val="{{ false }}">
+    <div data-screen-label="Conocenos" style="animation:ecFade .5s ease both">
+      <section style="max-width:1240px;margin:0 auto;padding:clamp(32px,6vw,72px) clamp(20px,5vw,56px);display:flex;gap:clamp(28px,5vw,80px);align-items:center;flex-wrap:wrap">
+        <div style="flex:1 1 300px;min-width:0;width:100%">
+          <div style="aspect-ratio:5/6;max-width:440px;margin:0 auto;background:#DED9CF;border-radius:20px;overflow:hidden;box-shadow:0 40px 80px -56px rgba(35,34,32,.6)">
+            <image-slot id="ec-about-img" src="{{ oficioImg }}" shape="rect" placeholder="Foto del proceso / taller"></image-slot>
+          </div>
+        </div>
+        <div style="flex:1 1 300px;min-width:0">
+          <div style="font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:#8a857b;margin-bottom:16px">{{ oficio.eyebrow }}</div>
+          <h1 style="font-family:Newsreader,serif;font-weight:400;font-size:clamp(28px,4.4vw,48px);margin:0 0 18px;letter-spacing:-.01em">{{ oficio.title }}</h1>
+          <p style="font-size:16px;color:#56534c;max-width:480px;margin:0 0 34px">{{ oficio.body }}</p>
+          <div style="display:flex;flex-direction:column;gap:20px">
+            <sc-for list="{{ oficio.steps }}" as="st" hint-placeholder-count="3">
+              <div style="display:flex;gap:18px;align-items:flex-start">
+                <span style="font-family:Newsreader,serif;font-size:22px;color:#8a857b;min-width:34px">{{ st.n }}</span>
+                <div><div style="font-size:16px;font-weight:600;margin-bottom:2px">{{ st.title }}</div><div style="font-size:14.5px;color:#6a665e">{{ st.desc }}</div></div>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </section>
+      <section id="about-contacto" style="background:#EAE6DE">
+        <div style="max-width:720px;margin:0 auto;padding:clamp(44px,8vw,90px) clamp(20px,5vw,56px);text-align:center">
+          <div style="font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:#8a857b;margin-bottom:14px">Contacto</div>
+          <h2 style="font-family:Newsreader,serif;font-weight:400;font-size:clamp(26px,4vw,40px);margin:0 0 24px;letter-spacing:-.01em">Hablemos</h2>
+          <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:32px">
+            <span style="font-size:15px;color:#56534c">Rafaela, Santa Fe</span>
+            <span style="font-size:15px;color:#56534c">WhatsApp: (3492)583885</span>
+          </div>
+          <div style="display:flex;gap:16px;justify-content:center;align-items:center">
+            <a href="{{ waLink }}" target="_blank" rel="noopener" aria-label="WhatsApp" style="display:flex;align-items:center;justify-content:center;width:48px;height:48px;border-radius:999px;background:#232220;color:#FAF9F6;text-decoration:none" style-hover="background:#3a3833">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M17.6 6.32A7.85 7.85 0 0 0 12.05 4c-4.37 0-7.93 3.56-7.93 7.93 0 1.4.37 2.76 1.06 3.96L4 20l4.2-1.1a7.9 7.9 0 0 0 3.85 1h.01c4.37 0 7.93-3.56 7.93-7.93 0-2.12-.83-4.11-2.4-5.65zM12.05 18.4h-.01a6.5 6.5 0 0 1-3.32-.91l-.24-.14-2.49.65.66-2.43-.16-.25a6.53 6.53 0 0 1-1-3.4c0-3.6 2.94-6.53 6.55-6.53 1.75 0 3.39.68 4.63 1.92a6.5 6.5 0 0 1 1.91 4.62c0 3.6-2.94 6.53-6.53 6.53zm3.58-4.9c-.2-.1-1.17-.58-1.35-.64-.18-.07-.31-.1-.44.1-.13.2-.5.64-.62.77-.11.13-.23.14-.42.05-.2-.1-.83-.3-1.58-.98-.58-.52-.98-1.16-1.09-1.36-.11-.2-.01-.3.09-.4.09-.09.2-.23.3-.35.1-.11.13-.2.2-.32.07-.13.03-.24-.02-.34-.05-.1-.44-1.06-.6-1.45-.16-.38-.32-.33-.44-.33h-.38c-.13 0-.34.05-.52.24-.18.2-.68.66-.68 1.62 0 .95.7 1.87.79 2 .1.13 1.37 2.1 3.33 2.94.46.2.83.32 1.11.41.47.15.9.13 1.24.08.38-.06 1.17-.48 1.33-.94.17-.46.17-.85.12-.94-.05-.09-.18-.14-.38-.24z"/></svg>
+            </a>
+            <a href="{{ instagramUrl }}" target="_blank" rel="noopener" aria-label="Instagram" style="display:flex;align-items:center;justify-content:center;width:48px;height:48px;border-radius:999px;background:#232220;color:#FAF9F6;text-decoration:none" style-hover="background:#3a3833">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="5"></rect><circle cx="12" cy="12" r="4"></circle><circle cx="17.2" cy="6.8" r="1.1" fill="currentColor" stroke="none"></circle></svg>
+            </a>
+          </div>
+        </div>
+      </section>
+    </div>
     </sc-if>
 
     <!-- ===================== CHECKOUT ===================== -->
@@ -1975,6 +2020,7 @@ class Component extends DCLogic {
     if(pathname==='/checkout') return {view:'checkout'};
     if(pathname==='/confirmacion') return {view:'confirm'};
     if(pathname==='/admin') return {view:'admin'};
+    if(pathname==='/conocenos') return {view:'about'};
     const m=pathname.match(/^\/producto\/([^/]+)\/?$/);
     if(m) return {view:'product',productId:decodeURIComponent(m[1])};
     return {view:'home'};
@@ -2014,6 +2060,7 @@ class Component extends DCLogic {
         const p=this.getProduct(s.productId);
         if(p){ product=p; title=p.name+' — Esencia Concreta'; desc=p.shortDesc||'Pieza artesanal de hormigón hecha a mano en Rafaela.'; path='/producto/'+encodeURIComponent(p.id); }
       }
+      else if(s.view==='about'){ title='Conocenos — Esencia Concreta'; desc='Conocé el oficio detrás de Esencia Concreta y cómo contactarnos.'; path='/conocenos'; }
       else if(s.view==='checkout'){ title='Finalizar compra — Esencia Concreta'; path='/checkout'; }
       else if(s.view==='confirm'){ title='Pedido confirmado — Esencia Concreta'; path='/confirmacion'; }
       else if(s.view==='admin'){ title='Panel de administración — Esencia Concreta'; path='/admin'; }
@@ -2241,8 +2288,8 @@ class Component extends DCLogic {
   };
   scrollToId=(id,offset)=>{ const go=()=>{ const el=document.getElementById(id); if(el) window.scrollTo({top:el.getBoundingClientRect().top+window.scrollY-offset,behavior:'smooth'}); }; go(); setTimeout(go,120); setTimeout(go,300); };
   scrollToEl=(sel,offset)=>{ const go=()=>{ const el=document.querySelector(sel); if(el) window.scrollTo({top:el.getBoundingClientRect().top+window.scrollY-offset,behavior:'smooth'}); }; go(); setTimeout(go,120); setTimeout(go,300); };
-  verProceso=()=>{ if(this.state.view!=='home'){ this.navigate('/'); this.setState({view:'home'}); setTimeout(()=>this.scrollToId('ec-proceso',60),80);} else this.scrollToId('ec-proceso',60); };
-  verContacto=()=>{ if(this.state.view!=='home'){ this.navigate('/'); this.setState({view:'home'}); setTimeout(()=>this.scrollToEl('footer',20),80);} else this.scrollToEl('footer',20); };
+  verProceso=()=>{ this.navigate('/conocenos'); this.setState({view:'about'}); this.scrollTop(); };
+  verContacto=()=>{ if(this.state.view!=='about'){ this.navigate('/conocenos'); this.setState({view:'about'}); setTimeout(()=>this.scrollToId('about-contacto',70),100);} else this.scrollToId('about-contacto',70); };
   setCatColor(id,color){ this.setState({catalogColors:{...this.state.catalogColors,[id]:color}}); }
   openProduct(id){ const p=this.getProduct(id); const fromCat=this.state.view==='catalog'; this.navigate('/producto/'+encodeURIComponent(id)); this.setState({view:'product',productId:id,detailColor:p?(this.state.catalogColors[id]||(p.colors[0]||null)):null,detailScent:this.isScented(p)?p.scents[0]:null,detailQty:1,galleryIndex:0,catalogScroll:fromCat?(window.scrollY||0):this.state.catalogScroll}); this.scrollTop(); }
   setGallery(i){ this.setState({galleryIndex:i}); }
@@ -2743,7 +2790,7 @@ class Component extends DCLogic {
       isAdmin:s.view==='admin', isStore:s.view!=='admin',
       adminAuthed:s.view==='admin'&&s.authRole==='admin', adminNeedsLogin:s.view==='admin'&&s.authRole!=='admin',
       authEmail:s.authEmail, authPassword:s.authPassword, authError:s.authError, onAuthEmail:this.onAuthEmail, onAuthPassword:this.onAuthPassword, doLogin:this.doLogin, doLogout:this.doLogout,
-      isHome:s.view==='home', isCatalog:s.view==='catalog', isProduct:s.view==='product'&&!!selectedProduct, isCheckout:s.view==='checkout', isConfirm:s.view==='confirm'&&!!s.order,
+      isHome:s.view==='home', isCatalog:s.view==='catalog', isProduct:s.view==='product'&&!!selectedProduct, isCheckout:s.view==='checkout', isConfirm:s.view==='confirm'&&!!s.order, isAbout:s.view==='about',
       cfg:s.config,
       goHome:this.goHome, goCatalog:this.goCatalog, goAdmin:this.goAdmin, verProceso:this.verProceso, verContacto:this.verContacto,
       openCart:this.openCart, closeCart:this.closeCart, cartCount, cartBumpAnim:(s.cartBump%2===0?'ecBumpA':'ecBumpB')+' .45s ease',
@@ -2762,6 +2809,8 @@ class Component extends DCLogic {
       adminTabs, tabProductos:s.adminTab==='productos', tabCategorias:s.adminTab==='categorias', tabAromas:s.adminTab==='aromas', tabVentas:s.adminTab==='ventas', tabDestacados:s.adminTab==='destacados', tabInicio:s.adminTab==='inicio',
       oficio,
       oficioImg,
+      waLink:'https://wa.me/'+String((s.config&&s.config.whatsapp)||'').replace(/\D/g,''),
+      instagramUrl:'https://www.instagram.com/esencia_concreta_/',
       oficioEditing:s.oficioEditing, oficioNotEditing:!s.oficioEditing, startEditOficio:this.startEditOficio, cancelEditOficio:this.cancelEditOficio, saveOficioDraft:this.saveOficioDraft,
       ofEyebrow:s.oficioEditing?s.oficioDraft.eyebrow:s.oficio.eyebrow,
       ofTitle:s.oficioEditing?s.oficioDraft.title:s.oficio.title,
