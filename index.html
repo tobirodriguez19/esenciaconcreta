@@ -8,6 +8,7 @@
 <meta name="keywords" content="hormigón, cemento, velas de hormigón, decoración artesanal, Rafaela, Santa Fe, Esencia Concreta">
 <link rel="canonical" href="https://esenciaconcreta.com.ar/">
 <link rel="icon" href="uploads/Logo.jpg">
+<link rel="apple-touch-icon" href="uploads/Logo.jpg">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Esencia Concreta">
 <meta property="og:title" content="Esencia Concreta — Piezas de hormigón hechas a mano">
@@ -53,8 +54,8 @@
 <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;0,6..72,500;1,6..72,400&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet">
 <style>
   *{box-sizing:border-box}
-  html,body{margin:0;padding:0}
-  body{background:#FAF9F6;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;overflow-x:hidden}
+  html,body{margin:0;padding:0;overflow-x:hidden;max-width:100%}
+  body{background:#FAF9F6;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
   input,button,textarea,select{font-family:inherit}
   ::selection{background:#232220;color:#FAF9F6}
   image-slot{display:block;width:100%;height:100%}
@@ -75,6 +76,8 @@
   #ec-cat-scroll::-webkit-scrollbar{height:6px}
   #ec-cat-scroll::-webkit-scrollbar-thumb{background:rgba(35,34,32,.18);border-radius:999px}
   .ec-hamburger{display:none}
+  .ec-cat-dropdown{display:none;opacity:0;transform:translateY(4px);transition:opacity .16s ease,transform .16s ease}
+  .ec-cat-nav:hover .ec-cat-dropdown{display:block;opacity:1;transform:translateY(0)}
   @media(max-width:768px){
     .ec-desktop-nav{display:none!important}
     .ec-hamburger{display:inline-flex!important}
@@ -83,14 +86,14 @@
     .ec-catalog-grid{grid-template-columns:repeat(2,1fr)!important;gap:12px!important}
   }
   @media(max-width:1140px){
-    #ec-hero-imgwrap{max-width:360px!important}
-    #ec-hero-text{width:100%!important;height:auto!important;margin-right:0!important}
-    #ec-hero-text>div:first-child{margin-bottom:8px!important}
-    #ec-hero-text h1{width:auto!important;height:auto!important;min-height:0!important;margin:0 0 10px!important;display:block!important}
-    #ec-hero-text p{min-height:0!important;margin:0 0 14px!important}
-    #ec-hero-text>div:nth-child(4){margin:0 0 20px!important}
-    #ec-hero-btns{padding-top:0!important;flex-wrap:nowrap!important;gap:10px!important}
+    #ec-hero-imgbox{max-width:360px!important}
+    #ec-hero-btns{flex-wrap:nowrap!important}
     #ec-hero-btns button{padding:13px 18px!important;flex:1 1 0!important;white-space:nowrap!important}
+  }
+  @media(max-width:600px){
+    #ec-trust-strip{flex-wrap:nowrap!important;overflow-x:auto!important;justify-content:flex-start!important;font-size:11px!important;gap:8px!important;-webkit-overflow-scrolling:touch}
+    #ec-trust-strip span{flex:0 0 auto!important;white-space:nowrap}
+    #ec-brand-name{display:none!important}
   }
 </style>
 <script src="image-slot.js"></script>
@@ -115,7 +118,7 @@
     <div style="max-width:1240px;margin:0 auto;padding:0 clamp(16px,5vw,56px);min-height:68px;display:flex;align-items:center;justify-content:space-between;gap:14px">
       <button onClick="{{ goHome }}" style="display:flex;align-items:center;gap:11px;background:none;border:none;cursor:pointer;padding:10px 0;min-width:0">
         <img src="uploads/Logo.jpg" alt="Esencia Concreta" style="width:40px;height:40px;border-radius:999px;object-fit:cover;display:block;flex-shrink:0">
-        <span style="font-family:Newsreader,serif;font-size:clamp(16px,2.2vw,20px);letter-spacing:.01em;color:#232220;line-height:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Esencia Concreta</span>
+        <span id="ec-brand-name" style="font-family:Newsreader,serif;font-size:clamp(16px,2.2vw,20px);letter-spacing:.01em;color:#232220;line-height:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Esencia Concreta</span>
       </button>
       <sc-if value="{{ isAdmin }}" hint-placeholder-val="{{ false }}">
         <button onClick="{{ goHome }}" style="display:flex;align-items:center;gap:8px;background:#232220;color:#FAF9F6;border:none;cursor:pointer;border-radius:999px;padding:10px 18px;font-size:13px;letter-spacing:.02em;white-space:nowrap;flex-shrink:0" style-hover="background:#3a3833">← Volver a la tienda</button>
@@ -124,7 +127,15 @@
         <div style="display:flex;align-items:center;gap:14px;flex-shrink:0">
           <nav class="ec-desktop-nav" style="display:flex;align-items:center;gap:clamp(12px,2vw,28px)">
             <button onClick="{{ goHome }}" style="background:none;border:none;cursor:pointer;font-size:14px;color:#4a4842;letter-spacing:.01em;padding:6px 0" style-hover="color:#232220">Inicio</button>
-            <button onClick="{{ goCatalog }}" style="background:none;border:none;cursor:pointer;font-size:14px;color:#4a4842;letter-spacing:.01em;padding:6px 0" style-hover="color:#232220">Catálogo</button>
+            <div class="ec-cat-nav" style="position:relative;padding:6px 0">
+              <button onClick="{{ goCatalog }}" style="background:none;border:none;cursor:pointer;font-size:14px;color:#4a4842;letter-spacing:.01em;padding:0" style-hover="color:#232220">Catálogo</button>
+              <div class="ec-cat-dropdown" style="position:absolute;top:100%;left:0;background:#fff;border:1px solid rgba(35,34,32,.1);border-radius:14px;box-shadow:0 20px 40px -20px rgba(0,0,0,.3);padding:8px;min-width:190px;z-index:80">
+                <button onClick="{{ goCatalog }}" style="display:block;width:100%;text-align:left;background:none;border:none;cursor:pointer;padding:9px 12px;border-radius:8px;font-size:13.5px;color:#232220" style-hover="background:rgba(35,34,32,.06)">Ver todo</button>
+                <sc-for list="{{ navCategories }}" as="cat" hint-placeholder-count="6">
+                  <button onClick="{{ cat.open }}" style="display:block;width:100%;text-align:left;background:none;border:none;cursor:pointer;padding:9px 12px;border-radius:8px;font-size:13.5px;color:#232220" style-hover="background:rgba(35,34,32,.06)">{{ cat.label }}</button>
+                </sc-for>
+              </div>
+            </div>
             <button onClick="{{ verProceso }}" style="background:none;border:none;cursor:pointer;font-size:14px;color:#4a4842;letter-spacing:.01em;padding:6px 0" style-hover="color:#232220">Conocenos</button>
             <button onClick="{{ verContacto }}" style="background:none;border:none;cursor:pointer;font-size:14px;color:#4a4842;letter-spacing:.01em;padding:6px 0" style-hover="color:#232220">Contacto</button>
           </nav>
@@ -154,7 +165,12 @@
         <button onClick="{{ closeNav }}" style="background:none;border:none;cursor:pointer;font-size:24px;color:#6a665e;width:36px;height:36px;border-radius:999px;line-height:1" style-hover="background:rgba(35,34,32,.06)">×</button>
       </div>
       <button onClick="{{ navHome }}" style="background:none;border:none;cursor:pointer;text-align:left;font-size:17px;color:#232220;padding:14px 0;border-bottom:1px solid rgba(35,34,32,.08)">Inicio</button>
-      <button onClick="{{ navCatalog }}" style="background:none;border:none;cursor:pointer;text-align:left;font-size:17px;color:#232220;padding:14px 0;border-bottom:1px solid rgba(35,34,32,.08)">Catálogo</button>
+      <button onClick="{{ navCatalog }}" style="background:none;border:none;cursor:pointer;text-align:left;font-size:17px;color:#232220;padding:14px 0 8px">Catálogo</button>
+      <button onClick="{{ navCatalog }}" style="background:none;border:none;cursor:pointer;text-align:left;font-size:14.5px;color:#6a665e;padding:8px 0 8px 14px">Ver todo</button>
+      <sc-for list="{{ navCategories }}" as="cat" hint-placeholder-count="6">
+        <button onClick="{{ cat.openNav }}" style="background:none;border:none;cursor:pointer;text-align:left;font-size:14.5px;color:#6a665e;padding:8px 0 8px 14px">{{ cat.label }}</button>
+      </sc-for>
+      <div style="border-bottom:1px solid rgba(35,34,32,.08);margin-bottom:0"></div>
       <button onClick="{{ navProceso }}" style="background:none;border:none;cursor:pointer;text-align:left;font-size:17px;color:#232220;padding:14px 0;border-bottom:1px solid rgba(35,34,32,.08)">Conocenos</button>
       <button onClick="{{ navContacto }}" style="background:none;border:none;cursor:pointer;text-align:left;font-size:17px;color:#232220;padding:14px 0;border-bottom:1px solid rgba(35,34,32,.08)">Contacto</button>
     </div>
@@ -172,32 +188,35 @@
       <section style="max-width: 1240px; margin: 0 auto; padding: clamp(24px,5vw,64px) clamp(20px,5vw,56px) clamp(36px,5vw,64px); position: relative">
         
         <div style="display: flex; gap: clamp(24px,5vw,64px); align-items: center; flex-wrap: wrap; position: relative">
-          <div style="flex:1 1 320px;min-width:0;order:1;width:100%">
-            <button onClick="{{ heroProduct.open }}" id="ec-hero-imgwrap" class="ec-hero-swipe" style="display:block;width:100%;max-width:440px;margin:0 auto;padding:0;border:none;cursor:pointer;background:none;position:relative;animation:{{ heroAnim }}">
+          <div id="ec-hero-imgbox" style="flex:1 1 320px;min-width:0;order:1;width:100%;max-width:440px;margin:0 auto;position:relative">
+            <button onClick="{{ heroProduct.open }}" id="ec-hero-imgwrap" class="ec-hero-swipe" style="display:block;width:100%;padding:0;border:none;cursor:pointer;background:none;position:relative;animation:{{ heroAnim }};touch-action:pan-y">
               <div style="aspect-ratio: 4/5; background: #EFEEEA; border-radius: 20px; overflow: hidden; box-shadow: 0 40px 80px -50px rgba(35,34,32,.5); animation: {{ heroAnim }}; width: 100%; height: auto">
                 <image-slot id="{{ heroProduct.slotId }}" src="{{ heroProduct.img }}" shape="rect" placeholder="{{ heroProduct.name }}" priority></image-slot>
               </div>
               <span style="position:absolute;top:14px;left:14px;background:rgba(35,34,32,.88);color:#FAF9F6;border-radius:999px;padding:6px 13px;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase">Destacado</span>
             </button>
-          </div><div id="ec-hero-text" style="flex: 1 1 320px; min-width: 0; order: 2; width: 514px; height: 408px; margin-right: 84px">
-            <div style="font-size: 12px; letter-spacing: .2em; text-transform: uppercase; color: #9a958c; margin-bottom: -41px">{{ heroProduct.catUpper }}</div>
-            <div style="font-family: Newsreader,serif; font-weight: 400; font-size: clamp(32px,5.2vw,60px); line-height: 1.05; letter-spacing: -.01em; margin: 0; min-height: 1.9em; display: flex; align-items: flex-end; margin-top: 45px; margin-bottom: 42px; width: 514px; height: 129px">{{ heroProduct.name }}</div>
-            <p style="font-size: clamp(15px,1.5vw,18px); color: #56534c; margin: 16px 0 0; min-height: 3em; margin-top: -41px; margin-bottom: -40px">{{ heroProduct.aromasLabel }}</p>
-            <div style="font-size: clamp(21px,2.4vw,25px); font-weight: 600; color: #232220; margin: 18px 0 26px; margin-bottom: -21px; margin-top: 20px">{{ heroProduct.priceFmt }}</div>
-            
-            <div id="ec-hero-btns" style="display: flex; gap: 12px; flex-wrap: wrap; padding-top: 37px; align-items: center; justify-content: flex-start">
+            <sc-if value="{{ heroHasNav }}" hint-placeholder-val="{{ false }}">
+              <button onClick="{{ heroPrev }}" aria-label="Producto anterior" style="position:absolute;top:50%;left:8px;transform:translateY(-50%);width:32px;height:32px;border-radius:999px;background:rgba(250,249,246,.92);border:1px solid rgba(35,34,32,.1);cursor:pointer;font-size:15px;color:#232220;display:flex;align-items:center;justify-content:center;box-shadow:0 6px 16px -8px rgba(0,0,0,.4);transition:background .2s" style-hover="background:#fff">‹</button>
+              <button onClick="{{ heroNext }}" aria-label="Producto siguiente" style="position:absolute;top:50%;right:8px;transform:translateY(-50%);width:32px;height:32px;border-radius:999px;background:rgba(250,249,246,.92);border:1px solid rgba(35,34,32,.1);cursor:pointer;font-size:15px;color:#232220;display:flex;align-items:center;justify-content:center;box-shadow:0 6px 16px -8px rgba(0,0,0,.4);transition:background .2s" style-hover="background:#fff">›</button>
+            </sc-if>
+          </div><div id="ec-hero-text" style="flex: 1 1 320px; min-width: 0; order: 2; display:flex; flex-direction:column; gap:10px">
+            <div style="font-size: 12px; letter-spacing: .2em; text-transform: uppercase; color: #9a958c">{{ heroProduct.catUpper }}</div>
+            <div style="font-family: Newsreader,serif; font-weight: 400; font-size: clamp(32px,5.2vw,60px); line-height: 1.05; letter-spacing: -.01em; margin: 0">{{ heroProduct.name }}</div>
+            <p style="font-size: clamp(15px,1.5vw,18px); color: #56534c; margin: 0">{{ heroProduct.aromasLabel }}</p>
+            <div style="font-size: clamp(21px,2.4vw,25px); font-weight: 600; color: #232220; margin: 4px 0 0">{{ heroProduct.priceFmt }}</div>
+            <div id="ec-hero-btns" style="display: flex; gap: 12px; flex-wrap: wrap; margin-top: 14px; align-items: center; justify-content: flex-start">
               <button onClick="{{ heroProduct.open }}" style="background:#232220;color:#FAF9F6;border:none;cursor:pointer;border-radius:999px;padding:14px 30px;font-size:15px;letter-spacing:.01em;transition:background .25s,transform .25s" style-hover="background:#3a3833;transform:translateY(-2px)">Ver producto</button>
               <button onClick="{{ heroProduct.openSimilar }}" style="background:transparent;color:#232220;border:1px solid rgba(35,34,32,.2);cursor:pointer;border-radius:999px;padding:14px 28px;font-size:15px;letter-spacing:.01em;transition:background .25s" style-hover="background:rgba(35,34,32,.05)">Ver similares</button>
-            </div><div style="display: flex; gap: 8px; margin-top: 21px; align-items: center; justify-content: flex-start">
+            </div><div style="display: flex; gap: 8px; margin-top: 6px; align-items: center; justify-content: flex-start">
               <sc-for list="{{ heroDots }}" as="d" hint-placeholder-count="5">
                 <button onClick="{{ d.go }}" aria-label="Producto destacado" style="{{ d.style }}"></button>
               </sc-for>
             </div>
           </div>
-          
+
         </div>
       </section><div style="border-top:1px solid rgba(35,34,32,.08);border-bottom:1px solid rgba(35,34,32,.08);background:#F3F1EB">
-        <div style="max-width:1240px;margin:0 auto;padding:18px clamp(20px,5vw,56px);display:flex;flex-wrap:wrap;gap:12px;justify-content:space-around;align-items:center;font-size:13px;letter-spacing:.03em;color:#6a665e;text-align:center">
+        <div id="ec-trust-strip" style="max-width:1240px;margin:0 auto;padding:18px clamp(20px,5vw,56px);display:flex;flex-wrap:wrap;gap:12px;justify-content:space-around;align-items:center;font-size:13px;letter-spacing:.03em;color:#6a665e;text-align:center">
           <span style="flex:1 1 auto">Hecho a mano en Rafaela</span>
           <span style="opacity:.3">·</span>
           <span style="flex:1 1 auto">Materiales nobles</span>
@@ -272,7 +291,7 @@
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#9a958c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="position:absolute;left:16px;top:50%;transform:translateY(-50%);pointer-events:none"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
           <input id="ec-catalog-search" value="{{ searchQuery }}" onChange="{{ onSearchQuery }}" placeholder="Buscar productos…" aria-label="Buscar productos" style="width:100%;border:1px solid rgba(35,34,32,.16);border-radius:999px;padding:13px 16px 13px 44px;font-size:15px;outline:none;background:#fff;transition:border-color .2s" style-focus="border-color:#232220">
         </div>
-        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:clamp(22px,4vw,40px)">
+        <div id="ec-catalog-chips" class="ec-dragscroll" style="display:flex;gap:8px;overflow-x:auto;flex-wrap:nowrap;-webkit-overflow-scrolling:touch;scroll-behavior:smooth;padding-bottom:4px;margin-bottom:clamp(22px,4vw,40px)">
           <sc-for list="{{ chips }}" as="c" hint-placeholder-count="7">
             <button onClick="{{ c.set }}" style="{{ c.style }}">{{ c.label }}</button>
           </sc-for>
@@ -1541,7 +1560,7 @@ class Component extends DCLogic {
       saleEditSeq:null, saleEditItems:[], saleSearch:'', photoModal:null,
       cart:[],
       navMounted:false, navOpen:false,
-      filter:'todos', searchQuery:'', catalogColors:{}, catalogScroll:0, cartBump:0, galleryIndex:0,
+      filter:'todos', searchQuery:'', chipsExpanded:false, catalogColors:{}, catalogScroll:0, cartBump:0, galleryIndex:0,
       prodSearch:'', prodCatFilter:'todas', expanded:{}, catGroupCollapsed:{},
       detailColor:null, detailScent:null, detailQty:1,
       form:{nombre:'',apellido:'',telefono:'',email:'',direccion:''},
@@ -2178,6 +2197,8 @@ class Component extends DCLogic {
   scanSlots(){ try{ const present={}, filledNow={}; document.querySelectorAll('image-slot').forEach(el=>{ if(!el.id) return; present[el.id]=true; if(el.hasAttribute('data-filled')) filledNow[el.id]=true; }); const cur=this.state.filled||{}; const next=Object.assign({},cur); let changed=false; for(const id in present){ const f=!!filledNow[id]; if((!!cur[id])!==f){ if(f) next[id]=true; else delete next[id]; changed=true; } } if(changed) this.setState({filled:next}); }catch(e){} }
   startHero(){ if(this._heroT) clearInterval(this._heroT); this._heroT=setInterval(()=>{ if(this.state.view==='home'){ const n=this.state.products.filter(p=>p.featured).length||this.state.products.length||1; this.setState(s=>({heroIndex:(s.heroIndex+1)%n})); } },8000); }
   setHero(i){ this.setState({heroIndex:i}); this.startHero(); }
+  heroPrev=()=>{ const n=this._heroLen||1; this.setState(s=>({heroIndex:(s.heroIndex-1+n)%n})); this.startHero(); };
+  heroNext=()=>{ const n=this._heroLen||1; this.setState(s=>({heroIndex:(s.heroIndex+1)%n})); this.startHero(); };
 
   goHome=()=>{ this.navigate('/'); this.setState({view:'home',catGroupCollapsed:{},expanded:{},editingProductId:null,productDraft:null}); this.scrollTop(); };
   goCatalog=()=>{ this.navigate('/catalogo'); this.setState({view:'catalog',filter:'todos'}); this.scrollTop(); };
@@ -2216,7 +2237,7 @@ class Component extends DCLogic {
   // cart
   cartCount(){ return this.state.cart.reduce((a,b)=>a+b.qty,0); }
   addToCart(id,color,scent,qty){ const p=this.getProduct(id); const avail=this.stockFor(id,color,scent); if(avail<=0){ this.showToast('Sin stock disponible'); return; } const key=id+'|'+color+'|'+(scent||''); const cart=this.state.cart.slice(); const ex=cart.find(c=>c.key===key); if(ex){ ex.qty=Math.min(avail,ex.qty+qty); } else { cart.push({key,id,color,scent:scent||null,qty:Math.min(avail,qty)}); } this.setState({cart,cartBump:this.state.cartBump+1}); }
-  quickAdd(id){ const p=this.getProduct(id); this.addToCart(id,(p.colors&&p.colors.length?p.colors[0]:null),this.isScented(p)?p.scents[0]:null,1); }
+  quickAdd(id){ const p=this.getProduct(id); const color=this.state.catalogColors[id]||(p.colors&&p.colors.length?p.colors[0]:null); this.addToCart(id,color,this.isScented(p)?p.scents[0]:null,1); }
   setDetailColor(n){ this.setState({detailColor:n,galleryIndex:0}); }
   setDetailScent(n){ this.setState({detailScent:n,detailQty:1}); }
   incDetail=()=>{ const max=this.stockFor(this.state.productId,this.state.detailColor,this.state.detailScent)||0; this.setState({detailQty:Math.min(Math.max(1,max),this.state.detailQty+1)}); };
@@ -2519,7 +2540,7 @@ class Component extends DCLogic {
   };
 
   // styles
-  chipStyle(a){ const b='cursor:pointer;border-radius:999px;padding:9px 18px;font-size:13.5px;letter-spacing:.01em;transition:all .2s;'; return a?b+'background:#232220;color:#FAF9F6;border:1px solid #232220':b+'background:transparent;color:#56534c;border:1px solid rgba(35,34,32,.16)'; }
+  chipStyle(a){ const b='cursor:pointer;border-radius:999px;padding:7px 14px;font-size:12.5px;letter-spacing:.01em;transition:all .2s;flex:0 0 auto;white-space:nowrap;'; return a?b+'background:#232220;color:#FAF9F6;border:1px solid #232220':b+'background:transparent;color:#56534c;border:1px solid rgba(35,34,32,.16)'; }
   scentChipStyle(a){ const b='cursor:pointer;border-radius:999px;padding:8px 16px;font-size:13px;letter-spacing:.01em;transition:all .2s;'; return a?b+'background:#232220;color:#FAF9F6;border:1px solid #232220':b+'background:transparent;color:#56534c;border:1px solid rgba(35,34,32,.16)'; }
   swatchStyle(hex,sel){ return 'width:38px;height:38px;border-radius:999px;cursor:pointer;background:'+hex+';transition:box-shadow .2s;'+(sel?'box-shadow:inset 0 0 0 2px #FAF9F6,0 0 0 2px #232220;':'box-shadow:inset 0 0 0 1px rgba(35,34,32,.14);'); }
   fulCardStyle(a){ const b='display:flex;align-items:center;gap:14px;cursor:pointer;border-radius:14px;padding:16px 18px;transition:all .2s;background:#fff;'; return b+(a?'border:1.5px solid #232220;':'border:1.5px solid rgba(35,34,32,.12);'); }
@@ -2530,7 +2551,7 @@ class Component extends DCLogic {
     const s=this.state;
     this.updateSeo();
     const cartQtyMap={}; s.cart.forEach(c=>{ cartQtyMap[c.id]=(cartQtyMap[c.id]||0)+c.qty; });
-    const dec=p=>{ const scents=this.isScented(p)?p.scents:[]; const stock=this.totalStock(p); const cols=p.colors||[]; const userColor=s.catalogColors[p.id]; const catColor=cols.length?(userColor||cols[0]):null; const fp=userColor?this.firstPhoto(p,userColor):this.featuredPhoto(p); const cq=cartQtyMap[p.id]||0; return {...p,scents,stock,featured:!!p.featured,categoryLabel:this.catLabel(p.category),priceFmt:this.fmt(p.price),slotId:this.mainSlot(p.id),img:this.photoUrlFor(p),catImgSlot:fp.slot,catImgSrc:fp.src,cartQty:cq,inCart:cq>0,soldOut:stock<=0,stockLabel:stock>5?'En stock':(stock>0?('Últimas '+stock+' unidades'):'Sin stock'),stockColor:stock>5?'#6a665e':(stock>0?'#a8742e':'#b3261e'),colorDots:cols.map(n=>({name:n,hex:this.hex(n,p)})),colorBtns:cols.map(n=>({name:n,set:()=>this.setCatColor(p.id,n),style:'width:18px;height:18px;border-radius:999px;cursor:pointer;background:'+this.hex(n,p)+';transition:box-shadow .2s;'+(n===catColor?'box-shadow:inset 0 0 0 2px #fff,0 0 0 2px #232220;':'box-shadow:inset 0 0 0 1px rgba(35,34,32,.18);')}))}; };
+    const dec=p=>{ const scents=this.isScented(p)?p.scents:[]; const stock=this.totalStock(p); const cols=p.colors||[]; const userColor=s.catalogColors[p.id]; const catColor=cols.length?(userColor||cols[0]):null; const catStock=cols.length?this.colorStock(p,catColor):stock; const fp=userColor?this.firstPhoto(p,userColor):this.featuredPhoto(p); const cq=cartQtyMap[p.id]||0; return {...p,scents,stock,featured:!!p.featured,categoryLabel:this.catLabel(p.category),priceFmt:this.fmt(p.price),slotId:this.mainSlot(p.id),img:this.photoUrlFor(p),catImgSlot:fp.slot,catImgSrc:fp.src,cartQty:cq,inCart:cq>0,soldOut:catStock<=0,stockLabel:stock>5?'En stock':(stock>0?('Últimas '+stock+' unidades'):'Sin stock'),stockColor:stock>5?'#6a665e':(stock>0?'#a8742e':'#b3261e'),colorDots:cols.map(n=>({name:n,hex:this.hex(n,p)})),colorBtns:cols.map(n=>({name:n,set:()=>this.setCatColor(p.id,n),style:'width:18px;height:18px;border-radius:999px;cursor:pointer;background:'+this.hex(n,p)+';transition:box-shadow .2s;'+(n===catColor?'box-shadow:inset 0 0 0 2px #fff,0 0 0 2px #232220;':'box-shadow:inset 0 0 0 1px rgba(35,34,32,.18);')}))}; };
     const decoded=s.products.map(dec);
     const byId=id=>decoded.find(p=>p.id===id);
 
@@ -2542,13 +2563,19 @@ class Component extends DCLogic {
     const heroProduct=heroPool[hIdx]||null;
     const heroDots=heroPool.map((p,i)=>({go:()=>this.setHero(i),style:'width:'+(i===hIdx?'26px':'8px')+';height:8px;border-radius:999px;border:none;cursor:pointer;padding:0;transition:all .35s ease;background:'+(i===hIdx?'#232220':'rgba(35,34,32,.22)')}));
     const heroAnim=(s.heroIndex%2===0?'ecCrossA':'ecCrossB')+' .55s ease';
+    const heroHasNav=heroPool.length>1;
 
     const catsSorted=s.categories.slice().sort((a,b)=>(a.sortOrder??0)-(b.sortOrder??0));
-    const categories=catsSorted.map(c=>({id:c.id,label:c.label,slotId:'ec-cat-'+c.id,img:c.photoUrl||this.NO_PHOTO_IMG,open:()=>this.openCatWith(c.id)}));
+    const categories=catsSorted.map(c=>({id:c.id,label:c.label,slotId:'ec-cat-'+c.id,img:c.photoUrl||this.NO_PHOTO_IMG,open:()=>this.openCatWith(c.id),openNav:()=>{ this.closeNav(); this.openCatWith(c.id); }}));
     let catalog=s.filter==='todos'?decoded:decoded.filter(p=>p.category===s.filter);
     const catSq=(s.searchQuery||'').trim().toLowerCase();
     if(catSq) catalog=catalog.filter(p=>p.name.toLowerCase().includes(catSq)||(p.shortDesc||'').toLowerCase().includes(catSq)||this.catLabel(p.category).toLowerCase().includes(catSq));
-    const chips=[{id:'todos',label:'Todo'}].concat(catsSorted.map(c=>({id:c.id,label:c.label}))).map(c=>({id:c.id,label:c.label,style:this.chipStyle(c.id===s.filter),set:()=>this.setFilter(c.id)}));
+    const allChipDefs=[{id:'todos',label:'Todo'}].concat(catsSorted.map(c=>({id:c.id,label:c.label})));
+    const maxChips=8;
+    const chipsShowAll=s.chipsExpanded||allChipDefs.length<=maxChips;
+    const chipDefs=chipsShowAll?allChipDefs:allChipDefs.slice(0,maxChips-1);
+    const chips=chipDefs.map(c=>({id:c.id,label:c.label,style:this.chipStyle(c.id===s.filter),set:()=>this.setFilter(c.id)}));
+    if(!chipsShowAll) chips.push({id:'__more',label:'+'+(allChipDefs.length-chipDefs.length),style:this.chipStyle(false),set:()=>this.setState({chipsExpanded:true})});
     decoded.forEach(p=>{ p.open=()=>this.openProduct(p.id); p.quickAdd=()=>this.quickAdd(p.id); });
 
     // selected product (color photo fallback)
@@ -2692,7 +2719,7 @@ class Component extends DCLogic {
       goHome:this.goHome, goCatalog:this.goCatalog, goAdmin:this.goAdmin, verProceso:this.verProceso, verContacto:this.verContacto,
       openCart:this.openCart, closeCart:this.closeCart, cartCount, cartBumpAnim:(s.cartBump%2===0?'ecBumpA':'ecBumpB')+' .45s ease',
       navMounted:s.navMounted, openNav:this.openNav, closeNav:this.closeNav, navHome:this.navHome, navCatalog:this.navCatalog, navProceso:this.navProceso, navContacto:this.navContacto, goSearch:this.goSearch,
-      heroProduct, heroDots, heroAnim, categories, scrollCatPrev:()=>this.scrollCat(-1), scrollCatNext:()=>this.scrollCat(1),
+      heroProduct, heroDots, heroAnim, heroHasNav, heroPrev:this.heroPrev, heroNext:this.heroNext, categories, navCategories:categories, scrollCatPrev:()=>this.scrollCat(-1), scrollCatNext:()=>this.scrollCat(1),
       catalogProducts:catalog, catalogCount:catalog.length, catalogNoResults:catalog.length===0, searchQuery:s.searchQuery, onSearchQuery:e=>this.setState({searchQuery:e.target.value}), chips, backToCatalog:this.backToCatalog, selectedProduct, detailQty:s.detailQty, incDetail:this.incDetail, decDetail:this.decDetail, addDetail:this.addDetail,
       cartLines:lines, cartEmpty:cartCount===0, cartHasItems:cartCount>0, cartSubtotalFmt:this.fmt(subtotal), cartTotalFmt:this.fmt(total),
       shippingFmt:this.fmt(s.config.shipping||0), shippingLabel:shipping>0?this.fmt(shipping):'Gratis',
