@@ -21,7 +21,7 @@
   ::selection{background:#232220;color:#FAF9F6}
   image-slot{display:block;width:100%;height:100%}
   image-slot::part(image){touch-action:auto}
-  .ec-dragscroll{touch-action:pan-x}
+  .ec-dragscroll{touch-action:pan-x pan-y}
   @keyframes ecFade{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
   @keyframes ecCrossA{from{opacity:0}to{opacity:1}}
   @keyframes ecCrossB{from{opacity:0}to{opacity:1}}
@@ -131,7 +131,7 @@
         
         <div style="display: flex; gap: clamp(24px,5vw,64px); align-items: center; flex-wrap: wrap; position: relative">
           <div style="flex:1 1 320px;min-width:0;order:1;width:100%">
-            <button onClick="{{ heroProduct.open }}" id="ec-hero-imgwrap" style="display:block;width:100%;max-width:440px;margin:0 auto;padding:0;border:none;cursor:pointer;background:none;position:relative;animation:{{ heroAnim }}">
+            <button onClick="{{ heroProduct.open }}" id="ec-hero-imgwrap" class="ec-hero-swipe" style="display:block;width:100%;max-width:440px;margin:0 auto;padding:0;border:none;cursor:pointer;background:none;position:relative;animation:{{ heroAnim }}">
               <div style="aspect-ratio: 4/5; background: #EFEEEA; border-radius: 20px; overflow: hidden; box-shadow: 0 40px 80px -50px rgba(35,34,32,.5); animation: {{ heroAnim }}; width: 100%; height: auto">
                 <image-slot id="{{ heroProduct.slotId }}" src="{{ heroProduct.img }}" shape="rect" placeholder="{{ heroProduct.name }}"></image-slot>
               </div>
@@ -184,7 +184,7 @@
                 <image-slot id="{{ cat.slotId }}" src="{{ cat.img }}" shape="rect" placeholder="{{ cat.label }}"></image-slot>
               </div>
               <div style="padding:14px 16px 16px">
-                <div style="font-family:Newsreader,serif;font-size:19px">{{ cat.label }}</div>
+                <div style="font-family:Newsreader,serif;font-size:19px;color:#232220">{{ cat.label }}</div>
               </div>
             </button>
           </sc-for>
@@ -274,7 +274,7 @@
         <div style="display:flex;gap:clamp(28px,5vw,72px);flex-wrap:wrap;align-items:flex-start">
           <div style="flex:1 1 320px;min-width:0;width:100%">
             <div style="position:relative;max-width:520px">
-              <div class="ec-swipe" style="aspect-ratio:4/5;background:#EFEEEA;border-radius:20px;overflow:hidden;box-shadow:0 40px 80px -54px rgba(35,34,32,.55);cursor:grab;touch-action:pan-y">
+              <div class="ec-swipe" style="aspect-ratio:4/5;background:#EFEEEA;border-radius:20px;overflow:hidden;box-shadow:0 40px 80px -54px rgba(35,34,32,.55);cursor:grab;touch-action:pan-y pinch-zoom">
                 <div style="display:flex;height:100%;transform:{{ selectedProduct.galleryShift }};transition:transform .42s cubic-bezier(.4,0,.2,1)">
                   <sc-for list="{{ selectedProduct.galleryPhotos }}" as="ph" hint-placeholder-count="1">
                     <div style="flex:0 0 100%;height:100%">
@@ -672,16 +672,21 @@
                             </div>
                           </sc-if>
                             </div>
-                            <div style="display:flex;flex-direction:column;gap:5px;align-items:center;flex-shrink:0">
-                              <div style="width:58px;height:72px;border-radius:8px;overflow:hidden;background:#EFEEEA;border:1px solid rgba(35,34,32,.08)">
-                                <image-slot id="{{ v.photoSlot }}" src="{{ v.photoSrc }}" shape="rect" placeholder="" style="pointer-events:none"></image-slot>
-                              </div>
-                              <div style="display:flex;gap:8px">
-                                <label style="background:none;border:none;cursor:pointer;font-size:10.5px;color:#6a665e;padding:0" style-hover="color:#232220">Subir
-                                  <input type="file" accept="image/jpeg,image/png,image/webp" onChange="{{ v.onUploadPhoto }}" style="display:none">
-                                </label>
-                                <button onClick="{{ v.onRemovePhoto }}" style="background:none;border:none;cursor:pointer;font-size:10.5px;color:#b3ada3;padding:0" style-hover="color:#b3261e">Quitar</button>
-                              </div>
+                            <div style="display:flex;gap:8px;flex-wrap:wrap;flex-shrink:0;max-width:200px;justify-content:flex-end">
+                              <sc-for list="{{ v.photos }}" as="ph" hint-placeholder-count="1">
+                                <div style="display:flex;flex-direction:column;gap:4px;align-items:center">
+                                  <div style="width:58px;height:72px;border-radius:8px;overflow:hidden;background:#EFEEEA;border:1px solid rgba(35,34,32,.08)">
+                                    <image-slot id="{{ ph.slotId }}" src="{{ ph.url }}" shape="rect" placeholder="" style="pointer-events:none"></image-slot>
+                                  </div>
+                                  <div style="display:flex;gap:6px">
+                                    <button onClick="{{ ph.onCrop }}" title="Recortar" style="background:none;border:none;cursor:pointer;font-size:10.5px;color:#6a665e;padding:0" style-hover="color:#232220">✂</button>
+                                    <button onClick="{{ ph.onRemove }}" title="Quitar" style="background:none;border:none;cursor:pointer;font-size:10.5px;color:#b3ada3;padding:0" style-hover="color:#b3261e">×</button>
+                                  </div>
+                                </div>
+                              </sc-for>
+                              <label style="width:58px;height:72px;border-radius:8px;border:1.5px dashed rgba(35,34,32,.22);display:flex;align-items:center;justify-content:center;font-size:20px;color:#9a958c;cursor:pointer;flex-shrink:0" style-hover="border-color:#232220;color:#232220">+
+                                <input type="file" accept="image/jpeg,image/png,image/webp" onChange="{{ v.onUploadPhoto }}" style="display:none">
+                              </label>
                             </div>
                           </div>
                         </div>
@@ -730,6 +735,26 @@
               </div>
             </sc-for>
           </div>
+
+          <sc-if value="{{ hasInactiveProducts }}" hint-placeholder-val="{{ false }}">
+          <div style="margin-top:26px">
+            <button onClick="{{ toggleInactiveProducts }}" style="display:flex;align-items:center;gap:10px;width:100%;background:#F1EFEA;border:none;cursor:pointer;border-radius:10px;padding:11px 16px;margin-bottom:10px;text-align:left" style-hover="background:#EAE7DF">
+              <span style="font-size:13px;color:#6a665e;width:14px">{{ inactiveProductsArrow }}</span>
+              <span style="font-family:Newsreader,serif;font-size:17px;color:#232220">Inactivos</span>
+              <span style="font-size:12.5px;color:#9a958c">{{ inactiveProducts.length }} productos</span>
+            </button>
+            <sc-if value="{{ inactiveProductsOpen }}" hint-placeholder-val="{{ false }}">
+              <div style="display:flex;flex-direction:column;gap:8px">
+                <sc-for list="{{ inactiveProducts }}" as="ip" hint-placeholder-count="2">
+                  <div style="display:flex;align-items:center;gap:12px;background:#fff;border:1px solid rgba(35,34,32,.07);border-radius:12px;padding:10px 16px">
+                    <span style="flex:1;font-size:14px;color:#56534c">{{ ip.name }} <span style="color:#a8a298">· {{ ip.sku }}</span></span>
+                    <button onClick="{{ ip.onReactivate }}" style="background:#232220;color:#FAF9F6;border:none;cursor:pointer;border-radius:999px;padding:8px 18px;font-size:13px" style-hover="background:#3a3833">Reactivar</button>
+                  </div>
+                </sc-for>
+              </div>
+            </sc-if>
+          </div>
+          </sc-if>
         </div>
         </sc-if>
 
@@ -772,6 +797,26 @@
               </div>
             </sc-for>
           </div>
+
+          <sc-if value="{{ hasInactiveCategories }}" hint-placeholder-val="{{ false }}">
+          <div style="margin-top:26px">
+            <button onClick="{{ toggleInactiveCategories }}" style="display:flex;align-items:center;gap:10px;width:100%;background:#F1EFEA;border:none;cursor:pointer;border-radius:10px;padding:11px 16px;margin-bottom:10px;text-align:left" style-hover="background:#EAE7DF">
+              <span style="font-size:13px;color:#6a665e;width:14px">{{ inactiveCategoriesArrow }}</span>
+              <span style="font-family:Newsreader,serif;font-size:17px;color:#232220">Inactivas</span>
+              <span style="font-size:12.5px;color:#9a958c">{{ inactiveCategories.length }}</span>
+            </button>
+            <sc-if value="{{ inactiveCategoriesOpen }}" hint-placeholder-val="{{ false }}">
+              <div style="display:flex;flex-direction:column;gap:8px">
+                <sc-for list="{{ inactiveCategories }}" as="ic" hint-placeholder-count="2">
+                  <div style="display:flex;align-items:center;gap:12px;background:#fff;border:1px solid rgba(35,34,32,.07);border-radius:12px;padding:10px 16px">
+                    <span style="flex:1;font-size:14px;color:#56534c">{{ ic.label }}</span>
+                    <button onClick="{{ ic.onReactivate }}" style="background:#232220;color:#FAF9F6;border:none;cursor:pointer;border-radius:999px;padding:8px 18px;font-size:13px" style-hover="background:#3a3833">Reactivar</button>
+                  </div>
+                </sc-for>
+              </div>
+            </sc-if>
+          </div>
+          </sc-if>
         </div>
         </sc-if>
 
@@ -803,6 +848,26 @@
               </sc-for>
             </div>
           </div>
+
+          <sc-if value="{{ hasInactiveAromas }}" hint-placeholder-val="{{ false }}">
+          <div style="margin-top:22px">
+            <button onClick="{{ toggleInactiveAromas }}" style="display:flex;align-items:center;gap:10px;width:100%;background:#F1EFEA;border:none;cursor:pointer;border-radius:10px;padding:11px 16px;margin-bottom:10px;text-align:left" style-hover="background:#EAE7DF">
+              <span style="font-size:13px;color:#6a665e;width:14px">{{ inactiveAromasArrow }}</span>
+              <span style="font-family:Newsreader,serif;font-size:17px;color:#232220">Inactivos</span>
+              <span style="font-size:12.5px;color:#9a958c">{{ inactiveAromasList.length }}</span>
+            </button>
+            <sc-if value="{{ inactiveAromasOpen }}" hint-placeholder-val="{{ false }}">
+              <div style="display:flex;flex-direction:column;gap:8px">
+                <sc-for list="{{ inactiveAromasList }}" as="ia" hint-placeholder-count="2">
+                  <div style="display:flex;align-items:center;gap:12px;background:#fff;border:1px solid rgba(35,34,32,.07);border-radius:12px;padding:10px 16px">
+                    <span style="flex:1;font-size:14px;color:#56534c">{{ ia.name }}</span>
+                    <button onClick="{{ ia.onReactivate }}" style="background:#232220;color:#FAF9F6;border:none;cursor:pointer;border-radius:999px;padding:8px 18px;font-size:13px" style-hover="background:#3a3833">Reactivar</button>
+                  </div>
+                </sc-for>
+              </div>
+            </sc-if>
+          </div>
+          </sc-if>
         </div>
         </sc-if>
 
@@ -1325,6 +1390,35 @@
     </div>
   </sc-if>
 
+  <!-- ===================== EDITOR DE RECORTE ===================== -->
+  <sc-if value="{{ cropModalOpen }}" hint-placeholder-val="{{ false }}">
+    <div style="position:fixed;inset:0;background:rgba(20,19,17,.6);z-index:90;display:flex;align-items:center;justify-content:center;padding:20px;animation:ecOverlayIn .2s ease both">
+      <div style="background:#FAF9F6;border-radius:18px;width:min(480px,100%);padding:24px;animation:ecPop .25s ease both">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+          <h3 style="font-family:Newsreader,serif;font-weight:400;font-size:21px;margin:0">Recortar foto</h3>
+          <button onClick="{{ closeCropEditor }}" style="background:none;border:none;cursor:pointer;font-size:24px;color:#6a665e;line-height:1" style-hover="color:#232220">×</button>
+        </div>
+        <p style="font-size:12.5px;color:#9a958c;margin:0 0 16px">Arrastrá las esquinas para recortar. Arrastrá el centro para mover el recuadro.</p>
+        <div id="ec-crop-imgwrap" style="position:relative;width:100%;aspect-ratio:1/1;background:#111;overflow:hidden;border-radius:10px;margin-bottom:18px;touch-action:none">
+          <img id="ec-crop-img" src="{{ cropUrl }}" crossorigin="anonymous" style="position:absolute;inset:0;width:100%;height:100%;object-fit:contain;pointer-events:none;user-select:none">
+          <div data-crop-move="1" style="position:absolute;border:2px solid #fff;box-shadow:0 0 0 9999px rgba(0,0,0,.5);cursor:move;left:{{ cropRect.left }};top:{{ cropRect.top }};width:{{ cropRect.width }};height:{{ cropRect.height }}">
+            <div data-crop-handle="nw" style="position:absolute;left:-7px;top:-7px;width:18px;height:18px;background:#fff;border-radius:999px;box-shadow:0 1px 4px rgba(0,0,0,.4);cursor:nwse-resize"></div>
+            <div data-crop-handle="ne" style="position:absolute;right:-7px;top:-7px;width:18px;height:18px;background:#fff;border-radius:999px;box-shadow:0 1px 4px rgba(0,0,0,.4);cursor:nesw-resize"></div>
+            <div data-crop-handle="sw" style="position:absolute;left:-7px;bottom:-7px;width:18px;height:18px;background:#fff;border-radius:999px;box-shadow:0 1px 4px rgba(0,0,0,.4);cursor:nesw-resize"></div>
+            <div data-crop-handle="se" style="position:absolute;right:-7px;bottom:-7px;width:18px;height:18px;background:#fff;border-radius:999px;box-shadow:0 1px 4px rgba(0,0,0,.4);cursor:nwse-resize"></div>
+          </div>
+        </div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:flex-end">
+          <sc-if value="{{ cropHasOriginal }}" hint-placeholder-val="{{ false }}">
+            <button onClick="{{ restoreOriginal }}" style="background:transparent;color:#56534c;border:1px solid rgba(35,34,32,.18);cursor:pointer;border-radius:999px;padding:11px 20px;font-size:13.5px" style-hover="background:rgba(35,34,32,.05)">Restaurar original</button>
+          </sc-if>
+          <button onClick="{{ closeCropEditor }}" style="background:transparent;color:#56534c;border:1px solid rgba(35,34,32,.18);cursor:pointer;border-radius:999px;padding:11px 20px;font-size:13.5px" style-hover="background:rgba(35,34,32,.05)">Cancelar</button>
+          <button onClick="{{ applyCrop }}" style="background:#232220;color:#FAF9F6;border:none;cursor:pointer;border-radius:999px;padding:11px 24px;font-size:13.5px" style-hover="background:#3a3833">Aplicar recorte</button>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
   <!-- ===================== CONFIRM MODAL ===================== -->
   <sc-if value="{{ confirmOpen }}" hint-placeholder-val="{{ false }}">
     <div onClick="{{ confirmNo }}" style="position:fixed;inset:0;background:rgba(20,19,17,.5);z-index:90;display:flex;align-items:center;justify-content:center;padding:20px;animation:ecOverlayIn .2s ease both">
@@ -1371,7 +1465,9 @@ class Component extends DCLogic {
       form:{nombre:'',apellido:'',telefono:'',email:'',direccion:''},
       fulfillment:'retiro', payment:'transferencia',
       heroIndex:0,
-      stockEditId:null, aromaSearch:'',
+      stockEditId:null, aromaSearch:'', cropModal:null,
+      inactiveProducts:[], inactiveCategories:[], inactiveAromas:[],
+      inactiveProductsOpen:false, inactiveCategoriesOpen:false, inactiveAromasOpen:false,
       editingProductId:null, productDraft:null, draftColorInput:'', draftColorHex:'#B6B1A8',
       prodAdding:false, newProduct:this.emptyNP(), newProductPhoto:null,
       catAdding:false, newCat:{label:''},
@@ -1422,6 +1518,14 @@ class Component extends DCLogic {
   // Display resolution: real photo, else the "Sin imagen" placeholder — always non-empty, safe to use as <image-slot src>.
   photoUrlFor(p,color){ return this.realPhotoUrl(p,color)||this.NO_PHOTO_IMG; }
   photoSeedSrc(p,sid,color){ return (sid===this.photoBase(p.id,color))?this.realPhotoUrl(p,color):''; }
+  // All photos for a color (falls back to the general/no-color bucket if that color has none of its own).
+  photosFor(p,color){
+    const own=(p.photos||[]).filter(ph=>color?ph.color_name===color:!ph.color_name);
+    if(own.length) return own;
+    if(color){ const general=(p.photos||[]).filter(ph=>!ph.color_name); if(general.length) return general; }
+    if(!color&&this.PHOTO_IDS.has(p.id)) return [{id:'seed',url:'uploads/products/'+p.id+'.jpg'}];
+    return [];
+  }
   filledPhotos(p,color){ return this.photoSlotIds(p,color).filter(sid=>this.isFilled(sid, !!this.photoSeedSrc(p,sid,color))); }
   firstPhoto(p,color){ return {slot:this.mainSlot(p.id), src:this.photoUrlFor(p,color)}; }
   salesUnits(id){ let n=0; this.state.sales.forEach(s=>{ if(s.cancelled) return; s.items.forEach(i=>{ if(i.id===id) n+=i.qty; }); }); return n; }
@@ -1632,6 +1736,49 @@ class Component extends DCLogic {
     await this.loadCatalog();
     this.showToast('Foto eliminada');
   }
+  async removeStoragePhotoById(photoId){
+    const { data,error:selErr } = await supabaseClient.from('product_photos').select('url').eq('id',photoId).single();
+    if(selErr){ this.showToast('Error: '+selErr.message); return; }
+    await supabaseClient.from('product_photos').delete().eq('id',photoId);
+    const path=this.storagePathFromUrl(data.url);
+    if(path) await supabaseClient.storage.from('product-photos').remove([path]);
+    await this.loadCatalog();
+    this.showToast('Foto eliminada');
+  }
+  // ---- editor de recorte ----
+  openCropEditor(photo){ this.setState({cropModal:{photoId:photo.id,url:photo.url,originalUrl:photo.original_url||null,rect:{x:10,y:10,w:80,h:80}}}); }
+  closeCropEditor=()=>this.setState({cropModal:null});
+  applyCrop=async()=>{
+    const cm=this.state.cropModal; if(!cm) return;
+    const img=document.getElementById('ec-crop-img'); if(!img||!img.naturalWidth){ this.showToast('La imagen todavía no cargó'); return; }
+    const nw=img.naturalWidth, nh=img.naturalHeight;
+    const sx=Math.round(cm.rect.x/100*nw), sy=Math.round(cm.rect.y/100*nh);
+    const sw=Math.max(1,Math.round(cm.rect.w/100*nw)), sh=Math.max(1,Math.round(cm.rect.h/100*nh));
+    const canvas=document.createElement('canvas'); canvas.width=sw; canvas.height=sh;
+    const ctx=canvas.getContext('2d');
+    try{ ctx.drawImage(img,sx,sy,sw,sh,0,0,sw,sh); }catch(e){ this.showToast('No se pudo procesar la imagen'); return; }
+    canvas.toBlob(async(blob)=>{
+      if(!blob){ this.showToast('No se pudo procesar la imagen'); return; }
+      const path='crops/'+cm.photoId+'-'+Date.now()+'.jpg';
+      const { error:upErr } = await supabaseClient.storage.from('product-photos').upload(path,blob,{cacheControl:'3600',contentType:'image/jpeg'});
+      if(upErr){ this.showToast('Error al subir el recorte: '+upErr.message); return; }
+      const { data:pub } = supabaseClient.storage.from('product-photos').getPublicUrl(path);
+      const patch={url:pub.publicUrl}; if(!cm.originalUrl) patch.original_url=cm.url;
+      const { error:updErr } = await supabaseClient.from('product_photos').update(patch).eq('id',cm.photoId);
+      if(updErr){ this.showToast('Error al guardar: '+updErr.message); return; }
+      this.setState({cropModal:null});
+      await this.loadCatalog();
+      this.showToast('Recorte aplicado');
+    },'image/jpeg',0.9);
+  };
+  restoreOriginal=async()=>{
+    const cm=this.state.cropModal; if(!cm||!cm.originalUrl) return;
+    const { error } = await supabaseClient.from('product_photos').update({url:cm.originalUrl}).eq('id',cm.photoId);
+    if(error){ this.showToast('Error: '+error.message); return; }
+    this.setState({cropModal:null});
+    await this.loadCatalog();
+    this.showToast('Foto restaurada al original');
+  };
   async uploadCategoryPhoto(catId,file){
     const okTypes=['image/jpeg','image/jpg','image/png','image/webp'];
     if(!file||okTypes.indexOf(file.type)<0){ this.showToast('Formato no permitido. Usá JPG, PNG o WEBP'); return; }
@@ -1658,7 +1805,7 @@ class Component extends DCLogic {
   // ============================================================
   // CICLO DE VIDA
   // ============================================================
-  componentDidMount(){ this.startHero(); this.loadFilled(); this.scanSlots(); this._scanT=setInterval(()=>this.scanSlots(),1200); this.setupGestures(); this.loadCatalog(); this.initAuth(); this.loadSiteContent();
+  componentDidMount(){ this.startHero(); this.loadFilled(); this.scanSlots(); this._scanT=setInterval(()=>this.scanSlots(),1200); this.setupGestures(); this.setupCropGestures(); this.loadCatalog(); this.initAuth(); this.loadSiteContent();
     this._hashHandler=()=>{ if(location.hash==='#admin') this.setState({view:'admin'}); };
     window.addEventListener('hashchange',this._hashHandler);
   }
@@ -1676,7 +1823,7 @@ class Component extends DCLogic {
     const { data,error } = await supabaseClient.from('profiles').select('role').eq('id',session.user.id).single();
     const role=error?null:(data&&data.role);
     this.setState({authUser:session.user,authRole:role,authChecked:true});
-    if(role==='admin') this.loadSales();
+    if(role==='admin'){ this.loadSales(); this.loadInactive(); }
   }
   async loadSales(){
     const { data,error } = await supabaseClient.from('sales')
@@ -1692,6 +1839,18 @@ class Component extends DCLogic {
       address:row.address||'', notes:row.notes||'', seen:row.seen
     }));
     this.setState({sales});
+  }
+  async loadInactive(){
+    const [pQ,cQ,aQ]=await Promise.all([
+      supabaseClient.from('products').select('id,sku,name,category_id').eq('active',false),
+      supabaseClient.from('categories').select('id,label').eq('active',false),
+      supabaseClient.from('aromas').select('name').eq('active',false)
+    ]);
+    this.setState({
+      inactiveProducts:pQ.error?[]:pQ.data,
+      inactiveCategories:cQ.error?[]:cQ.data,
+      inactiveAromas:aQ.error?[]:aQ.data.map(a=>a.name)
+    });
   }
   onAuthEmail=e=>this.setState({authEmail:e.target.value,authError:''});
   onAuthPassword=e=>this.setState({authPassword:e.target.value,authError:''});
@@ -1738,13 +1897,13 @@ class Component extends DCLogic {
   async loadCatalog(){
     try{
       const [catsQ,prodQ,colorsQ,aromasQ,prodAromasQ,stockQ,photosQ]=await Promise.all([
-        supabaseClient.from('categories').select('id,label,has_aroma,photo_url,sort_order').order('sort_order'),
+        supabaseClient.from('categories').select('id,label,photo_url,sort_order').eq('active',true).order('sort_order'),
         supabaseClient.from('products').select('id,category_id,sku,name,short_desc,long_desc,price,featured,featured_order').eq('active',true),
         supabaseClient.from('product_colors').select('product_id,color_name,hex_value,sort_order').order('sort_order'),
-        supabaseClient.from('aromas').select('name'),
+        supabaseClient.from('aromas').select('name').eq('active',true),
         supabaseClient.from('product_aromas').select('product_id,aroma_name,sort_order').order('sort_order'),
         supabaseClient.from('stock').select('product_id,color_name,aroma_name,quantity'),
-        supabaseClient.from('product_photos').select('id,product_id,color_name,url,sort_order').order('sort_order')
+        supabaseClient.from('product_photos').select('id,product_id,color_name,url,original_url,sort_order').order('sort_order')
       ]);
       const err=[catsQ,prodQ,colorsQ,aromasQ,prodAromasQ,stockQ,photosQ].map(r=>r.error).find(Boolean);
       if(err){ console.error('Supabase loadCatalog error',err); this.showToast('No se pudo cargar el catálogo'); return; }
@@ -1775,15 +1934,53 @@ class Component extends DCLogic {
     const down=e=>{ if(e.pointerType==='touch') return; const t=e.target.closest&&e.target.closest('.ec-dragscroll'); if(!t) return; el=t; startX=e.clientX; startScroll=t.scrollLeft; dragging=true; moved=false; el.style.cursor='grabbing'; };
     const move=e=>{ if(!dragging||!el) return; const dx=e.clientX-startX; if(Math.abs(dx)>4) moved=true; el.scrollLeft=startScroll-dx; };
     const up=()=>{ if(dragging&&el) el.style.cursor=''; if(dragging&&moved){ const blk=ev=>{ ev.stopPropagation(); ev.preventDefault(); window.removeEventListener('click',blk,true); }; window.addEventListener('click',blk,true); setTimeout(()=>window.removeEventListener('click',blk,true),60); } dragging=false; el=null; };
-    // swipe (gallery)
-    let sx=0,sy=0,swActive=false;
-    const sdown=e=>{ const t=e.target.closest&&e.target.closest('.ec-swipe'); if(!t) return; sx=e.clientX; sy=e.clientY; swActive=true; };
-    const sup=e=>{ if(!swActive) return; swActive=false; const dx=e.clientX-sx, dy=e.clientY-sy; if(Math.abs(dx)>40&&Math.abs(dx)>Math.abs(dy)&&this._galLen>1){ this.galleryStep(dx<0?1:-1,this._galLen); } };
+    // swipe (product gallery + hero carousel)
+    let sx=0,sy=0,swActive=false,swKind=null;
+    const sdown=e=>{ const g=e.target.closest&&e.target.closest('.ec-swipe'); const h=e.target.closest&&e.target.closest('.ec-hero-swipe'); if(!g&&!h) return; sx=e.clientX; sy=e.clientY; swActive=true; swKind=g?'gallery':'hero'; };
+    const sup=e=>{ if(!swActive) return; swActive=false; const dx=e.clientX-sx, dy=e.clientY-sy; if(Math.abs(dx)<=40||Math.abs(dx)<=Math.abs(dy)) return;
+      if(swKind==='gallery'&&this._galLen>1) this.galleryStep(dx<0?1:-1,this._galLen);
+      else if(swKind==='hero'&&this._heroLen>1){ const n=this._heroLen; this.setState(s=>({heroIndex:((s.heroIndex+(dx<0?1:-1))%n+n)%n})); this.startHero(); }
+    };
     this._gd=e=>{ down(e); sdown(e); }; this._gm=move; this._gu=e=>{ up(e); sup(e); };
     document.addEventListener('pointerdown',this._gd); document.addEventListener('pointermove',this._gm); document.addEventListener('pointerup',this._gu); document.addEventListener('pointercancel',this._gu);
   }
   loadFilled(){ try{ fetch('.image-slots.state.json',{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{ if(j&&typeof j==='object'){ const f={...this.state.filled}; let ch=false; for(const id in j){ const v=j[id]; const has=v&&(typeof v==='string'?v:(v.u)); if(has&&!f[id]){ f[id]=true; ch=true; } } if(ch) this.setState({filled:f}); } }).catch(()=>{}); }catch(e){} }
-  componentWillUnmount(){ [this._heroT,this._scanT].forEach(t=>t&&clearInterval(t)); [this._toastT,this._closeT,this._navT].forEach(t=>t&&clearTimeout(t)); if(this._gd){ document.removeEventListener('pointerdown',this._gd); document.removeEventListener('pointermove',this._gm); document.removeEventListener('pointerup',this._gu); document.removeEventListener('pointercancel',this._gu); } if(this._hashHandler) window.removeEventListener('hashchange',this._hashHandler); }
+  componentWillUnmount(){ [this._heroT,this._scanT].forEach(t=>t&&clearInterval(t)); [this._toastT,this._closeT,this._navT].forEach(t=>t&&clearTimeout(t)); if(this._gd){ document.removeEventListener('pointerdown',this._gd); document.removeEventListener('pointermove',this._gm); document.removeEventListener('pointerup',this._gu); document.removeEventListener('pointercancel',this._gu); } if(this._hashHandler) window.removeEventListener('hashchange',this._hashHandler); if(this._cropD){ document.removeEventListener('pointerdown',this._cropD); document.removeEventListener('pointermove',this._cropM); document.removeEventListener('pointerup',this._cropU); document.removeEventListener('pointercancel',this._cropU); } }
+  setupCropGestures(){
+    let mode=null,startX=0,startY=0,rect0=null,cw=0,ch=0;
+    const down=e=>{
+      if(!this.state.cropModal) return;
+      const handle=e.target.closest&&e.target.closest('[data-crop-handle]');
+      const mover=e.target.closest&&e.target.closest('[data-crop-move]');
+      if(!handle&&!mover) return;
+      e.preventDefault(); e.stopPropagation();
+      const wrap=document.getElementById('ec-crop-imgwrap'); if(!wrap) return;
+      cw=wrap.clientWidth; ch=wrap.clientHeight;
+      mode=handle?handle.getAttribute('data-crop-handle'):'move';
+      startX=e.clientX; startY=e.clientY; rect0={...this.state.cropModal.rect};
+    };
+    const move=e=>{
+      if(!mode) return;
+      const dxPct=(e.clientX-startX)/cw*100, dyPct=(e.clientY-startY)/ch*100;
+      let {x,y,w,h}=rect0;
+      if(mode==='move'){ x=rect0.x+dxPct; y=rect0.y+dyPct; }
+      else{
+        if(mode.indexOf('w')>=0){ x=rect0.x+dxPct; w=rect0.w-dxPct; }
+        if(mode.indexOf('e')>=0){ w=rect0.w+dxPct; }
+        if(mode.indexOf('n')>=0){ y=rect0.y+dyPct; h=rect0.h-dyPct; }
+        if(mode.indexOf('s')>=0){ h=rect0.h+dyPct; }
+      }
+      x=Math.max(0,Math.min(100,x)); y=Math.max(0,Math.min(100,y));
+      w=Math.max(8,Math.min(100-x,w)); h=Math.max(8,Math.min(100-y,h));
+      this.setState({cropModal:{...this.state.cropModal,rect:{x,y,w,h}}});
+    };
+    const up=()=>{ mode=null; };
+    this._cropD=down; this._cropM=move; this._cropU=up;
+    document.addEventListener('pointerdown',this._cropD);
+    document.addEventListener('pointermove',this._cropM);
+    document.addEventListener('pointerup',this._cropU);
+    document.addEventListener('pointercancel',this._cropU);
+  }
   scanSlots(){ try{ const present={}, filledNow={}; document.querySelectorAll('image-slot').forEach(el=>{ if(!el.id) return; present[el.id]=true; if(el.hasAttribute('data-filled')) filledNow[el.id]=true; }); const cur=this.state.filled||{}; const next=Object.assign({},cur); let changed=false; for(const id in present){ const f=!!filledNow[id]; if((!!cur[id])!==f){ if(f) next[id]=true; else delete next[id]; changed=true; } } if(changed) this.setState({filled:next}); }catch(e){} }
   startHero(){ if(this._heroT) clearInterval(this._heroT); this._heroT=setInterval(()=>{ if(this.state.view==='home'){ const n=this.state.products.filter(p=>p.featured).length||this.state.products.length||1; this.setState(s=>({heroIndex:(s.heroIndex+1)%n})); } },8000); }
   setHero(i){ this.setState({heroIndex:i}); this.startHero(); }
@@ -1929,7 +2126,8 @@ class Component extends DCLogic {
     await this.loadCatalog();
     this.showToast(name+' · creado');
   };
-  deleteProduct(id){ const p=this.getProduct(id); this.askConfirm({title:'Eliminar producto',message:'¿Seguro que querés eliminar "'+(p?p.name:'')+'"? Esta acción no se puede deshacer.',yesLabel:'Eliminar',danger:true,onYes:async()=>{ const { error } = await supabaseClient.from('products').delete().eq('id',id); if(error){ this.showToast('Error al eliminar: '+error.message); return; } this.setState({products:this.state.products.filter(x=>x.id!==id),cart:this.state.cart.filter(c=>c.id!==id)}); this.showToast('Producto eliminado'); }}); }
+  deleteProduct(id){ const p=this.getProduct(id); this.askConfirm({title:'Desactivar producto',message:'¿Desactivar "'+(p?p.name:'')+'"? Deja de verse en la tienda, pero podés reactivarlo después desde "Inactivos".',yesLabel:'Desactivar',danger:true,onYes:async()=>{ const { error } = await supabaseClient.from('products').update({active:false}).eq('id',id); if(error){ this.showToast('Error: '+error.message); return; } this.setState({products:this.state.products.filter(x=>x.id!==id),cart:this.state.cart.filter(c=>c.id!==id)}); await this.loadInactive(); this.showToast('Producto desactivado'); }}); }
+  reactivateProduct=async(id)=>{ const { error } = await supabaseClient.from('products').update({active:true}).eq('id',id); if(error){ this.showToast('Error: '+error.message); return; } await this.loadCatalog(); await this.loadInactive(); this.showToast('Producto reactivado'); };
   toggleStockEdit(id){ this.setState({stockEditId:this.state.stockEditId===id?null:id}); }
   onAromaSearch=e=>this.setState({aromaSearch:e.target.value});
 
@@ -1949,7 +2147,8 @@ class Component extends DCLogic {
     await supabaseClient.from('categories').update({sort_order:posA}).eq('id',b.id);
   };
   setCatLabel(id,v){ this.setState({categories:this.state.categories.map(c=>c.id===id?{...c,label:v}:c)}); this.debounce('catlabel:'+id,()=>supabaseClient.from('categories').update({label:v}).eq('id',id)); }
-  deleteCategory(id){ const c=this.getCat(id); const n=this.state.products.filter(p=>p.category===id).length; if(n>0){ this.showToast('No se puede: hay '+n+' productos en esa categoría'); return; } this.askConfirm({title:'Eliminar categoría',message:'¿Eliminar la categoría "'+(c?c.label:'')+'"?',yesLabel:'Eliminar',danger:true,onYes:async()=>{ const { error } = await supabaseClient.from('categories').delete().eq('id',id); if(error){ this.showToast('No se pudo eliminar: '+error.message); return; } this.setState({categories:this.state.categories.filter(x=>x.id!==id)}); this.showToast('Categoría eliminada'); }}); }
+  deleteCategory(id){ const c=this.getCat(id); this.askConfirm({title:'Desactivar categoría',message:'¿Desactivar "'+(c?c.label:'')+'"? Los productos que la usan la mantienen; podés reactivarla después desde "Inactivas".',yesLabel:'Desactivar',danger:true,onYes:async()=>{ const { error } = await supabaseClient.from('categories').update({active:false}).eq('id',id); if(error){ this.showToast('Error: '+error.message); return; } this.setState({categories:this.state.categories.filter(x=>x.id!==id)}); await this.loadInactive(); this.showToast('Categoría desactivada'); }}); }
+  reactivateCategory=async(id)=>{ const { error } = await supabaseClient.from('categories').update({active:true}).eq('id',id); if(error){ this.showToast('Error: '+error.message); return; } await this.loadCatalog(); await this.loadInactive(); this.showToast('Categoría reactivada'); };
 
   // ============================================================
   // AROMAS (catálogo)
@@ -1960,7 +2159,11 @@ class Component extends DCLogic {
   cancelAromaEdit(name){ const edits={...this.state.aromaEdits}; delete edits[name]; this.setState({aromaEditName:null,aromaEdits:edits}); }
   setAromaEdit(name,v){ this.setState({aromaEdits:{...this.state.aromaEdits,[name]:v}}); }
   saveAromaName=async(oldName)=>{ const v=(this.state.aromaEdits[oldName]!=null?this.state.aromaEdits[oldName]:oldName).trim(); const edits={...this.state.aromaEdits}; delete edits[oldName]; if(!v||v===oldName){ this.setState({aromaEdits:edits,aromaEditName:null}); return; } if(this.state.aromas.some(a=>a.toLowerCase()===v.toLowerCase())){ this.showToast('Ese aroma ya existe'); return; } const { error } = await supabaseClient.from('aromas').update({name:v}).eq('name',oldName); if(error){ this.showToast('Error al renombrar: '+error.message); return; } await supabaseClient.from('stock').update({aroma_name:v}).eq('aroma_name',oldName); await this.loadCatalog(); this.setState(s=>({aromas:s.aromas.map(a=>a===v?v:a),aromaEdits:edits,aromaEditName:null})); this.showToast('Aroma actualizado'); };
-  deleteAroma(name){ const used=this.state.products.filter(p=>(p.scents||[]).indexOf(name)>=0); if(used.length>0){ this.showToast('No se puede eliminar: está en '+used.length+' producto(s)'); return; } this.askConfirm({title:'Eliminar aroma',message:'¿Eliminar este aroma del catálogo?',yesLabel:'Eliminar',danger:true,onYes:async()=>{ const { error } = await supabaseClient.from('aromas').delete().eq('name',name); if(error){ this.showToast('No se pudo eliminar: '+error.message); return; } this.setState({aromas:this.state.aromas.filter(a=>a!==name)}); this.showToast('Aroma eliminado'); }}); }
+  deleteAroma(name){ this.askConfirm({title:'Desactivar aroma',message:'¿Desactivar "'+name+'"? Los productos que ya lo usan lo mantienen; podés reactivarlo después desde "Inactivos".',yesLabel:'Desactivar',danger:true,onYes:async()=>{ const { error } = await supabaseClient.from('aromas').update({active:false}).eq('name',name); if(error){ this.showToast('Error: '+error.message); return; } this.setState({aromas:this.state.aromas.filter(a=>a!==name)}); await this.loadInactive(); this.showToast('Aroma desactivado'); }}); }
+  reactivateAroma=async(name)=>{ const { error } = await supabaseClient.from('aromas').update({active:true}).eq('name',name); if(error){ this.showToast('Error: '+error.message); return; } await this.loadCatalog(); await this.loadInactive(); this.showToast('Aroma reactivado'); };
+  toggleInactiveProducts=()=>this.setState({inactiveProductsOpen:!this.state.inactiveProductsOpen});
+  toggleInactiveCategories=()=>this.setState({inactiveCategoriesOpen:!this.state.inactiveCategoriesOpen});
+  toggleInactiveAromas=()=>this.setState({inactiveAromasOpen:!this.state.inactiveAromasOpen});
 
   // config
   setCfg(patch){ this.setState({config:{...this.state.config,...patch}}); }
@@ -2135,6 +2338,7 @@ class Component extends DCLogic {
     // hero (featured products in chosen order)
     const orderedFeatured=decoded.filter(p=>p.featured).sort((a,b)=>(a.featuredPos??1e9)-(b.featuredPos??1e9));
     const heroPool=(orderedFeatured.length?orderedFeatured:decoded).map(hp=>{ const aromasTxt=hp.scents.length?hp.scents.join(' · '):(hp.colors||[]).join(' · '); return {name:hp.name,aromasLabel:hp.scents.length?('Aromas: '+aromasTxt):hp.shortDesc,catUpper:(this.catLabel(hp.category)||'').toUpperCase(),priceFmt:hp.priceFmt,slotId:hp.slotId,img:hp.img,open:()=>this.openProduct(hp.id),openSimilar:()=>this.openCatWith(hp.category)}; });
+    this._heroLen=heroPool.length;
     const hIdx=heroPool.length?(s.heroIndex%heroPool.length):0;
     const heroProduct=heroPool[hIdx]||null;
     const heroDots=heroPool.map((p,i)=>({go:()=>this.setHero(i),style:'width:'+(i===hIdx?'26px':'8px')+';height:8px;border-radius:999px;border:none;cursor:pointer;padding:0;transition:all .35s ease;background:'+(i===hIdx?'#232220':'rgba(35,34,32,.22)')}));
@@ -2148,7 +2352,7 @@ class Component extends DCLogic {
 
     // selected product (color photo fallback)
     let selectedProduct=null;
-    if(s.productId){ const base=byId(s.productId); if(base){ const hasColors=base.colors.length>0; const col=hasColors?(s.detailColor||base.colors[0]):null; const hasScents=base.scents.length>0; const sc=hasScents?(s.detailScent||base.scents[0]):null; const selStock=this.stockFor(base.id,col,sc); const photos=[{slot:this.mainSlot(base.id),src:this.photoUrlFor(base,col)}]; const gi=0; const cur=photos[0]; this._galLen=1; selectedProduct={...base,selColor:col,selScent:sc,hasScents,hasColors,gallerySlot:cur.slot,gallerySrc:cur.src,galleryPhotos:photos,galleryShift:'translateX(0%)',galleryHasNav:false,galleryDots:[],galleryPrev:()=>{},galleryNext:()=>{},stockLabel:selStock>5?'En stock':(selStock>0?('Últimas '+selStock+' unidades'):'Sin stock'),stockColor:selStock>5?'#6a665e':(selStock>0?'#a8742e':'#b3261e'),addLabel:selStock<=0?'Sin stock':'Agregar al carrito',colorOptions:base.colors.map(n=>{ const cstk=this.colorStock(base,n); return {name:n,hex:this.hex(n,base),cstk,style:this.swatchStyle(this.hex(n,base),n===col)+(cstk<=0?'opacity:.4;':''),set:()=>this.setDetailColor(n)}; }).sort((a,b)=>(a.cstk<=0?1:0)-(b.cstk<=0?1:0)),scentOptions:base.scents.map(n=>{ const st=this.stockFor(base.id,col,n); return {name:n,st,label:st>0?n:(n+' · sin stock'),style:this.scentChipStyle(n===sc)+(st<=0?'opacity:.45;':''),set:()=>this.setDetailScent(n)}; }).sort((a,b)=>(a.st<=0?1:0)-(b.st<=0?1:0))}; } }
+    if(s.productId){ const base=byId(s.productId); if(base){ const hasColors=base.colors.length>0; const col=hasColors?(s.detailColor||base.colors[0]):null; const hasScents=base.scents.length>0; const sc=hasScents?(s.detailScent||base.scents[0]):null; const selStock=this.stockFor(base.id,col,sc); const rawPhotos=this.photosFor(base,col); const photos=(rawPhotos.length?rawPhotos:[{id:'placeholder',url:this.NO_PHOTO_IMG}]).map(ph=>({slot:'ec-photo-'+ph.id,src:ph.url})); const gi=Math.min(Math.max(0,s.galleryIndex),photos.length-1); const cur=photos[gi]; this._galLen=photos.length; selectedProduct={...base,selColor:col,selScent:sc,hasScents,hasColors,gallerySlot:cur.slot,gallerySrc:cur.src,galleryPhotos:photos,galleryShift:'translateX(-'+(gi*100)+'%)',galleryHasNav:photos.length>1,galleryDots:photos.map((_,i)=>({style:'width:'+(i===gi?'22px':'7px')+';height:7px;border-radius:999px;border:none;cursor:pointer;padding:0;transition:all .3s ease;background:'+(i===gi?'#232220':'rgba(35,34,32,.25)'),go:()=>this.setGallery(i)})),galleryPrev:()=>this.galleryStep(-1,photos.length),galleryNext:()=>this.galleryStep(1,photos.length),stockLabel:selStock>5?'En stock':(selStock>0?('Últimas '+selStock+' unidades'):'Sin stock'),stockColor:selStock>5?'#6a665e':(selStock>0?'#a8742e':'#b3261e'),addLabel:selStock<=0?'Sin stock':'Agregar al carrito',colorOptions:base.colors.map(n=>{ const cstk=this.colorStock(base,n); return {name:n,hex:this.hex(n,base),cstk,style:this.swatchStyle(this.hex(n,base),n===col)+(cstk<=0?'opacity:.4;':''),set:()=>this.setDetailColor(n)}; }).sort((a,b)=>(a.cstk<=0?1:0)-(b.cstk<=0?1:0)),scentOptions:base.scents.map(n=>{ const st=this.stockFor(base.id,col,n); return {name:n,st,label:st>0?n:(n+' · sin stock'),style:this.scentChipStyle(n===sc)+(st<=0?'opacity:.45;':''),set:()=>this.setDetailScent(n)}; }).sort((a,b)=>(a.st<=0?1:0)-(b.st<=0?1:0))}; } }
 
     const lines=this.buildLines();
     const cartCount=this.cartCount();
@@ -2196,7 +2400,7 @@ class Component extends DCLogic {
           colorTotal:isEditing?draftColorTotal(vCstock,color||'',vScented):this.colorStock(p,color||''),
           canRemove:!!color&&vColorKeys.length>1, onRename:e=>this.renameDraftColor(ci,e.target.value), onHex:e=>this.setDraftColorHex(ci,e.target.value), onRemove:()=>this.removeDraftColor(ci),
           onMinus:()=>this.draftAdjustVariant(color||'',null,-1), onPlus:()=>this.draftAdjustVariant(color||'',null,1), onInput:e=>this.draftSetVariant(color||'',null,e.target.value),
-          photoSlot:this.photoBase(p.id,color), photoSrc:this.photoUrlFor(p,color),
+          photos:(p.photos||[]).filter(ph=>color?ph.color_name===color:!ph.color_name).map(ph=>({id:ph.id,slotId:'ec-vph-'+ph.id,url:ph.url,onRemove:()=>this.removeStoragePhotoById(ph.id),onCrop:()=>this.openCropEditor(ph)})),
           onUploadPhoto:e=>{ const f=e.target.files&&e.target.files[0]; if(f) this.uploadProductPhoto(p.id,color,f); e.target.value=''; },
           onRemovePhoto:()=>this.removeStoragePhoto(p.id,color),
           scentRows:(vScented?vScents:[]).map(sc=>({name:sc,qty:(vCstock[color||'']&&vCstock[color||''][sc])||0,onMinus:()=>this.draftAdjustVariant(color||'',sc,-1),onPlus:()=>this.draftAdjustVariant(color||'',sc,1),onInput:e=>this.draftSetVariant(color||'',sc,e.target.value)})) }; }),
@@ -2322,6 +2526,15 @@ class Component extends DCLogic {
       npAromaChips:s.newProduct.aromasList.map((a,i)=>({name:a,onRemove:()=>this.removeNPAroma(i)})),
       onNPPhoto:this.onNPPhoto,
       aromaSearch:s.aromaSearch||'', onAromaSearch:this.onAromaSearch,
+      hasInactiveProducts:s.inactiveProducts.length>0, inactiveProductsOpen:s.inactiveProductsOpen, inactiveProductsArrow:s.inactiveProductsOpen?'▾':'▸', toggleInactiveProducts:this.toggleInactiveProducts,
+      inactiveProducts:s.inactiveProducts.map(p=>({name:p.name,sku:p.sku||'sin SKU',onReactivate:()=>this.reactivateProduct(p.id)})),
+      hasInactiveCategories:s.inactiveCategories.length>0, inactiveCategoriesOpen:s.inactiveCategoriesOpen, inactiveCategoriesArrow:s.inactiveCategoriesOpen?'▾':'▸', toggleInactiveCategories:this.toggleInactiveCategories,
+      inactiveCategories:s.inactiveCategories.map(c=>({label:c.label,onReactivate:()=>this.reactivateCategory(c.id)})),
+      hasInactiveAromas:s.inactiveAromas.length>0, inactiveAromasOpen:s.inactiveAromasOpen, inactiveAromasArrow:s.inactiveAromasOpen?'▾':'▸', toggleInactiveAromas:this.toggleInactiveAromas,
+      inactiveAromasList:s.inactiveAromas.map(name=>({name,onReactivate:()=>this.reactivateAroma(name)})),
+      cropModalOpen:!!s.cropModal, cropUrl:s.cropModal?s.cropModal.url:'', cropHasOriginal:!!(s.cropModal&&s.cropModal.originalUrl),
+      cropRect:s.cropModal?{left:s.cropModal.rect.x+'%',top:s.cropModal.rect.y+'%',width:s.cropModal.rect.w+'%',height:s.cropModal.rect.h+'%'}:{left:'0%',top:'0%',width:'0%',height:'0%'},
+      closeCropEditor:this.closeCropEditor, applyCrop:this.applyCrop, restoreOriginal:this.restoreOriginal,
       adminCategories, adminCatCount:s.categories.length, catAdding:s.catAdding, catAddBtnLabel:s.catAdding?'Cerrar':'+ Agregar categoría', catAddBtnStyle:this.pillBtn(s.catAdding), ncat:s.newCat, onNCatLabel:e=>this.setNCat({label:e.target.value}), toggleCatAdding:this.toggleCatAdding, addCategory:this.addCategory,
       aromaList, aromaCount:s.aromas.length, newAroma:s.newAroma, onNewAroma:this.setNewAroma, addAroma:this.addAroma,
       onCfgShipping:this.onCfgShipping, onCfgTitular:this.onCfgTitular, onCfgAlias:this.onCfgAlias, onCfgCbu:this.onCfgCbu, onCfgWhatsapp:this.onCfgWhatsapp,
