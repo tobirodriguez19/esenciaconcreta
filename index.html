@@ -197,10 +197,6 @@
                     </div>
                     <span style="position:absolute;top:14px;left:14px;background:rgba(35,34,32,.88);color:#FAF9F6;border-radius:999px;padding:6px 13px;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase">Destacado</span>
                   </button>
-                  <sc-if value="{{ heroHasNav }}" hint-placeholder-val="{{ false }}">
-                    <button onClick="{{ heroPrev }}" aria-label="Producto anterior" style="position:absolute;top:50%;left:8px;transform:translateY(-50%);width:32px;height:32px;border-radius:999px;background:rgba(250,249,246,.92);border:1px solid rgba(35,34,32,.1);cursor:pointer;font-size:15px;color:#232220;display:flex;align-items:center;justify-content:center;box-shadow:0 6px 16px -8px rgba(0,0,0,.4);transition:background .2s" style-hover="background:#fff">‹</button>
-                    <button onClick="{{ heroNext }}" aria-label="Producto siguiente" style="position:absolute;top:50%;right:8px;transform:translateY(-50%);width:32px;height:32px;border-radius:999px;background:rgba(250,249,246,.92);border:1px solid rgba(35,34,32,.1);cursor:pointer;font-size:15px;color:#232220;display:flex;align-items:center;justify-content:center;box-shadow:0 6px 16px -8px rgba(0,0,0,.4);transition:background .2s" style-hover="background:#fff">›</button>
-                  </sc-if>
                 </div><div style="flex: 1 1 320px; min-width: 0; order: 2; display:flex; flex-direction:column; gap:10px">
                   <div style="font-size: 12px; letter-spacing: .2em; text-transform: uppercase; color: #9a958c">{{ hp.catUpper }}</div>
                   <div style="font-family: Newsreader,serif; font-weight: 400; font-size: clamp(32px,5.2vw,60px); line-height: 1.05; letter-spacing: -.01em; margin: 0">{{ hp.name }}</div>
@@ -215,6 +211,10 @@
             </sc-for>
           </div>
         </div>
+        <sc-if value="{{ heroHasNav }}" hint-placeholder-val="{{ false }}">
+          <button onClick="{{ heroPrev }}" aria-label="Producto anterior" style="position:absolute;top:50%;left:0;transform:translateY(-50%);width:32px;height:32px;border-radius:999px;background:rgba(250,249,246,.92);border:1px solid rgba(35,34,32,.1);cursor:pointer;font-size:15px;color:#232220;display:flex;align-items:center;justify-content:center;box-shadow:0 6px 16px -8px rgba(0,0,0,.4);transition:background .2s;z-index:2" style-hover="background:#fff">‹</button>
+          <button onClick="{{ heroNext }}" aria-label="Producto siguiente" style="position:absolute;top:50%;right:0;transform:translateY(-50%);width:32px;height:32px;border-radius:999px;background:rgba(250,249,246,.92);border:1px solid rgba(35,34,32,.1);cursor:pointer;font-size:15px;color:#232220;display:flex;align-items:center;justify-content:center;box-shadow:0 6px 16px -8px rgba(0,0,0,.4);transition:background .2s;z-index:2" style-hover="background:#fff">›</button>
+        </sc-if>
         <div style="display: flex; gap: 8px; margin-top: 14px; align-items: center; justify-content: center">
           <sc-for list="{{ heroDots }}" as="d" hint-placeholder-count="5">
             <button onClick="{{ d.go }}" aria-label="Producto destacado" style="{{ d.style }}"></button>
@@ -2239,8 +2239,10 @@ class Component extends DCLogic {
       });
     }
   };
-  verProceso=()=>{ const go=()=>{ const el=document.getElementById('ec-proceso'); if(el) window.scrollTo({top:el.getBoundingClientRect().top+window.scrollY-60,behavior:'smooth'}); }; if(this.state.view!=='home'){ this.navigate('/'); this.setState({view:'home'}); setTimeout(go,80);} else go(); };
-  verContacto=()=>{ const go=()=>{ const el=document.querySelector('footer'); if(el) window.scrollTo({top:el.getBoundingClientRect().top+window.scrollY-20,behavior:'smooth'}); }; if(this.state.view!=='home'){ this.navigate('/'); this.setState({view:'home'}); setTimeout(go,80);} else go(); };
+  scrollToId=(id,offset)=>{ const go=()=>{ const el=document.getElementById(id); if(el) window.scrollTo({top:el.getBoundingClientRect().top+window.scrollY-offset,behavior:'smooth'}); }; go(); setTimeout(go,120); setTimeout(go,300); };
+  scrollToEl=(sel,offset)=>{ const go=()=>{ const el=document.querySelector(sel); if(el) window.scrollTo({top:el.getBoundingClientRect().top+window.scrollY-offset,behavior:'smooth'}); }; go(); setTimeout(go,120); setTimeout(go,300); };
+  verProceso=()=>{ if(this.state.view!=='home'){ this.navigate('/'); this.setState({view:'home'}); setTimeout(()=>this.scrollToId('ec-proceso',60),80);} else this.scrollToId('ec-proceso',60); };
+  verContacto=()=>{ if(this.state.view!=='home'){ this.navigate('/'); this.setState({view:'home'}); setTimeout(()=>this.scrollToEl('footer',20),80);} else this.scrollToEl('footer',20); };
   setCatColor(id,color){ this.setState({catalogColors:{...this.state.catalogColors,[id]:color}}); }
   openProduct(id){ const p=this.getProduct(id); const fromCat=this.state.view==='catalog'; this.navigate('/producto/'+encodeURIComponent(id)); this.setState({view:'product',productId:id,detailColor:p?(this.state.catalogColors[id]||(p.colors[0]||null)):null,detailScent:this.isScented(p)?p.scents[0]:null,detailQty:1,galleryIndex:0,catalogScroll:fromCat?(window.scrollY||0):this.state.catalogScroll}); this.scrollTop(); }
   setGallery(i){ this.setState({galleryIndex:i}); }
