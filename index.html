@@ -1655,7 +1655,27 @@ class Component extends DCLogic {
   hex(name,p){ return (p&&p.colorHex&&p.colorHex[name])||this.HEX[name]||'#B6B1A8'; }
   slug(s){ return String(s).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,''); }
   emptyNP(){ return {name:'',category:'',price:'',stock:'',shortDesc:'',sku:'',colorsList:[],colorDraft:'',colorDraftHex:'#B6B1A8',aromasList:[],aromaDraft:'',photoName:'',stockMap:{},stockTouched:false}; }
-  scrollTop(){ const go=()=>{ try{ window.scrollTo(0,0); }catch(e){} }; go(); requestAnimationFrame(()=>{ go(); requestAnimationFrame(go); }); setTimeout(go,80); setTimeout(go,220); }
+  forceScroll(getTarget){
+    const apply=(y)=>{
+      window.scrollTo(0,y);
+      if(document.scrollingElement) document.scrollingElement.scrollTop=y;
+      document.documentElement.scrollTop=y;
+      document.body.scrollTop=y;
+    };
+    const run=(frames)=>{
+      let n=0;
+      const tick=()=>{
+        try{ const y=getTarget(); if(y!=null) apply(y); }catch(e){}
+        n++;
+        if(n<frames) requestAnimationFrame(tick);
+      };
+      tick();
+    };
+    run(45);
+    setTimeout(()=>run(10),500);
+    setTimeout(()=>run(10),1000);
+  }
+  scrollTop(){ this.forceScroll(()=>0); }
   stop=e=>{ if(e&&e.stopPropagation) e.stopPropagation(); };
   getProduct(id){ return this.state.products.find(x=>x.id===id); }
   getCat(id){ return this.state.categories.find(c=>c.id===id); }
@@ -2286,8 +2306,8 @@ class Component extends DCLogic {
       });
     }
   };
-  scrollToId=(id,offset)=>{ const go=()=>{ const el=document.getElementById(id); if(el) window.scrollTo({top:el.getBoundingClientRect().top+window.scrollY-offset,behavior:'smooth'}); }; go(); setTimeout(go,120); setTimeout(go,300); };
-  scrollToEl=(sel,offset)=>{ const go=()=>{ const el=document.querySelector(sel); if(el) window.scrollTo({top:el.getBoundingClientRect().top+window.scrollY-offset,behavior:'smooth'}); }; go(); setTimeout(go,120); setTimeout(go,300); };
+  scrollToId=(id,offset)=>{ this.forceScroll(()=>{ const el=document.getElementById(id); return el?el.getBoundingClientRect().top+window.scrollY-offset:null; }); };
+  scrollToEl=(sel,offset)=>{ this.forceScroll(()=>{ const el=document.querySelector(sel); return el?el.getBoundingClientRect().top+window.scrollY-offset:null; }); };
   verProceso=()=>{ this.navigate('/conocenos'); this.setState({view:'about'}); this.scrollTop(); };
   verContacto=()=>{ if(this.state.view!=='about'){ this.navigate('/conocenos'); this.setState({view:'about'}); setTimeout(()=>this.scrollToId('about-contacto',70),100);} else this.scrollToId('about-contacto',70); };
   setCatColor(id,color){ this.setState({catalogColors:{...this.state.catalogColors,[id]:color}}); }
