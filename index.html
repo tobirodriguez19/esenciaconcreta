@@ -305,7 +305,7 @@
               <sc-for list="{{ selectedProduct.colorOptions }}" as="c" hint-placeholder-count="3">
                 <button onClick="{{ c.set }}" title="{{ c.name }}" style="{{ c.style }}"></button>
               </sc-for>
-            </div><div style="font-size: 13px; letter-spacing: .04em; text-transform: uppercase; color: #9a958c; margin-bottom: 12px">Color · {{ selectedProduct.selColor }}</div><sc-if value="{{ selectedProduct.hasScents }}" hint-placeholder-val="{{ false }}"><div style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 4px">
+            </div><sc-if value="{{ selectedProduct.hasColors }}" hint-placeholder-val="{{ false }}"><div style="font-size: 13px; letter-spacing: .04em; text-transform: uppercase; color: #9a958c; margin-bottom: 12px">Color · {{ selectedProduct.selColor }}</div></sc-if><sc-if value="{{ selectedProduct.hasScents }}" hint-placeholder-val="{{ false }}"><div style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 4px">
                 <sc-for list="{{ selectedProduct.scentOptions }}" as="sopt" hint-placeholder-count="4">
                   <button onClick="{{ sopt.set }}" style="{{ sopt.style }}">{{ sopt.label }}</button>
                 </sc-for>
@@ -488,13 +488,11 @@
                 <label style="display:flex;flex-direction:column;gap:6px;font-size:12px;color:#6a665e">Precio (ARS)
                   <input value="{{ np.price }}" onChange="{{ onNPPrice }}" placeholder="9900" style="border:1px solid rgba(35,34,32,.16);border-radius:10px;padding:10px 12px;font-size:14px;outline:none" style-focus="border-color:#232220">
                 </label>
-                <label style="display:flex;flex-direction:column;gap:6px;font-size:12px;color:#6a665e">Categoría
+                <label style="display:flex;flex-direction:column;gap:6px;font-size:12px;color:#6a665e">Categoría <span style="color:#a8a298">(obligatorio)</span>
                   <select value="{{ np.category }}" onChange="{{ onNPCat }}" style="border:1px solid rgba(35,34,32,.16);border-radius:10px;padding:10px 12px;font-size:14px;outline:none;background:#fff">
+                    <option value="">Elegí una categoría…</option>
                     <sc-for list="{{ catOptions }}" as="o" hint-placeholder-count="6"><option value="{{ o.id }}">{{ o.label }}</option></sc-for>
                   </select>
-                </label>
-                <label style="display:flex;flex-direction:column;gap:6px;font-size:12px;color:#6a665e">Stock inicial
-                  <input value="{{ np.stock }}" onChange="{{ onNPStock }}" placeholder="10" style="border:1px solid rgba(35,34,32,.16);border-radius:10px;padding:10px 12px;font-size:14px;outline:none" style-focus="border-color:#232220">
                 </label>
                 <label style="display:flex;flex-direction:column;gap:6px;font-size:12px;color:#6a665e">SKU <span style="color:#a8a298">(opcional)</span>
                   <input value="{{ np.sku }}" onChange="{{ onNPSku }}" placeholder="EC-VEL-003" style="border:1px solid rgba(35,34,32,.16);border-radius:10px;padding:10px 12px;font-size:14px;outline:none" style-focus="border-color:#232220">
@@ -529,10 +527,35 @@
                   </div>
                 </sc-for>
               </div>
-              <div style="display:flex;align-items:center;gap:6px;border:1px dashed rgba(35,34,32,.2);border-radius:999px;padding:4px 5px 4px 14px;margin-bottom:16px;max-width:340px">
-                <input value="{{ np.aromaDraft }}" onChange="{{ onNPAromaDraft }}" placeholder="Agregar o crear aroma" style="border:none;outline:none;background:transparent;font-size:13px;flex:1;min-width:0;color:#232220">
+              <div style="display:flex;align-items:center;gap:6px;border:1px dashed rgba(35,34,32,.2);border-radius:999px;padding:4px 5px 4px 14px;margin-bottom:8px;max-width:340px">
+                <input value="{{ np.aromaDraft }}" onChange="{{ onNPAromaDraft }}" placeholder="Buscar o crear aroma" style="border:none;outline:none;background:transparent;font-size:13px;flex:1;min-width:0;color:#232220">
                 <button onClick="{{ addNPAroma }}" style="background:#232220;color:#FAF9F6;border:none;cursor:pointer;border-radius:999px;width:28px;height:28px;font-size:16px;line-height:1;flex-shrink:0" style-hover="background:#3a3833">+</button>
               </div>
+              <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px">
+                <sc-for list="{{ npAromaResults }}" as="r" hint-placeholder-count="3">
+                  <button onClick="{{ r.add }}" style="background:#fff;border:1px solid rgba(35,34,32,.16);color:#232220;cursor:pointer;border-radius:999px;padding:6px 14px;font-size:12.5px" style-hover="background:#232220;color:#FAF9F6">+ {{ r.name }}</button>
+                </sc-for>
+                <sc-if value="{{ npAromaCanCreate }}" hint-placeholder-val="{{ false }}">
+                  <button onClick="{{ addNPAroma }}" style="background:#232220;color:#FAF9F6;border:none;cursor:pointer;border-radius:999px;padding:6px 14px;font-size:12.5px" style-hover="background:#3a3833">+ Crear "{{ np.aromaDraft }}"</button>
+                </sc-if>
+              </div>
+
+              <sc-if value="{{ npStockSimple }}" hint-placeholder-val="{{ true }}">
+                <label style="display:flex;flex-direction:column;gap:6px;font-size:12px;color:#6a665e;margin-bottom:16px;max-width:200px">Stock inicial
+                  <input value="{{ np.stock }}" onChange="{{ onNPStock }}" placeholder="10" style="border:1px solid rgba(35,34,32,.16);border-radius:10px;padding:10px 12px;font-size:14px;outline:none" style-focus="border-color:#232220">
+                </label>
+              </sc-if>
+              <sc-if value="{{ npStockGrid.length }}" hint-placeholder-val="{{ false }}">
+                <div style="font-size:12px;color:#6a665e;margin-bottom:8px">Repartí el stock entre las variantes</div>
+                <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:16px">
+                  <sc-for list="{{ npStockGrid }}" as="row" hint-placeholder-count="2">
+                    <div style="display:flex;align-items:center;gap:10px;background:#FAF9F6;border:1px solid rgba(35,34,32,.08);border-radius:10px;padding:9px 12px">
+                      <span style="flex:1;font-size:13px;color:#232220">{{ row.label }}</span>
+                      <input value="{{ row.qty }}" onChange="{{ row.onChange }}" placeholder="0" style="width:70px;border:1px solid rgba(35,34,32,.16);border-radius:8px;padding:7px 10px;font-size:13px;outline:none;text-align:center" style-focus="border-color:#232220">
+                    </div>
+                  </sc-for>
+                </div>
+              </sc-if>
 
               <label style="display:flex;flex-direction:column;gap:6px;font-size:12px;color:#6a665e;margin-bottom:16px">Foto principal <span style="color:#a8a298">(opcional, se puede agregar después)</span>
                 <input type="file" accept="image/jpeg,image/png,image/webp" onChange="{{ onNPPhoto }}" style="font-size:13px">
@@ -1117,7 +1140,7 @@
                 <button onClick="{{ saveOficioDraft }}" style="background:#232220;color:#FAF9F6;border:none;cursor:pointer;border-radius:999px;padding:11px 26px;font-size:14px" style-hover="background:#3a3833">Guardar cambios</button>
               </div>
             </sc-if>
-            <sc-if value="{{ oficioEditing }}" hint-placeholder-val="{{ true }}">
+            <sc-if value="{{ oficioNotEditing }}" hint-placeholder-val="{{ true }}">
               <button onClick="{{ startEditOficio }}" style="background:#F0EEE9;color:#232220;border:none;cursor:pointer;border-radius:999px;padding:11px 22px;font-size:14px;flex-shrink:0" style-hover="background:#232220;color:#FAF9F6">Editar</button>
             </sc-if>
           </div>
@@ -1487,7 +1510,7 @@ class Component extends DCLogic {
   fmt(n){ return '$'+Number(n||0).toLocaleString('es-AR'); }
   hex(name,p){ return (p&&p.colorHex&&p.colorHex[name])||this.HEX[name]||'#B6B1A8'; }
   slug(s){ return String(s).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,''); }
-  emptyNP(){ return {name:'',category:'velas',price:'',stock:'',shortDesc:'',sku:'',colorsList:[],colorDraft:'',colorDraftHex:'#B6B1A8',aromasList:[],aromaDraft:'',photoName:''}; }
+  emptyNP(){ return {name:'',category:'',price:'',stock:'',shortDesc:'',sku:'',colorsList:[],colorDraft:'',colorDraftHex:'#B6B1A8',aromasList:[],aromaDraft:'',photoName:'',stockMap:{},stockTouched:false}; }
   scrollTop(){ const go=()=>{ try{ window.scrollTo(0,0); }catch(e){} }; go(); requestAnimationFrame(()=>{ go(); requestAnimationFrame(go); }); }
   stop=e=>{ if(e&&e.stopPropagation) e.stopPropagation(); };
   getProduct(id){ return this.state.products.find(x=>x.id===id); }
@@ -1986,13 +2009,13 @@ class Component extends DCLogic {
   setHero(i){ this.setState({heroIndex:i}); this.startHero(); }
 
   clearAdminHash(){ try{ if(location.hash) history.replaceState(null,'',location.pathname+location.search); }catch(e){} }
-  goHome=()=>{ this.clearAdminHash(); this.setState({view:'home'}); this.scrollTop(); };
+  goHome=()=>{ this.clearAdminHash(); this.setState({view:'home',catGroupCollapsed:{},expanded:{},editingProductId:null,productDraft:null}); this.scrollTop(); };
   goCatalog=()=>{ this.setState({view:'catalog',filter:'todos'}); this.scrollTop(); };
   openCatWith(cat){ this.setState({view:'catalog',filter:cat}); this.scrollTop(); };
   setFilter(cat){ this.setState({filter:cat}); }
   goAdmin=()=>{ this.setState({view:'admin'}); this.scrollTop(); };
   goAdminTab=(tab)=>{
-    this.setState({adminTab:tab});
+    this.setState({adminTab:tab,catGroupCollapsed:{},expanded:{},editingProductId:null,productDraft:null});
     if(tab==='ventas'){
       this.loadSales().then(()=>{
         const unseenIds=this.state.sales.filter(s=>!s.seen&&!s.cancelled).map(s=>s.seq);
@@ -2081,21 +2104,30 @@ class Component extends DCLogic {
   // ============================================================
   setNP(patch){ this.setState({newProduct:{...this.state.newProduct,...patch}}); }
   toggleProdAdding=()=>this.setState({prodAdding:!this.state.prodAdding,newProduct:this.emptyNP(),newProductPhoto:null});
-  addNPColor=()=>{ const np=this.state.newProduct; const name=(np.colorDraft||'').trim(); if(!name) return; if(np.colorsList.some(c=>c.name.toLowerCase()===name.toLowerCase())){ this.showToast('Ese color ya existe'); return; } this.setNP({colorsList:[...np.colorsList,{name,hex:np.colorDraftHex}],colorDraft:'',colorDraftHex:'#B6B1A8'}); };
-  removeNPColor=(idx)=>{ const np=this.state.newProduct; this.setNP({colorsList:np.colorsList.filter((_,i)=>i!==idx)}); };
-  addNPAroma=()=>{ const np=this.state.newProduct; const name=(np.aromaDraft||'').trim(); if(!name) return; if(np.aromasList.some(a=>a.toLowerCase()===name.toLowerCase())){ this.showToast('Ese aroma ya está agregado'); return; } this.setNP({aromasList:[...np.aromasList,name],aromaDraft:''}); };
-  removeNPAroma=(idx)=>{ const np=this.state.newProduct; this.setNP({aromasList:np.aromasList.filter((_,i)=>i!==idx)}); };
+  addNPColor=()=>{ const np=this.state.newProduct; const name=(np.colorDraft||'').trim(); if(!name) return; if(np.colorsList.some(c=>c.name.toLowerCase()===name.toLowerCase())){ this.showToast('Ese color ya existe'); return; } this.setNP({colorsList:[...np.colorsList,{name,hex:np.colorDraftHex}],colorDraft:'',colorDraftHex:'#B6B1A8',stockMap:{},stockTouched:false}); };
+  removeNPColor=(idx)=>{ const np=this.state.newProduct; this.setNP({colorsList:np.colorsList.filter((_,i)=>i!==idx),stockMap:{},stockTouched:false}); };
+  addNPAroma=(name)=>{ const np=this.state.newProduct; const v=(name||np.aromaDraft||'').trim(); if(!v) return; if(np.aromasList.some(a=>a.toLowerCase()===v.toLowerCase())){ this.showToast('Ese aroma ya está agregado'); return; } this.setNP({aromasList:[...np.aromasList,v],aromaDraft:'',stockMap:{},stockTouched:false}); };
+  removeNPAroma=(idx)=>{ const np=this.state.newProduct; this.setNP({aromasList:np.aromasList.filter((_,i)=>i!==idx),stockMap:{},stockTouched:false}); };
   onNPPhoto=e=>{ const f=e.target.files&&e.target.files[0]; this.setState({newProductPhoto:f||null}); this.setNP({photoName:f?f.name:''}); };
+  npComboList(np){
+    const colors=np.colorsList||[]; const aromas=np.aromasList||[];
+    const colorKeys=colors.length?colors.map(c=>c.name):[''];
+    return aromas.length?colorKeys.flatMap(ck=>aromas.map(a=>({color:ck,aroma:a}))):colorKeys.map(ck=>({color:ck,aroma:null}));
+  }
+  setNPStockCombo=(key,v)=>{ const np=this.state.newProduct; this.setNP({stockMap:{...np.stockMap,[key]:v},stockTouched:true}); };
   addProduct=async()=>{
     const np=this.state.newProduct; const name=(np.name||'').trim();
     if(!name){ this.showToast('Poné un nombre'); return; }
+    if(!np.category){ this.showToast('Elegí una categoría'); return; }
     const price=parseInt(String(np.price).replace(/\D/g,''),10)||0;
     const colors=np.colorsList||[]; const aromas=np.aromasList||[];
+    const comboList=this.npComboList(np);
+    if(comboList.length>1&&!np.stockTouched){ this.showToast('Repartí el stock entre las variantes antes de crear el producto'); return; }
     let id=this.slug(name); if(!id) id='prod-'+Date.now();
     if(this.state.products.some(p=>p.id===id)) id=id+'-'+Math.floor(Math.random()*999);
     const sd=(np.shortDesc||'').trim();
     const sku=(np.sku||'').trim()||('AUTO-'+Date.now().toString().slice(-6));
-    const { error:prodErr } = await supabaseClient.from('products').insert({id,sku,category_id:np.category||'velas',name,short_desc:sd||'Pieza artesanal de hormigón.',long_desc:sd||'Pieza artesanal hecha a mano en hormigón.',price,featured:false,active:true});
+    const { error:prodErr } = await supabaseClient.from('products').insert({id,sku,category_id:np.category,name,short_desc:sd||'Pieza artesanal de hormigón.',long_desc:sd||'Pieza artesanal hecha a mano en hormigón.',price,featured:false,active:true});
     if(prodErr){ this.showToast('Error al crear producto: '+prodErr.message); return; }
 
     if(colors.length){
@@ -2107,16 +2139,9 @@ class Component extends DCLogic {
       await supabaseClient.from('product_aromas').insert(aromas.map((a,i)=>({product_id:id,aroma_name:a,sort_order:i})));
     }
 
-    const total=Math.max(0,parseInt(np.stock,10)||0);
-    const colorKeys=colors.length?colors.map(c=>c.name):[''];
-    const comboCount=Math.max(1,aromas.length?colorKeys.length*aromas.length:colorKeys.length);
-    const base=Math.floor(total/comboCount); const remainder=total-base*comboCount;
-    const stockRows=[]; let idx=0;
-    if(aromas.length){
-      colorKeys.forEach(ck=>{ aromas.forEach(a=>{ stockRows.push({product_id:id,color_name:ck,aroma_name:a,quantity:base+(idx===0?remainder:0)}); idx++; }); });
-    } else {
-      colorKeys.forEach(ck=>{ stockRows.push({product_id:id,color_name:ck,aroma_name:null,quantity:base+(idx===0?remainder:0)}); idx++; });
-    }
+    const stockRows=comboList.length===1
+      ? [{product_id:id,color_name:comboList[0].color,aroma_name:comboList[0].aroma,quantity:Math.max(0,parseInt(np.stock,10)||0)}]
+      : comboList.map(cb=>({product_id:id,color_name:cb.color,aroma_name:cb.aroma,quantity:Math.max(0,parseInt(np.stockMap[cb.color+'|'+(cb.aroma||'')],10)||0)}));
     await supabaseClient.from('stock').insert(stockRows);
     await Promise.all(stockRows.map(r=>this.recordStockMovement(id,r.color_name,r.aroma_name,'entrada',r.quantity,'Alta de producto')));
 
@@ -2412,7 +2437,7 @@ class Component extends DCLogic {
     const catsForGroups=s.categories.slice().sort((a,b)=>(a.sortOrder??0)-(b.sortOrder??0));
     const adminGroups=catsForGroups.map(c=>{
       const items=adminProducts.filter(p=>p.category===c.id).sort((a,b)=>(a.sku||'').localeCompare(b.sku||'',undefined,{numeric:true,sensitivity:'base'})||a.name.localeCompare(b.name));
-      const collapsed=!!s.catGroupCollapsed[c.id];
+      const collapsed=s.catGroupCollapsed[c.id]!==false;
       return { id:c.id, label:c.label, count:items.length, products:items, collapsed, expanded:!collapsed,
         onToggle:()=>this.setState({catGroupCollapsed:{...s.catGroupCollapsed,[c.id]:!collapsed}}),
         arrow:collapsed?'▸':'▾' };
@@ -2522,9 +2547,13 @@ class Component extends DCLogic {
       np:s.newProduct, onNPName:e=>this.setNP({name:e.target.value}), onNPPrice:e=>this.setNP({price:e.target.value}), onNPCat:e=>this.setNP({category:e.target.value}), onNPStock:e=>this.setNP({stock:e.target.value}), onNPDesc:e=>this.setNP({shortDesc:e.target.value}), onNPSku:e=>this.setNP({sku:e.target.value}), toggleProdAdding:this.toggleProdAdding, addProduct:this.addProduct,
       onNPColorDraft:e=>this.setNP({colorDraft:e.target.value}), onNPColorHex:e=>this.setNP({colorDraftHex:e.target.value}), addNPColor:this.addNPColor,
       npColorChips:s.newProduct.colorsList.map((c,i)=>({name:c.name,hex:c.hex,onRemove:()=>this.removeNPColor(i)})),
-      onNPAromaDraft:e=>this.setNP({aromaDraft:e.target.value}), addNPAroma:this.addNPAroma,
+      onNPAromaDraft:e=>this.setNP({aromaDraft:e.target.value}), addNPAroma:()=>this.addNPAroma(),
       npAromaChips:s.newProduct.aromasList.map((a,i)=>({name:a,onRemove:()=>this.removeNPAroma(i)})),
+      npAromaResults:s.aromas.filter(a=>s.newProduct.aromasList.indexOf(a)<0&&a.toLowerCase().includes((s.newProduct.aromaDraft||'').toLowerCase())).map(a=>({name:a,add:()=>this.addNPAroma(a)})),
+      npAromaCanCreate:!!(s.newProduct.aromaDraft||'').trim()&&!s.aromas.some(a=>a.toLowerCase()===(s.newProduct.aromaDraft||'').trim().toLowerCase()),
       onNPPhoto:this.onNPPhoto,
+      npStockSimple:this.npComboList(s.newProduct).length<=1,
+      npStockGrid:this.npComboList(s.newProduct).length>1?this.npComboList(s.newProduct).map(cb=>{ const key=cb.color+'|'+(cb.aroma||''); const label=(cb.color||'General')+(cb.aroma?(' · '+cb.aroma):''); return {label,qty:s.newProduct.stockMap[key]||'',onChange:e=>this.setNPStockCombo(key,e.target.value)}; }):[],
       aromaSearch:s.aromaSearch||'', onAromaSearch:this.onAromaSearch,
       hasInactiveProducts:s.inactiveProducts.length>0, inactiveProductsOpen:s.inactiveProductsOpen, inactiveProductsArrow:s.inactiveProductsOpen?'▾':'▸', toggleInactiveProducts:this.toggleInactiveProducts,
       inactiveProducts:s.inactiveProducts.map(p=>({name:p.name,sku:p.sku||'sin SKU',onReactivate:()=>this.reactivateProduct(p.id)})),
