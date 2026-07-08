@@ -52,51 +52,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
 <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;0,6..72,500;1,6..72,400&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet">
-<style>
-  *{box-sizing:border-box}
-  html,body{margin:0;padding:0;overflow-x:hidden;max-width:100%;overflow-anchor:none}
-  *{overflow-anchor:none}
-  body{background:#FAF9F6;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
-  input,button,textarea,select{font-family:inherit}
-  ::selection{background:#232220;color:#FAF9F6}
-  image-slot{display:block;width:100%;height:100%}
-  image-slot::part(image){touch-action:auto}
-  .ec-dragscroll{touch-action:pan-x pan-y}
-  @keyframes ecFade{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
-  @keyframes ecCrossA{from{opacity:0}to{opacity:1}}
-  @keyframes ecCrossB{from{opacity:0}to{opacity:1}}
-  @keyframes ecSlideIn{from{transform:translateX(100%)}to{transform:translateX(0)}}
-  @keyframes ecSlideOut{from{transform:translateX(0)}to{transform:translateX(100%)}}
-  @keyframes ecOverlayIn{from{opacity:0}to{opacity:1}}
-  @keyframes ecPop{from{opacity:0;transform:translateY(10px) scale(.98)}to{opacity:1;transform:none}}
-  @keyframes ecToast{0%{opacity:0;transform:translateY(14px)}12%{opacity:1;transform:none}88%{opacity:1;transform:none}100%{opacity:0;transform:translateY(8px)}}
-  @keyframes ecBumpA{0%{transform:scale(1)}40%{transform:scale(1.55)}100%{transform:scale(1)}}
-  @keyframes ecBumpB{0%{transform:scale(1)}40%{transform:scale(1.55)}100%{transform:scale(1)}}
-  #ec-carousel::-webkit-scrollbar{height:0;display:none}
-  #ec-cat-scroll{scrollbar-width:thin}
-  #ec-cat-scroll::-webkit-scrollbar{height:6px}
-  #ec-cat-scroll::-webkit-scrollbar-thumb{background:rgba(35,34,32,.18);border-radius:999px}
-  .ec-hamburger{display:none}
-  .ec-cat-dropdown{display:none;opacity:0;transform:translateY(4px);transition:opacity .16s ease,transform .16s ease}
-  .ec-cat-nav:hover .ec-cat-dropdown{display:block;opacity:1;transform:translateY(0)}
-  @media(max-width:768px){
-    .ec-desktop-nav{display:none!important}
-    .ec-hamburger{display:inline-flex!important}
-    #ec-hero-pill{margin-left:0!important;font-size:16px!important}
-    .ec-checkout-grid{grid-template-columns:1fr!important}
-    .ec-catalog-grid{grid-template-columns:repeat(2,1fr)!important;gap:12px!important}
-  }
-  @media(max-width:1140px){
-    .ec-hero-imgbox{max-width:360px!important}
-    .ec-hero-btns{flex-wrap:nowrap!important}
-    .ec-hero-btns button{padding:13px 18px!important;flex:1 1 0!important;white-space:nowrap!important}
-  }
-  @media(max-width:600px){
-    #ec-trust-strip{flex-wrap:nowrap!important;overflow-x:auto!important;justify-content:flex-start!important;font-size:11px!important;gap:8px!important;-webkit-overflow-scrolling:touch}
-    #ec-trust-strip span{flex:0 0 auto!important;white-space:nowrap}
-    #ec-brand-name{display:none!important}
-  }
-</style>
+<link rel="stylesheet" href="/css/app.css">
 <script src="/image-slot.js"></script>
 </helmet>
 <meta name="ext-resource-dependency" content="uploads/products/bandeja-organica.jpg">
