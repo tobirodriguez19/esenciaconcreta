@@ -1656,6 +1656,10 @@ class Component extends DCLogic {
   slug(s){ return String(s).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,''); }
   emptyNP(){ return {name:'',category:'',price:'',stock:'',shortDesc:'',sku:'',colorsList:[],colorDraft:'',colorDraftHex:'#B6B1A8',aromasList:[],aromaDraft:'',photoName:'',stockMap:{},stockTouched:false}; }
   forceScroll(getTarget){
+    let cancelled=false;
+    const cancel=()=>{ cancelled=true; cleanup(); };
+    const cleanup=()=>{ ['wheel','touchstart','touchmove','pointerdown'].forEach(evt=>window.removeEventListener(evt,cancel)); };
+    ['wheel','touchstart','touchmove','pointerdown'].forEach(evt=>window.addEventListener(evt,cancel,{passive:true}));
     const apply=(y)=>{
       window.scrollTo(0,y);
       if(document.scrollingElement) document.scrollingElement.scrollTop=y;
@@ -1665,6 +1669,7 @@ class Component extends DCLogic {
     const run=(frames)=>{
       let n=0;
       const tick=()=>{
+        if(cancelled) return;
         try{ const y=getTarget(); if(y!=null) apply(y); }catch(e){}
         n++;
         if(n<frames) requestAnimationFrame(tick);
@@ -1672,8 +1677,7 @@ class Component extends DCLogic {
       tick();
     };
     run(45);
-    setTimeout(()=>run(10),500);
-    setTimeout(()=>run(10),1000);
+    setTimeout(cleanup,800);
   }
   scrollTop(){ this.forceScroll(()=>0); }
   stop=e=>{ if(e&&e.stopPropagation) e.stopPropagation(); };
