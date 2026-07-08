@@ -7,8 +7,8 @@
 <meta name="description" content="Velas, floreros, portavelas, bandejas y posavasos de hormigón hechos a mano en Rafaela, Santa Fe. Piezas artesanales únicas para tu hogar.">
 <meta name="keywords" content="hormigón, cemento, velas de hormigón, decoración artesanal, Rafaela, Santa Fe, Esencia Concreta">
 <link rel="canonical" href="https://esenciaconcreta.com.ar/">
-<link rel="icon" href="uploads/Logo.jpg">
-<link rel="apple-touch-icon" href="uploads/Logo.jpg">
+<link rel="icon" href="/uploads/Logo.jpg">
+<link rel="apple-touch-icon" href="/uploads/Logo.jpg">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Esencia Concreta">
 <meta property="og:title" content="Esencia Concreta — Piezas de hormigón hechas a mano">
@@ -43,8 +43,8 @@
   }(window.location));
 </script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-<script src="./supabase-config.js"></script>
-<script src="./support.js"></script>
+<script src="/supabase-config.js"></script>
+<script src="/support.js"></script>
 </head>
 <body>
 <x-dc>
@@ -97,7 +97,7 @@
     #ec-brand-name{display:none!important}
   }
 </style>
-<script src="image-slot.js"></script>
+<script src="/image-slot.js"></script>
 </helmet>
 <meta name="ext-resource-dependency" content="uploads/products/bandeja-organica.jpg">
 <meta name="ext-resource-dependency" content="uploads/products/bandeja-rect.jpg">
@@ -118,7 +118,7 @@
   <header style="position:sticky;top:0;z-index:50;background:rgba(250,249,246,.86);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-bottom:1px solid rgba(35,34,32,.08)">
     <div style="max-width:1240px;margin:0 auto;padding:0 clamp(16px,5vw,56px);min-height:68px;display:flex;align-items:center;justify-content:space-between;gap:14px">
       <button onClick="{{ goHome }}" style="display:flex;align-items:center;gap:11px;background:none;border:none;cursor:pointer;padding:10px 0;min-width:0">
-        <img src="uploads/Logo.jpg" alt="Esencia Concreta" style="width:40px;height:40px;border-radius:999px;object-fit:cover;display:block;flex-shrink:0">
+        <img src="/uploads/Logo.jpg" alt="Esencia Concreta" style="width:40px;height:40px;border-radius:999px;object-fit:cover;display:block;flex-shrink:0">
         <span id="ec-brand-name" style="font-family:Newsreader,serif;font-size:clamp(16px,2.2vw,20px);letter-spacing:.01em;color:#232220;line-height:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Esencia Concreta</span>
       </button>
       <sc-if value="{{ isAdmin }}" hint-placeholder-val="{{ false }}">
@@ -1344,7 +1344,7 @@
       <div style="display:flex;flex-wrap:wrap;gap:clamp(26px,4vw,56px);padding-bottom:40px">
         <div style="flex:2 1 260px;min-width:220px;max-width:340px">
           <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px">
-            <img src="uploads/Logo.jpg" alt="" style="width:36px;height:36px;border-radius:999px;object-fit:cover;flex-shrink:0">
+            <img src="/uploads/Logo.jpg" alt="" style="width:36px;height:36px;border-radius:999px;object-fit:cover;flex-shrink:0">
             <span style="font-family:Newsreader,serif;font-size:20px;color:#FAF9F6;white-space:nowrap">Esencia Concreta</span>
           </div>
           <p style="font-size:14px;color:#8d877c;margin:0;max-width:300px">Decoración artesanal en hormigón y velas de soja. Piezas únicas, hechas a mano en Rafaela.</p>
@@ -1699,7 +1699,7 @@ class Component extends DCLogic {
     if(color){ const list=(p.photos||[]).filter(ph=>ph.color_name===color); if(list.length) return list[list.length-1].url; }
     const general=(p.photos||[]).filter(ph=>!ph.color_name);
     if(general.length) return general[general.length-1].url;
-    if(!color&&this.PHOTO_IDS.has(p.id)) return 'uploads/products/'+p.id+'.jpg';
+    if(!color&&this.PHOTO_IDS.has(p.id)) return '/uploads/products/'+p.id+'.jpg';
     return '';
   }
   // Display resolution: real photo, else the "Sin imagen" placeholder — always non-empty, safe to use as <image-slot src>.
@@ -1710,7 +1710,7 @@ class Component extends DCLogic {
     const own=(p.photos||[]).filter(ph=>color?ph.color_name===color:!ph.color_name);
     if(own.length) return own;
     if(color){ const general=(p.photos||[]).filter(ph=>!ph.color_name); if(general.length) return general; }
-    if(!color&&this.PHOTO_IDS.has(p.id)) return [{id:'seed',url:'uploads/products/'+p.id+'.jpg'}];
+    if(!color&&this.PHOTO_IDS.has(p.id)) return [{id:'seed',url:'/uploads/products/'+p.id+'.jpg'}];
     return [];
   }
   filledPhotos(p,color){ return this.photoSlotIds(p,color).filter(sid=>this.isFilled(sid, !!this.photoSeedSrc(p,sid,color))); }
@@ -2245,7 +2245,7 @@ class Component extends DCLogic {
     this._gd=e=>{ down(e); sdown(e); }; this._gm=move; this._gu=e=>{ up(e); sup(e); };
     document.addEventListener('pointerdown',this._gd); document.addEventListener('pointermove',this._gm); document.addEventListener('pointerup',this._gu); document.addEventListener('pointercancel',this._gu);
   }
-  loadFilled(){ try{ fetch('.image-slots.state.json',{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{ if(j&&typeof j==='object'){ const f={...this.state.filled}; let ch=false; for(const id in j){ const v=j[id]; const has=v&&(typeof v==='string'?v:(v.u)); if(has&&!f[id]){ f[id]=true; ch=true; } } if(ch) this.setState({filled:f}); } }).catch(()=>{}); }catch(e){} }
+  loadFilled(){ try{ fetch('/.image-slots.state.json',{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{ if(j&&typeof j==='object'){ const f={...this.state.filled}; let ch=false; for(const id in j){ const v=j[id]; const has=v&&(typeof v==='string'?v:(v.u)); if(has&&!f[id]){ f[id]=true; ch=true; } } if(ch) this.setState({filled:f}); } }).catch(()=>{}); }catch(e){} }
   componentWillUnmount(){ [this._heroT,this._scanT].forEach(t=>t&&clearInterval(t)); [this._toastT,this._closeT,this._navT].forEach(t=>t&&clearTimeout(t)); if(this._gd){ document.removeEventListener('pointerdown',this._gd); document.removeEventListener('pointermove',this._gm); document.removeEventListener('pointerup',this._gu); document.removeEventListener('pointercancel',this._gu); } if(this._popHandler) window.removeEventListener('popstate',this._popHandler); if(this._cropD){ document.removeEventListener('pointerdown',this._cropD); document.removeEventListener('pointermove',this._cropM); document.removeEventListener('pointerup',this._cropU); document.removeEventListener('pointercancel',this._cropU); } }
   setupCropGestures(){
     let mode=null,startX=0,startY=0,rect0=null,cw=0,ch=0;
@@ -2306,15 +2306,14 @@ class Component extends DCLogic {
       });
     }
   };
-  scrollToId=(id,offset)=>{ this.forceScroll(()=>{ const el=document.getElementById(id); return el?el.getBoundingClientRect().top+window.scrollY-offset:null; }); };
-  scrollToEl=(sel,offset)=>{ this.forceScroll(()=>{ const el=document.querySelector(sel); return el?el.getBoundingClientRect().top+window.scrollY-offset:null; }); };
+  scrollToId=(id,offset)=>{ const el=document.getElementById(id); if(!el) return; const y=el.getBoundingClientRect().top+window.scrollY-offset; this.forceScroll(()=>y); };
   verProceso=()=>{ this.navigate('/conocenos'); this.setState({view:'about'}); this.scrollTop(); };
-  verContacto=()=>{ if(this.state.view!=='about'){ this.navigate('/conocenos'); this.setState({view:'about'}); setTimeout(()=>this.scrollToId('about-contacto',70),100);} else this.scrollToId('about-contacto',70); };
+  verContacto=()=>{ if(this.state.view!=='about'){ this.navigate('/conocenos'); this.setState({view:'about'}); setTimeout(()=>this.scrollToId('about-contacto',70),600);} else this.scrollToId('about-contacto',70); };
   setCatColor(id,color){ this.setState({catalogColors:{...this.state.catalogColors,[id]:color}}); }
   openProduct(id){ const p=this.getProduct(id); const fromCat=this.state.view==='catalog'; this.navigate('/producto/'+encodeURIComponent(id)); this.setState({view:'product',productId:id,detailColor:p?(this.state.catalogColors[id]||(p.colors[0]||null)):null,detailScent:this.isScented(p)?p.scents[0]:null,detailQty:1,galleryIndex:0,catalogScroll:fromCat?(window.scrollY||0):this.state.catalogScroll}); this.scrollTop(); }
   setGallery(i){ this.setState({galleryIndex:i}); }
   galleryStep(d,n){ this.setState({galleryIndex:((this.state.galleryIndex+d)%n+n)%n}); }
-  backToCatalog=()=>{ const y=this.state.catalogScroll||0; this.navigate('/catalogo'); this.setState({view:'catalog'}); setTimeout(()=>{ try{ window.scrollTo(0,y); }catch(e){} },40); };
+  backToCatalog=()=>{ const y=this.state.catalogScroll||0; this.navigate('/catalogo'); this.setState({view:'catalog'}); this.forceScroll(()=>y); };
 
   // nav drawer
   openNav=()=>{ if(this._navT) clearTimeout(this._navT); this.setState({navMounted:true,navOpen:true}); };
