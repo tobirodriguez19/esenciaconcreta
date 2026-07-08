@@ -310,7 +310,7 @@
         </sc-if>
         <div class="ec-catalog-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:clamp(14px,1.8vw,26px)">
           <sc-for list="{{ catalogProducts }}" as="p" hint-placeholder-count="8">
-            <div style="background:#fff;border:1px solid rgba(35,34,32,.06);border-radius:16px;overflow:hidden;transition:transform .35s ease,box-shadow .35s ease;box-shadow:0 1px 2px rgba(0,0,0,.03);display:flex;flex-direction:column" style-hover="transform:translateY(-5px);box-shadow:0 28px 46px -34px rgba(35,34,32,.5)">
+            <div id="{{ p.cardId }}" style="background:#fff;border:1px solid rgba(35,34,32,.06);border-radius:16px;overflow:hidden;transition:transform .35s ease,box-shadow .35s ease;box-shadow:0 1px 2px rgba(0,0,0,.03);display:flex;flex-direction:column" style-hover="transform:translateY(-5px);box-shadow:0 28px 46px -34px rgba(35,34,32,.5)">
               <button onClick="{{ p.open }}" style="background:none;border:none;padding:0;cursor:pointer;display:block;position:relative">
                 <div style="aspect-ratio:1/1;background:#EFEEEA;overflow:hidden">
                   <image-slot id="{{ p.catImgSlot }}" src="{{ p.catImgSrc }}" shape="rect" placeholder="{{ p.name }}"></image-slot>
@@ -1626,7 +1626,7 @@ class Component extends DCLogic {
       saleEditSeq:null, saleEditItems:[], saleSearch:'', photoModal:null,
       cart:[],
       navMounted:false, navOpen:false,
-      filter:'todos', searchQuery:'', chipsExpanded:false, navCatExpanded:false, catalogColors:{}, catalogScroll:0, cartBump:0, galleryIndex:0,
+      filter:'todos', searchQuery:'', chipsExpanded:false, navCatExpanded:false, catalogColors:{}, catalogScroll:0, lastCatalogProductId:null, cartBump:0, galleryIndex:0,
       prodSearch:'', prodCatFilter:'todas', expanded:{}, catGroupCollapsed:{},
       detailColor:null, detailScent:null, detailQty:1,
       form:{nombre:'',apellido:'',telefono:'',email:'',direccion:''},
@@ -2314,10 +2314,20 @@ class Component extends DCLogic {
   verProceso=()=>{ this.navigate('/conocenos'); this.setState({view:'about'}); this.scrollTop(); };
   verContacto=()=>{ if(this.state.view!=='about'){ this.navigate('/conocenos'); this.setState({view:'about'}); setTimeout(()=>this.scrollToId('about-contacto',70),600);} else this.scrollToId('about-contacto',70); };
   setCatColor(id,color){ this.setState({catalogColors:{...this.state.catalogColors,[id]:color}}); }
-  openProduct(id){ const p=this.getProduct(id); const fromCat=this.state.view==='catalog'; this.navigate('/producto/'+encodeURIComponent(id)); this.setState({view:'product',productId:id,detailColor:p?(this.state.catalogColors[id]||(p.colors[0]||null)):null,detailScent:this.isScented(p)?p.scents[0]:null,detailQty:1,galleryIndex:0,catalogScroll:fromCat?(window.scrollY||0):this.state.catalogScroll}); this.scrollTop(); }
+  openProduct(id){ const p=this.getProduct(id); const fromCat=this.state.view==='catalog'; this.navigate('/producto/'+encodeURIComponent(id)); this.setState({view:'product',productId:id,detailColor:p?(this.state.catalogColors[id]||(p.colors[0]||null)):null,detailScent:this.isScented(p)?p.scents[0]:null,detailQty:1,galleryIndex:0,catalogScroll:fromCat?(window.scrollY||0):this.state.catalogScroll,lastCatalogProductId:fromCat?id:this.state.lastCatalogProductId}); this.scrollTop(); }
   setGallery(i){ this.setState({galleryIndex:i}); }
   galleryStep(d,n){ this.setState({galleryIndex:((this.state.galleryIndex+d)%n+n)%n}); }
-  backToCatalog=()=>{ const y=this.state.catalogScroll||0; this.navigate('/catalogo'); this.setState({view:'catalog'}); this.forceScroll(()=>y); };
+  backToCatalog=()=>{
+    const y=this.state.catalogScroll||0;
+    const pid=this.state.lastCatalogProductId;
+    this.navigate('/catalogo');
+    this.setState({view:'catalog'});
+    setTimeout(()=>{
+      const el=pid?document.getElementById('ec-catcard-'+pid):null;
+      const target=el?(el.getBoundingClientRect().top+window.scrollY-90):y;
+      this.forceScroll(()=>target);
+    },60);
+  };
 
   // nav drawer
   openNav=()=>{ if(this._navT) clearTimeout(this._navT); this.setState({navMounted:true,navOpen:true}); };
@@ -2644,7 +2654,7 @@ class Component extends DCLogic {
     const s=this.state;
     this.updateSeo();
     const cartQtyMap={}; s.cart.forEach(c=>{ cartQtyMap[c.id]=(cartQtyMap[c.id]||0)+c.qty; });
-    const dec=p=>{ const scents=this.isScented(p)?p.scents:[]; const stock=this.totalStock(p); const cols=p.colors||[]; const userColor=s.catalogColors[p.id]; const catColor=cols.length?(userColor||cols[0]):null; const catStock=cols.length?this.colorStock(p,catColor):stock; const fp=userColor?this.firstPhoto(p,userColor):this.featuredPhoto(p); const cq=cartQtyMap[p.id]||0; return {...p,scents,stock,featured:!!p.featured,categoryLabel:this.catLabel(p.category),priceFmt:this.fmt(p.price),slotId:this.mainSlot(p.id),img:this.photoUrlFor(p),catImgSlot:fp.slot,catImgSrc:fp.src,cartQty:cq,inCart:cq>0,soldOut:catStock<=0,stockLabel:stock>5?'En stock':(stock>0?('Últimas '+stock+' unidades'):'Sin stock'),stockColor:stock>5?'#6a665e':(stock>0?'#a8742e':'#b3261e'),colorDots:cols.map(n=>({name:n,hex:this.hex(n,p)})),colorBtns:cols.map(n=>({name:n,set:()=>this.setCatColor(p.id,n),style:'width:18px;height:18px;border-radius:999px;cursor:pointer;background:'+this.hex(n,p)+';transition:box-shadow .2s;'+(n===catColor?'box-shadow:inset 0 0 0 2px #fff,0 0 0 2px #232220;':'box-shadow:inset 0 0 0 1px rgba(35,34,32,.18);')}))}; };
+    const dec=p=>{ const scents=this.isScented(p)?p.scents:[]; const stock=this.totalStock(p); const cols=p.colors||[]; const userColor=s.catalogColors[p.id]; const catColor=cols.length?(userColor||cols[0]):null; const catStock=cols.length?this.colorStock(p,catColor):stock; const fp=userColor?this.firstPhoto(p,userColor):this.featuredPhoto(p); const cq=cartQtyMap[p.id]||0; return {...p,scents,stock,featured:!!p.featured,categoryLabel:this.catLabel(p.category),priceFmt:this.fmt(p.price),slotId:this.mainSlot(p.id),img:this.photoUrlFor(p),catImgSlot:fp.slot,catImgSrc:fp.src,cardId:'ec-catcard-'+p.id,cartQty:cq,inCart:cq>0,soldOut:catStock<=0,stockLabel:stock>5?'En stock':(stock>0?('Últimas '+stock+' unidades'):'Sin stock'),stockColor:stock>5?'#6a665e':(stock>0?'#a8742e':'#b3261e'),colorDots:cols.map(n=>({name:n,hex:this.hex(n,p)})),colorBtns:cols.map(n=>({name:n,set:()=>this.setCatColor(p.id,n),style:'width:18px;height:18px;border-radius:999px;cursor:pointer;background:'+this.hex(n,p)+';transition:box-shadow .2s;'+(n===catColor?'box-shadow:inset 0 0 0 2px #fff,0 0 0 2px #232220;':'box-shadow:inset 0 0 0 1px rgba(35,34,32,.18);')}))}; };
     const decoded=s.products.map(dec);
     const byId=id=>decoded.find(p=>p.id===id);
 
