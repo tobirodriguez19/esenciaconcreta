@@ -62,6 +62,8 @@
 <script src="/js/images.js"></script>
 <script src="/js/catalog.js"></script>
 <script src="/js/product.js"></script>
+<script src="/js/cart.js"></script>
+<script src="/js/checkout.js"></script>
 </helmet>
 <meta name="ext-resource-dependency" content="uploads/products/bandeja-organica.jpg">
 <meta name="ext-resource-dependency" content="uploads/products/bandeja-rect.jpg">
@@ -1608,7 +1610,7 @@ class Component extends DCLogic {
     super(props);
     // Métodos compartidos, definidos en js/core/*.js (ver <helmet>) y mezclados acá
     // antes de armar el estado inicial, porque emptyNP()/parseRoute() ya se usan abajo.
-    Object.assign(this, EC.utils(this), EC.gestures(this), EC.seo(this), EC.auth(this), EC.router(this), EC.images(this), EC.catalog(this), EC.product(this));
+    Object.assign(this, EC.utils(this), EC.gestures(this), EC.seo(this), EC.auth(this), EC.router(this), EC.images(this), EC.catalog(this), EC.product(this), EC.cart(this), EC.checkout(this));
     this.HEX = {'Arena':'#D8CBB6','Cemento':'#B6B1A8','Blanco':'#EFEDE7','Carbón':'#2A2926','Negro':'#2A2926','Terrazo claro':'#D6CFC2','Terrazo oscuro':'#8C877E'};
     this.PHOTO_IDS = new Set(['vela-bruma','vela-niebla','portavela-cilindro','portavela-trio','bandeja-organica','bandeja-rect','florero-tubo','florero-bombe','posavasos-cuarteto','posavasos-terrazo','sahumerio-lineal','sahumerio-cuenco']);
     this.NO_PHOTO_IMG = 'data:image/svg+xml,'+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="400" height="500"><rect width="100%" height="100%" fill="#EFEEEA"/><text x="50%" y="50%" font-family="sans-serif" font-size="22" fill="#9a958c" text-anchor="middle" dominant-baseline="middle">Sin imagen</text></svg>');
@@ -1897,62 +1899,9 @@ class Component extends DCLogic {
   // backToCatalog) y el drawer mobile → js/router.js
 
   // cart
-  cartCount(){ return this.state.cart.reduce((a,b)=>a+b.qty,0); }
-  addToCart(id,color,scent,qty){ const p=this.getProduct(id); const avail=this.stockFor(id,color,scent); if(avail<=0){ this.showToast('Sin stock disponible'); return; } const key=id+'|'+color+'|'+(scent||''); const cart=this.state.cart.slice(); const ex=cart.find(c=>c.key===key); if(ex){ ex.qty=Math.min(avail,ex.qty+qty); } else { cart.push({key,id,color,scent:scent||null,qty:Math.min(avail,qty)}); } this.setState({cart,cartBump:this.state.cartBump+1}); }
-  quickAdd(id){ const p=this.getProduct(id); const color=this.state.catalogColors[id]||(p.colors&&p.colors.length?p.colors[0]:null); this.addToCart(id,color,this.isScented(p)?p.scents[0]:null,1); }
-  setDetailColor(n){ this.pauseVideos(); this.setState({detailColor:n,galleryIndex:0,videoActivated:false}); }
-  setDetailScent(n){ this.setState({detailScent:n,detailQty:1}); }
-  incDetail=()=>{ const max=this.stockFor(this.state.productId,this.state.detailColor,this.state.detailScent)||0; this.setState({detailQty:Math.min(Math.max(1,max),this.state.detailQty+1)}); };
-  decDetail=()=>{ this.setState({detailQty:Math.max(1,this.state.detailQty-1)}); };
-  addDetail=()=>{ const p=this.getProduct(this.state.productId); if(!p) return; const color=this.state.detailColor||p.colors[0]; const scent=this.isScented(p)?(this.state.detailScent||p.scents[0]):null; if(this.stockFor(p.id,color,scent)<=0){ this.showToast('Sin stock disponible'); return; } this.addToCart(p.id,color,scent,this.state.detailQty); this.openCart(); };
-  incLine(key){ const cart=this.state.cart.slice(); const it=cart.find(c=>c.key===key); it.qty=Math.min(this.stockFor(it.id,it.color,it.scent),it.qty+1); this.setState({cart}); }
-  decLine(key){ let cart=this.state.cart.slice(); const it=cart.find(c=>c.key===key); it.qty-=1; if(it.qty<=0) cart=cart.filter(c=>c.key!==key); this.setState({cart}); }
-  removeLine(key){ this.setState({cart:this.state.cart.filter(c=>c.key!==key)}); }
-  openCart=()=>{ if(this._closeT) clearTimeout(this._closeT); this.navigate('/carrito'); this.setState({cartMounted:true,cartOpen:true}); };
-  closeCart=(skipHistory)=>{ this.setState({cartOpen:false}); if(this._closeT) clearTimeout(this._closeT); this._closeT=setTimeout(()=>this.setState({cartMounted:false}),300); if(!skipHistory&&location.pathname==='/carrito'){ try{ history.back(); }catch(e){} } };
-  goCatalogFromCart=()=>{ this.closeCart(true); this.goCatalog(); };
-  goCheckout=()=>{ if(!this.state.cart.length){ this.showToast('Tu carrito está vacío'); return; } this.closeCart(true); this.navigate('/checkout'); this.setState({view:'checkout'}); this.scrollTop(); };
+  // Carrito → js/cart.js
 
-  // ============================================================
-  // VENTAS — checkout público (RPC create_order) y datos de pago
-  // ============================================================
-  // checkout
-  onNombre=e=>this.setState({form:{...this.state.form,nombre:e.target.value}});
-  onApellido=e=>this.setState({form:{...this.state.form,apellido:e.target.value}});
-  onTelefono=e=>this.setState({form:{...this.state.form,telefono:e.target.value}});
-  onEmail=e=>this.setState({form:{...this.state.form,email:e.target.value}});
-  onDireccion=e=>this.setState({form:{...this.state.form,direccion:e.target.value}});
-  selRetiro=()=>this.setState({fulfillment:'retiro'});
-  selEnvio=()=>this.setState({fulfillment:'envio'});
-  selTransfer=()=>this.setState({payment:'transferencia'});
-  selEfectivo=()=>this.setState({payment:'efectivo'});
-  buildLines(){ return this.state.cart.map(it=>{ const p=this.getProduct(it.id); const total=p.price*it.qty; return {key:it.key,id:it.id,color:it.color,scent:it.scent||null,name:p.name,qty:it.qty,total,priceFmt:this.fmt(p.price),lineFmt:this.fmt(total),slotId:'ec-prod-'+p.id,img:this.photoUrlFor(p),meta:it.scent?(it.color+' · '+it.scent):('Color · '+it.color),inc:()=>this.incLine(it.key),dec:()=>this.decLine(it.key),remove:()=>this.removeLine(it.key)}; }); }
-  placeOrder=async()=>{
-    const f=this.state.form;
-    if(!f.nombre||!f.email){ this.showToast('Completá tu nombre y email'); return; }
-    if(this.state.fulfillment==='envio'&&!f.direccion){ this.showToast('Ingresá tu dirección de envío'); return; }
-    const lines=this.buildLines();
-    const subtotal=lines.reduce((a,l)=>a+l.total,0);
-    const shipping=this.state.fulfillment==='envio'?(this.state.config.shipping||0):0;
-    const total=subtotal+shipping;
-    const address=this.state.fulfillment==='envio'?f.direccion:'';
-    const items=this.state.cart.map(it=>({product_id:it.id,color_name:it.color,aroma_name:it.scent||null,quantity:it.qty,unit_price:this.getProduct(it.id).price}));
-    const { data,error } = await supabaseClient.rpc('create_order',{
-      p_customer:{name:f.nombre,last_name:f.apellido,email:f.email,phone:f.telefono,address},
-      p_items:items, p_channel:'online', p_payment_method:this.state.payment,
-      p_pay_status:'pendiente', p_delivery_status:'pendiente', p_address:address, p_notes:'', p_seen:false
-    });
-    if(error){ this.showToast(/sin stock/i.test(error.message)?error.message:'No se pudo procesar el pedido'); return; }
-    if(shipping>0) await supabaseClient.from('sales').update({total}).eq('id',data.sale_id);
-    const isTransfer=this.state.payment==='transferencia';
-    const order={code:'#'+String(data.sale_id).padStart(2,'0'),name:f.nombre,totalFmt:this.fmt(total),isTransfer,isEfectivo:!isTransfer,deliveryWord:this.state.fulfillment==='envio'?'el envío':'el retiro',items:lines.map(l=>({name:l.name,meta:l.meta,qty:l.qty,lineFmt:this.fmt(l.total)}))};
-    const products=this.applyStock(this.state.products,this.state.cart,-1);
-    this.navigate('/confirmacion',true);
-    this.setState({products,order,view:'confirm',cart:[]});
-    this.scrollTop();
-  };
-  sendReceipt=()=>{ const num=String((this.state.config&&this.state.config.whatsapp)||'').replace(/\D/g,''); const url='https://wa.me/'+num; try{ window.open(url,'_blank','noopener'); }catch(e){ window.location.href=url; } };
-  backToShop=()=>{ this.navigate('/'); this.setState({order:null,view:'home'}); this.scrollTop(); };
+  // Checkout público (RPC create_order) → js/checkout.js
 
   // ============================================================
   // PRODUCTOS — alta y borrado
