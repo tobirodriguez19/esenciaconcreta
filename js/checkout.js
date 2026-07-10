@@ -39,6 +39,9 @@ EC.checkout = function (self) {
         items: lines.map(l => '- ' + l.name + (l.meta ? ' (' + l.meta + ')' : '') + ' x' + l.qty + ' — ' + l.lineFmt).join('\n'),
         shipping: self.fmt(shipping), total: order.totalFmt
       });
+      self.notifyCustomerOrderReceived({
+        to_email: f.email, customer_name: f.nombre, order_id: data.sale_id, delivery_word: order.deliveryWord
+      });
       const products = self.applyStock(self.state.products, self.state.cart, -1);
       self.navigate('/confirmacion', true);
       self.setState({ products, order, view: 'confirm', cart: [] });

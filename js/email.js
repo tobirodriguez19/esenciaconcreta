@@ -9,6 +9,12 @@ EC.email = function (self) {
         emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, params)
           .catch(e => console.error('notifySale failed', e));
       } catch (e) { console.error('notifySale failed', e); }
+    },
+    notifyCustomerOrderReceived: (params) => {
+      try {
+        emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_CUSTOMER_TEMPLATE_ID, params)
+          .catch(e => console.error('notifyCustomerOrderReceived failed', e));
+      } catch (e) { console.error('notifyCustomerOrderReceived failed', e); }
     }
   };
 };
