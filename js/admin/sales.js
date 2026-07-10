@@ -50,6 +50,7 @@ EC.admin.sales = function (self) {
       });
       if (error) { self.showToast(/sin stock/i.test(error.message) ? error.message : 'Error al registrar la venta'); return; }
       self.notifySale({
+        notice_type: 'Nueva venta',
         to_email: self.state.config.notifyEmails || '', order_id: data.sale_id, customer_name: (d.nombre || 'Mostrador') + (d.apellido ? ' ' + d.apellido : ''), customer_phone: '', customer_email: '',
         delivery_method: 'Venta presencial', payment_method: d.method === 'efectivo' ? 'Efectivo' : d.method,
         items: d.items.map(it => { const p = self.getProduct(it.id); const meta = it.color ? (' (' + it.color + (it.scent ? ' · ' + it.scent : '') + ')') : ''; return '- ' + p.name + meta + ' x' + it.qty + ' — ' + self.fmt(p.price * it.qty); }).join('\n'),

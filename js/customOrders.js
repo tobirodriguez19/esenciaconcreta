@@ -21,11 +21,21 @@ EC.customOrders = function (self) {
     submitCustomOrder: async () => {
       const d = self.state.customOrderDraft;
       if (!d.nombre.trim() || !d.telefono.trim()) { self.showToast('Completá tu nombre y teléfono'); return; }
+      // No hace falta leer de vuelta la fila insertada (y tampoco se podría: RLS
+      // solo permite SELECT a admin) — para el email alcanza una referencia
+      // armada del lado del cliente, no es un número de pedido real.
       const { error } = await supabaseClient.from('custom_orders').insert({
         product_id: d.productId, product_name: d.productName, color_name: d.color, aroma_name: d.scent, quantity: d.qty,
         customer_name: d.nombre.trim(), customer_phone: d.telefono.trim(), comment: d.comentario.trim() || null
       });
       if (error) { self.showToast('No se pudo enviar el pedido: ' + error.message); return; }
+      self.notifySale({
+        notice_type: 'Nuevo pedido por encargo',
+        to_email: self.state.config.notifyEmails || '', order_id: 'ENC-' + Date.now().toString().slice(-6), customer_name: d.nombre.trim(), customer_phone: d.telefono.trim(), customer_email: '',
+        delivery_method: 'Pedido por encargo', payment_method: '-',
+        items: '- ' + d.productName + (d.color ? (' (' + d.color + (d.scent ? ' · ' + d.scent : '') + ')') : '') + ' x' + d.qty + (d.comentario.trim() ? ('\nComentario: ' + d.comentario.trim()) : ''),
+        shipping: '-', total: '-'
+      });
       self.closeCustomOrderModal();
       self.showToast('¡Pedido enviado! Te vamos a contactar para coordinar.');
     }

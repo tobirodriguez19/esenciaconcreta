@@ -34,6 +34,7 @@ EC.checkout = function (self) {
       const isTransfer = self.state.payment === 'transferencia';
       const order = { code: '#' + String(data.sale_id).padStart(2, '0'), name: f.nombre, totalFmt: self.fmt(data.total), isTransfer, isEfectivo: !isTransfer, deliveryWord: self.state.fulfillment === 'envio' ? 'el envío' : 'el retiro', items: lines.map(l => ({ name: l.name, meta: l.meta, qty: l.qty, lineFmt: self.fmt(l.total) })) };
       self.notifySale({
+        notice_type: 'Nueva venta',
         to_email: self.state.config.notifyEmails || '', order_id: data.sale_id, customer_name: (f.nombre + ' ' + f.apellido).trim(), customer_phone: f.telefono, customer_email: f.email,
         delivery_method: self.state.fulfillment === 'envio' ? 'Envío a domicilio' : 'Retiro en local', payment_method: isTransfer ? 'Transferencia' : 'Efectivo',
         items: lines.map(l => '- ' + l.name + (l.meta ? ' (' + l.meta + ')' : '') + ' x' + l.qty + ' — ' + l.lineFmt).join('\n'),
