@@ -42,7 +42,7 @@ EC.admin.sales = function (self) {
     registerSale: async () => {
       const d = self.state.saleDraft;
       if (!d.items.length) { self.showToast('Agregá al menos un producto'); return; }
-      const items = d.items.map(it => ({ product_id: it.id, color_name: it.color, aroma_name: it.scent || null, quantity: it.qty, unit_price: self.getProduct(it.id).price }));
+      const items = d.items.map(it => ({ product_id: it.id, color_name: it.color || '', aroma_name: it.scent || null, quantity: it.qty, unit_price: self.getProduct(it.id).price }));
       const { data, error } = await supabaseClient.rpc('create_order', {
         p_customer: { name: d.nombre || 'Mostrador', last_name: d.apellido || '', email: null, phone: null, address: null },
         p_items: items, p_channel: 'presencial', p_payment_method: d.method,
@@ -102,7 +102,7 @@ EC.admin.sales = function (self) {
       const seq = self.state.saleEditSeq; const old = self.state.sales.find(x => x.seq === seq);
       if (!old) { self.closeSaleEdit(); return; }
       if (!self.state.saleEditItems.length) { self.showToast('La venta necesita al menos un producto'); return; }
-      const items = self.state.saleEditItems.map(it => ({ product_id: it.id, color_name: it.color, aroma_name: it.scent || null, quantity: it.qty, unit_price: self.getProduct(it.id).price }));
+      const items = self.state.saleEditItems.map(it => ({ product_id: it.id, color_name: it.color || '', aroma_name: it.scent || null, quantity: it.qty, unit_price: self.getProduct(it.id).price }));
       const { data, error } = await supabaseClient.rpc('edit_sale_items', { p_sale_id: seq, p_items: items });
       if (error) { self.showToast('Error al guardar: ' + error.message); return; }
       let products = self.state.products;

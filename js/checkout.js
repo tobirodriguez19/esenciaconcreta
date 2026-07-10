@@ -14,7 +14,7 @@ EC.checkout = function (self) {
     selEfectivo: () => self.setState({ payment: 'efectivo' }),
     buildLines: () => self.state.cart.map(it => {
       const p = self.getProduct(it.id); const total = p.price * it.qty;
-      return { key: it.key, id: it.id, color: it.color, scent: it.scent || null, name: p.name, qty: it.qty, total, priceFmt: self.fmt(p.price), lineFmt: self.fmt(total), slotId: 'ec-prod-' + p.id, img: self.photoUrlFor(p), meta: it.scent ? (it.color + ' · ' + it.scent) : ('Color · ' + it.color), inc: () => self.incLine(it.key), dec: () => self.decLine(it.key), remove: () => self.removeLine(it.key) };
+      return { key: it.key, id: it.id, color: it.color, scent: it.scent || null, name: p.name, qty: it.qty, total, priceFmt: self.fmt(p.price), lineFmt: self.fmt(total), slotId: 'ec-prod-' + p.id, img: self.photoUrlFor(p), meta: it.scent ? (it.color + ' · ' + it.scent) : (it.color ? ('Color · ' + it.color) : ''), inc: () => self.incLine(it.key), dec: () => self.decLine(it.key), remove: () => self.removeLine(it.key) };
     }),
     placeOrder: async () => {
       const f = self.state.form;
@@ -25,7 +25,7 @@ EC.checkout = function (self) {
       const shipping = self.state.fulfillment === 'envio' ? (self.state.config.shipping || 0) : 0;
       const total = subtotal + shipping;
       const address = self.state.fulfillment === 'envio' ? f.direccion : '';
-      const items = self.state.cart.map(it => ({ product_id: it.id, color_name: it.color, aroma_name: it.scent || null, quantity: it.qty, unit_price: self.getProduct(it.id).price }));
+      const items = self.state.cart.map(it => ({ product_id: it.id, color_name: it.color || '', aroma_name: it.scent || null, quantity: it.qty, unit_price: self.getProduct(it.id).price }));
       const { data, error } = await supabaseClient.rpc('create_order', {
         p_customer: { name: f.nombre, last_name: f.apellido, email: f.email, phone: f.telefono, address },
         p_items: items, p_channel: 'online', p_payment_method: self.state.payment,
