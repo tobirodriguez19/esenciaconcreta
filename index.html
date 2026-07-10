@@ -52,26 +52,26 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
 <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;0,6..72,500;1,6..72,400&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/css/app.css">
-<script src="/image-slot.js"></script>
-<script src="/js/core/utils.js"></script>
-<script src="/js/core/gestures.js"></script>
-<script src="/js/core/seo.js"></script>
-<script src="/js/core/renderVals.js"></script>
-<script src="/js/auth.js"></script>
-<script src="/js/router.js"></script>
-<script src="/js/images.js"></script>
-<script src="/js/catalog.js"></script>
-<script src="/js/product.js"></script>
-<script src="/js/cart.js"></script>
-<script src="/js/checkout.js"></script>
-<script src="/js/admin/products.js"></script>
-<script src="/js/admin/categories.js"></script>
-<script src="/js/admin/aromas.js"></script>
-<script src="/js/admin/sales.js"></script>
-<script src="/js/admin/stock.js"></script>
-<script src="/js/admin/siteContent.js"></script>
-<script src="/js/admin/featured.js"></script>
+<link rel="stylesheet" href="/css/app.css?v=2">
+<script src="/image-slot.js?v=2"></script>
+<script src="/js/core/utils.js?v=2"></script>
+<script src="/js/core/gestures.js?v=2"></script>
+<script src="/js/core/seo.js?v=2"></script>
+<script src="/js/core/renderVals.js?v=2"></script>
+<script src="/js/auth.js?v=2"></script>
+<script src="/js/router.js?v=2"></script>
+<script src="/js/images.js?v=2"></script>
+<script src="/js/catalog.js?v=2"></script>
+<script src="/js/product.js?v=2"></script>
+<script src="/js/cart.js?v=2"></script>
+<script src="/js/checkout.js?v=2"></script>
+<script src="/js/admin/products.js?v=2"></script>
+<script src="/js/admin/categories.js?v=2"></script>
+<script src="/js/admin/aromas.js?v=2"></script>
+<script src="/js/admin/sales.js?v=2"></script>
+<script src="/js/admin/stock.js?v=2"></script>
+<script src="/js/admin/siteContent.js?v=2"></script>
+<script src="/js/admin/featured.js?v=2"></script>
 </helmet>
 <meta name="ext-resource-dependency" content="uploads/products/bandeja-organica.jpg">
 <meta name="ext-resource-dependency" content="uploads/products/bandeja-rect.jpg">
@@ -1628,6 +1628,9 @@ class Component extends DCLogic {
       if(location.hash==='#admin'){ initView='admin'; }
       else if(location.pathname==='/carrito'){ initCartOpen=true; }
       else { const r=this.parseRoute(location.pathname); initView=r.view; initProductId=r.productId||null; }
+      // Carga directa de /checkout o /confirmacion: el carrito y el pedido siempre
+      // arrancan vacíos (no se persisten), así que no hay nada que mostrar ahí.
+      if(initView==='checkout'||initView==='confirm'){ initView='home'; try{ this.navigate('/',true); }catch(e){} }
     }
     this.state={
       view:initView, adminTab:'productos', productId:initProductId,

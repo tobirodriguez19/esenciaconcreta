@@ -32,6 +32,9 @@ EC.router = function (self) {
         self.setState({ ...resetAdmin, view: 'product', productId: r.productId, detailColor: p ? (self.state.catalogColors[r.productId] || (p.colors[0] || null)) : null, detailScent: (p && self.isScented(p)) ? p.scents[0] : null, detailQty: 1, galleryIndex: 0, videoActivated: false });
       } else if (r.view === 'confirm') {
         if (self.state.order) self.setState({ ...resetAdmin, view: 'confirm' }); else self.navigate('/', true);
+      } else if (r.view === 'checkout' && !self.state.cart.length) {
+        self.navigate('/', true);
+        self.setState({ ...resetAdmin, view: 'home' });
       } else {
         self.setState({ ...resetAdmin, view: r.view });
       }
