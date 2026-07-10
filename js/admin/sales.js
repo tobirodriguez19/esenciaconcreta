@@ -31,7 +31,6 @@ EC.admin.sales = function (self) {
     toggleSaleAdding: () => self.setState({ saleAdding: !self.state.saleAdding, salePick: { id: '', color: '', scent: '', qty: 1 }, saleDraft: self.emptySaleDraft() }),
     pickSaleProduct: (id) => { const p = self.getProduct(id); self.setState({ salePick: { id, color: p ? (p.colors[0] || '') : '', scent: p && self.isScented(p) ? p.scents[0] : '', qty: 1 } }); },
     clearSalePick: () => self.setState({ salePick: { id: '', color: '', scent: '', qty: 1 } }),
-    onSalePickColor: e => self.setState({ salePick: { ...self.state.salePick, color: e.target.value } }),
     onSalePickColorVal: c => self.setState({ salePick: { ...self.state.salePick, color: c } }),
     onSalePickScent: e => self.setState({ salePick: { ...self.state.salePick, scent: e.target.value } }),
     onSalePickQty: e => { const n = parseInt(String(e.target.value).replace(/\D/g, ''), 10); self.setState({ salePick: { ...self.state.salePick, qty: Math.max(1, isNaN(n) ? 1 : n) } }); },
