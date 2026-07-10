@@ -59,19 +59,20 @@
 <script src="/js/core/utils.js?v=3"></script>
 <script src="/js/core/gestures.js?v=3"></script>
 <script src="/js/core/seo.js?v=4"></script>
-<script src="/js/core/renderVals.js?v=5"></script>
+<script src="/js/core/renderVals.js?v=6"></script>
 <script src="/js/auth.js?v=3"></script>
-<script src="/js/router.js?v=4"></script>
+<script src="/js/router.js?v=5"></script>
 <script src="/js/images.js?v=3"></script>
 <script src="/js/catalog.js?v=4"></script>
 <script src="/js/product.js?v=3"></script>
 <script src="/js/cart.js?v=3"></script>
 <script src="/js/checkout.js?v=5"></script>
 <script src="/js/customOrders.js?v=1"></script>
-<script src="/js/admin/products.js?v=3"></script>
+<script src="/js/admin/products.js?v=4"></script>
 <script src="/js/admin/categories.js?v=3"></script>
 <script src="/js/admin/aromas.js?v=3"></script>
 <script src="/js/admin/sales.js?v=4"></script>
+<script src="/js/admin/customOrders.js?v=1"></script>
 <script src="/js/admin/stock.js?v=3"></script>
 <script src="/js/admin/siteContent.js?v=3"></script>
 <script src="/js/admin/featured.js?v=3"></script>
@@ -408,7 +409,7 @@
             <sc-if value="{{ selectedProduct.canCustomOrder }}" hint-placeholder-val="{{ false }}">
               <div style="background:#F3F0E9;border:1px solid rgba(35,34,32,.1);border-radius:16px;padding:20px 22px;margin:18px 0 28px;max-width:460px">
                 <div style="font-family:Newsreader,serif;font-size:18px;color:#232220;margin-bottom:6px">Esta pieza se fabrica por encargo</div>
-                <p style="font-size:14px;color:#6a665e;margin:0 0 4px">No tenemos esta combinación en stock ahora, pero podemos fabricarla especialmente para vos.</p>
+                <p style="font-size:14px;color:#6a665e;margin:0 0 4px">{{ selectedProduct.customOrderMsg }}</p>
                 <sc-if value="{{ selectedProduct.customOrderEtaLabel }}" hint-placeholder-val="{{ '' }}">
                   <p style="font-size:13px;color:#8a857b;margin:0 0 14px">{{ selectedProduct.customOrderEtaLabel }}</p>
                 </sc-if>
@@ -836,6 +837,25 @@
                         <textarea value="{{ p.longDesc }}" onChange="{{ p.onLongDesc }}" style="border:1px solid rgba(35,34,32,.16);border-radius:10px;padding:10px 12px;font-size:14px;outline:none;min-height:72px;resize:vertical;font-family:inherit" style-focus="border-color:#232220"></textarea>
                       </label>
                     </div>
+                  </div>
+
+                  <!-- PEDIDOS POR ENCARGO -->
+                  <div style="margin-top:14px;padding-top:14px;border-top:1px solid rgba(35,34,32,.07)">
+                    <div style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#9a958c;margin-bottom:10px">Pedidos por encargo</div>
+                    <label style="display:flex;align-items:center;gap:8px;font-size:13px;color:#56534c;margin-bottom:12px;cursor:pointer">
+                      <input type="checkbox" checked="{{ p.allowCustomOrder }}" onChange="{{ p.onToggleAllowCustomOrder }}" style="width:16px;height:16px;cursor:pointer">
+                      Permitir pedidos por encargo cuando no haya stock
+                    </label>
+                    <sc-if value="{{ p.allowCustomOrder }}" hint-placeholder-val="{{ false }}">
+                      <label style="display:flex;flex-direction:column;gap:6px;font-size:12px;color:#6a665e;max-width:280px">Tiempo estimado de fabricación
+                        <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:4px">
+                          <sc-for list="{{ p.etaPresets }}" as="ep" hint-placeholder-count="3">
+                            <button onClick="{{ ep.set }}" style="background:none;border:1px solid rgba(35,34,32,.18);cursor:pointer;border-radius:999px;padding:5px 12px;font-size:12px;color:#56534c" style-hover="background:rgba(35,34,32,.05)">{{ ep.label }}</button>
+                          </sc-for>
+                        </div>
+                        <input value="{{ p.customOrderEta }}" onChange="{{ p.onCustomOrderEta }}" placeholder="Ej. 48 h, o un texto personalizado" style="border:1px solid rgba(35,34,32,.16);border-radius:10px;padding:9px 12px;font-size:14px;outline:none" style-focus="border-color:#232220">
+                      </label>
+                    </sc-if>
                   </div>
 
                   <!-- VIDEO -->
@@ -1318,6 +1338,43 @@
         </div>
         </sc-if>
 
+        <!-- ===== PEDIDOS POR ENCARGO ===== -->
+        <sc-if value="{{ tabEncargos }}" hint-placeholder-val="{{ false }}">
+        <div>
+          <h2 style="font-family:Newsreader,serif;font-weight:400;font-size:24px;margin:0 0 18px">Pedidos por encargo</h2>
+          <sc-if value="{{ customOrdersEmpty }}" hint-placeholder-val="{{ false }}">
+            <div style="background:#fff;border:1px dashed rgba(35,34,32,.18);border-radius:16px;padding:44px;text-align:center;color:#9a958c;font-size:14px">Todavía no hay pedidos por encargo.</div>
+          </sc-if>
+          <div style="display:flex;flex-direction:column;gap:14px">
+            <sc-for list="{{ customOrdersList }}" as="o" hint-placeholder-count="2">
+              <div style="background:#fff;border:1px solid rgba(35,34,32,.07);border-radius:14px;padding:18px 20px">
+                <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:14px;flex-wrap:wrap;margin-bottom:10px">
+                  <div>
+                    <div style="font-family:Newsreader,serif;font-size:18px;color:#232220">{{ o.productName }} × {{ o.qty }}</div>
+                    <div style="font-size:12.5px;color:#9a958c"><sc-if value="{{ o.hasColor }}" hint-placeholder-val="{{ false }}">{{ o.color }}<sc-if value="{{ o.hasAroma }}" hint-placeholder-val="{{ false }}"> · </sc-if></sc-if><sc-if value="{{ o.hasAroma }}" hint-placeholder-val="{{ false }}">{{ o.aroma }}</sc-if></div>
+                  </div>
+                  <div style="font-size:12px;color:#9a958c">{{ o.dateFmt }}</div>
+                </div>
+                <div style="font-size:13.5px;color:#56534c;margin-bottom:10px">{{ o.customerName }} · {{ o.customerPhone }}</div>
+                <sc-if value="{{ o.hasComment }}" hint-placeholder-val="{{ false }}">
+                  <div style="font-size:13px;color:#6a665e;background:#F3F0E9;border-radius:10px;padding:9px 12px;margin-bottom:12px">{{ o.comment }}</div>
+                </sc-if>
+                <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end">
+                  <label style="display:flex;flex-direction:column;gap:6px;font-size:12px;color:#6a665e">Estado
+                    <select value="{{ o.status }}" onChange="{{ o.onStatus }}" style="border:1px solid rgba(35,34,32,.16);border-radius:10px;padding:9px 12px;font-size:13.5px;outline:none;background:#fff">
+                      <sc-for list="{{ o.statusOptions }}" as="so" hint-placeholder-count="5"><option value="{{ so.value }}">{{ so.label }}</option></sc-for>
+                    </select>
+                  </label>
+                  <label style="display:flex;flex-direction:column;gap:6px;font-size:12px;color:#6a665e;flex:1 1 220px;min-width:200px">Notas internas
+                    <input value="{{ o.notes }}" onChange="{{ o.onNotes }}" placeholder="Sin notas" style="border:1px solid rgba(35,34,32,.16);border-radius:10px;padding:9px 12px;font-size:13.5px;outline:none" style-focus="border-color:#232220">
+                  </label>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+        </sc-if>
+
         <!-- ===== DESTACADOS ===== -->
         <sc-if value="{{ tabDestacados }}" hint-placeholder-val="{{ false }}">
         <div>
@@ -1712,7 +1769,7 @@ class Component extends DCLogic {
     super(props);
     // Métodos compartidos, definidos en js/core/*.js (ver <helmet>) y mezclados acá
     // antes de armar el estado inicial, porque emptyNP()/parseRoute() ya se usan abajo.
-    Object.assign(this, EC.utils(this), EC.gestures(this), EC.seo(this), EC.auth(this), EC.router(this), EC.images(this), EC.email(this), EC.catalog(this), EC.product(this), EC.cart(this), EC.checkout(this), EC.customOrders(this), EC.admin.products(this), EC.admin.categories(this), EC.admin.aromas(this), EC.admin.sales(this), EC.admin.stock(this), EC.admin.siteContent(this), EC.admin.featured(this), EC.admin.config(this), EC.core.renderVals(this));
+    Object.assign(this, EC.utils(this), EC.gestures(this), EC.seo(this), EC.auth(this), EC.router(this), EC.images(this), EC.email(this), EC.catalog(this), EC.product(this), EC.cart(this), EC.checkout(this), EC.customOrders(this), EC.admin.products(this), EC.admin.categories(this), EC.admin.aromas(this), EC.admin.sales(this), EC.admin.customOrders(this), EC.admin.stock(this), EC.admin.siteContent(this), EC.admin.featured(this), EC.admin.config(this), EC.core.renderVals(this));
     this.HEX = {'Arena':'#D8CBB6','Cemento':'#B6B1A8','Blanco':'#EFEDE7','Carbón':'#2A2926','Negro':'#2A2926','Terrazo claro':'#D6CFC2','Terrazo oscuro':'#8C877E'};
     this.PHOTO_IDS = new Set(['vela-bruma','vela-niebla','portavela-cilindro','portavela-trio','bandeja-organica','bandeja-rect','florero-tubo','florero-bombe','posavasos-cuarteto','posavasos-terrazo','sahumerio-lineal','sahumerio-cuenco']);
     this.NO_PHOTO_IMG = 'data:image/svg+xml,'+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="400" height="500"><rect width="100%" height="100%" fill="#EFEEEA"/><text x="50%" y="50%" font-family="sans-serif" font-size="22" fill="#9a958c" text-anchor="middle" dominant-baseline="middle">Sin imagen</text></svg>');
@@ -1729,7 +1786,7 @@ class Component extends DCLogic {
     this.state={
       view:initView, adminTab:'productos', productId:initProductId,
       cartMounted:initCartOpen, cartOpen:initCartOpen,
-      categories:cats, products:[], aromas:[], sales:[],
+      categories:cats, products:[], aromas:[], sales:[], customOrders:[],
       config:{shipping:5000,alias:'esencia.concreta',cbu:'0000003100093421750001',titular:'María Pérez',whatsapp:'5493492583885',notifyEmails:'tobiirodriguezz19@gmail.com'},
       cfgEditing:false, cfgDraft:null,
       oficio:{eyebrow:'',title:'',body:'',steps:[]}, oficioPhotoUrl:'', oficioEditing:false, oficioDraft:null,

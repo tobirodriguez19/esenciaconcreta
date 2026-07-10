@@ -10,7 +10,8 @@ EC.admin.products = function (self) {
       name: p.name, shortDesc: p.shortDesc || '', longDesc: p.longDesc || '', price: p.price, sku: p.sku || '', category: p.category,
       colors: (p.colors || []).map(name => ({ orig: name, name, hex: (p.colorHex && p.colorHex[name]) || '' })),
       scents: (p.scents || []).slice(),
-      cstock: JSON.parse(JSON.stringify(p.cstock || {}))
+      cstock: JSON.parse(JSON.stringify(p.cstock || {})),
+      allowCustomOrder: !!p.allowCustomOrder, customOrderEta: p.customOrderEta || ''
     }),
     startEditProduct: (id) => {
       const p = self.getProduct(id); if (!p) return;
@@ -81,7 +82,7 @@ EC.admin.products = function (self) {
       if (!d.name.trim()) { self.showToast('Poné un nombre'); return; }
       try {
         const price = parseInt(String(d.price).replace(/\D/g, ''), 10) || 0;
-        const { error: pErr } = await supabaseClient.from('products').update({ name: d.name.trim(), short_desc: d.shortDesc, long_desc: d.longDesc, price, sku: d.sku || null, category_id: d.category }).eq('id', id);
+        const { error: pErr } = await supabaseClient.from('products').update({ name: d.name.trim(), short_desc: d.shortDesc, long_desc: d.longDesc, price, sku: d.sku || null, category_id: d.category, allow_custom_order: !!d.allowCustomOrder, custom_order_eta: d.customOrderEta || '' }).eq('id', id);
         if (pErr) throw pErr;
 
         // product_colors solo guarda colores con nombre real — un producto sin color no tiene filas ahí.

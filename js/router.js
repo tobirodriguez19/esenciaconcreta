@@ -58,6 +58,7 @@ EC.router = function (self) {
           }
         });
       }
+      if (tab === 'encargos') self.loadCustomOrders();
     },
     verProceso: () => { self.navigate('/conocenos'); self.setState({ view: 'about' }); self.scrollTop(); },
     verContacto: () => { self.navigate('/contacto'); self.setState({ view: 'contact' }); self.scrollTop(); },
