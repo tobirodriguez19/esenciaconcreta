@@ -207,6 +207,7 @@ EC.admin.products = function (self) {
     },
     deleteProduct: (id) => { const p = self.getProduct(id); self.askConfirm({ title: 'Desactivar producto', message: '¿Desactivar "' + (p ? p.name : '') + '"? Deja de verse en la tienda, pero podés reactivarlo después desde "Inactivos".', yesLabel: 'Desactivar', danger: true, onYes: async () => { const { error } = await supabaseClient.from('products').update({ active: false }).eq('id', id); if (error) { self.showToast('Error: ' + error.message); return; } self.setState({ products: self.state.products.filter(x => x.id !== id), cart: self.state.cart.filter(c => c.id !== id) }); await self.loadInactive(); self.showToast('Producto desactivado'); } }); },
     reactivateProduct: async (id) => { const { error } = await supabaseClient.from('products').update({ active: true }).eq('id', id); if (error) { self.showToast('Error: ' + error.message); return; } await self.loadCatalog(); await self.loadInactive(); self.showToast('Producto reactivado'); },
-    onAromaSearch: e => self.setState({ aromaSearch: e.target.value })
+    onAromaSearch: e => self.setState({ aromaSearch: e.target.value }),
+    toggleInactiveProducts: () => self.setState({ inactiveProductsOpen: !self.state.inactiveProductsOpen })
   };
 };

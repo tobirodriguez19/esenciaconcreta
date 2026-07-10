@@ -65,6 +65,8 @@
 <script src="/js/cart.js"></script>
 <script src="/js/checkout.js"></script>
 <script src="/js/admin/products.js"></script>
+<script src="/js/admin/categories.js"></script>
+<script src="/js/admin/aromas.js"></script>
 </helmet>
 <meta name="ext-resource-dependency" content="uploads/products/bandeja-organica.jpg">
 <meta name="ext-resource-dependency" content="uploads/products/bandeja-rect.jpg">
@@ -1611,7 +1613,7 @@ class Component extends DCLogic {
     super(props);
     // Métodos compartidos, definidos en js/core/*.js (ver <helmet>) y mezclados acá
     // antes de armar el estado inicial, porque emptyNP()/parseRoute() ya se usan abajo.
-    Object.assign(this, EC.utils(this), EC.gestures(this), EC.seo(this), EC.auth(this), EC.router(this), EC.images(this), EC.catalog(this), EC.product(this), EC.cart(this), EC.checkout(this), EC.admin.products(this));
+    Object.assign(this, EC.utils(this), EC.gestures(this), EC.seo(this), EC.auth(this), EC.router(this), EC.images(this), EC.catalog(this), EC.product(this), EC.cart(this), EC.checkout(this), EC.admin.products(this), EC.admin.categories(this), EC.admin.aromas(this));
     this.HEX = {'Arena':'#D8CBB6','Cemento':'#B6B1A8','Blanco':'#EFEDE7','Carbón':'#2A2926','Negro':'#2A2926','Terrazo claro':'#D6CFC2','Terrazo oscuro':'#8C877E'};
     this.PHOTO_IDS = new Set(['vela-bruma','vela-niebla','portavela-cilindro','portavela-trio','bandeja-organica','bandeja-rect','florero-tubo','florero-bombe','posavasos-cuarteto','posavasos-terrazo','sahumerio-lineal','sahumerio-cuenco']);
     this.NO_PHOTO_IMG = 'data:image/svg+xml,'+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="400" height="500"><rect width="100%" height="100%" fill="#EFEEEA"/><text x="50%" y="50%" font-family="sans-serif" font-size="22" fill="#9a958c" text-anchor="middle" dominant-baseline="middle">Sin imagen</text></svg>');
@@ -1748,39 +1750,7 @@ class Component extends DCLogic {
 
   // Checkout público (RPC create_order) → js/checkout.js
 
-  // ============================================================
-  // CATEGORÍAS
-  // ============================================================
-  toggleCatAdding=()=>this.setState({catAdding:!this.state.catAdding,newCat:{label:''}});
-  setNCat(patch){ this.setState({newCat:{...this.state.newCat,...patch}}); }
-  addCategory=async()=>{ const label=(this.state.newCat.label||'').trim(); if(!label){ this.showToast('Poné un nombre'); return; } let id=this.slug(label); if(!id) id='cat-'+Date.now(); if(this.state.categories.some(c=>c.id===id)) id=id+'-'+Math.floor(Math.random()*999); const sortOrder=this.state.categories.reduce((m,c)=>Math.max(m,c.sortOrder||0),0)+1; const { error } = await supabaseClient.from('categories').insert({id,label,sort_order:sortOrder}); if(error){ this.showToast('Error al crear categoría: '+error.message); return; } this.setState({categories:[...this.state.categories,{id,label,sortOrder}],catAdding:false,newCat:{label:''}}); this.showToast(label+' · categoría creada'); };
-  moveCategory=async(id,dir)=>{
-    const list=this.state.categories.slice().sort((a,b)=>(a.sortOrder??0)-(b.sortOrder??0));
-    const i=list.findIndex(c=>c.id===id); if(i<0) return;
-    const j=i+dir; if(j<0||j>=list.length) return;
-    const a=list[i], b=list[j]; const posA=a.sortOrder??i, posB=b.sortOrder??j;
-    this.setState({categories:this.state.categories.map(c=>{ if(c.id===a.id) return {...c,sortOrder:posB}; if(c.id===b.id) return {...c,sortOrder:posA}; return c; })});
-    await supabaseClient.from('categories').update({sort_order:posB}).eq('id',a.id);
-    await supabaseClient.from('categories').update({sort_order:posA}).eq('id',b.id);
-  };
-  setCatLabel(id,v){ this.setState({categories:this.state.categories.map(c=>c.id===id?{...c,label:v}:c)}); this.debounce('catlabel:'+id,()=>supabaseClient.from('categories').update({label:v}).eq('id',id)); }
-  deleteCategory(id){ const c=this.getCat(id); this.askConfirm({title:'Desactivar categoría',message:'¿Desactivar "'+(c?c.label:'')+'"? Los productos que la usan la mantienen; podés reactivarla después desde "Inactivas".',yesLabel:'Desactivar',danger:true,onYes:async()=>{ const { error } = await supabaseClient.from('categories').update({active:false}).eq('id',id); if(error){ this.showToast('Error: '+error.message); return; } this.setState({categories:this.state.categories.filter(x=>x.id!==id)}); await this.loadInactive(); this.showToast('Categoría desactivada'); }}); }
-  reactivateCategory=async(id)=>{ const { error } = await supabaseClient.from('categories').update({active:true}).eq('id',id); if(error){ this.showToast('Error: '+error.message); return; } await this.loadCatalog(); await this.loadInactive(); this.showToast('Categoría reactivada'); };
-
-  // ============================================================
-  // AROMAS (catálogo)
-  // ============================================================
-  setNewAroma=e=>this.setState({newAroma:e.target.value});
-  addAroma=async()=>{ const name=(this.state.newAroma||'').trim(); if(!name) return; if(this.state.aromas.some(a=>a.toLowerCase()===name.toLowerCase())){ this.showToast('Ese aroma ya existe'); return; } const { error } = await supabaseClient.from('aromas').insert({name}); if(error){ this.showToast('Error al crear aroma: '+error.message); return; } this.setState({aromas:[name,...this.state.aromas],newAroma:''}); this.showToast(name+' · aroma agregado'); };
-  startAromaEdit(name){ this.setState({aromaEditName:name,aromaEdits:{...this.state.aromaEdits,[name]:name}}); }
-  cancelAromaEdit(name){ const edits={...this.state.aromaEdits}; delete edits[name]; this.setState({aromaEditName:null,aromaEdits:edits}); }
-  setAromaEdit(name,v){ this.setState({aromaEdits:{...this.state.aromaEdits,[name]:v}}); }
-  saveAromaName=async(oldName)=>{ const v=(this.state.aromaEdits[oldName]!=null?this.state.aromaEdits[oldName]:oldName).trim(); const edits={...this.state.aromaEdits}; delete edits[oldName]; if(!v||v===oldName){ this.setState({aromaEdits:edits,aromaEditName:null}); return; } if(this.state.aromas.some(a=>a.toLowerCase()===v.toLowerCase())){ this.showToast('Ese aroma ya existe'); return; } const { error } = await supabaseClient.from('aromas').update({name:v}).eq('name',oldName); if(error){ this.showToast('Error al renombrar: '+error.message); return; } await supabaseClient.from('stock').update({aroma_name:v}).eq('aroma_name',oldName); await this.loadCatalog(); this.setState(s=>({aromas:s.aromas.map(a=>a===v?v:a),aromaEdits:edits,aromaEditName:null})); this.showToast('Aroma actualizado'); };
-  deleteAroma(name){ this.askConfirm({title:'Desactivar aroma',message:'¿Desactivar "'+name+'"? Los productos que ya lo usan lo mantienen; podés reactivarlo después desde "Inactivos".',yesLabel:'Desactivar',danger:true,onYes:async()=>{ const { error } = await supabaseClient.from('aromas').update({active:false}).eq('name',name); if(error){ this.showToast('Error: '+error.message); return; } this.setState({aromas:this.state.aromas.filter(a=>a!==name)}); await this.loadInactive(); this.showToast('Aroma desactivado'); }}); }
-  reactivateAroma=async(name)=>{ const { error } = await supabaseClient.from('aromas').update({active:true}).eq('name',name); if(error){ this.showToast('Error: '+error.message); return; } await this.loadCatalog(); await this.loadInactive(); this.showToast('Aroma reactivado'); };
-  toggleInactiveProducts=()=>this.setState({inactiveProductsOpen:!this.state.inactiveProductsOpen});
-  toggleInactiveCategories=()=>this.setState({inactiveCategoriesOpen:!this.state.inactiveCategoriesOpen});
-  toggleInactiveAromas=()=>this.setState({inactiveAromasOpen:!this.state.inactiveAromasOpen});
+  // Categorías → js/admin/categories.js. Aromas → js/admin/aromas.js.
 
   // config
   setCfg(patch){ this.setState({config:{...this.state.config,...patch}}); }
