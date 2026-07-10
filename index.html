@@ -59,14 +59,15 @@
 <script src="/js/core/utils.js?v=3"></script>
 <script src="/js/core/gestures.js?v=3"></script>
 <script src="/js/core/seo.js?v=4"></script>
-<script src="/js/core/renderVals.js?v=4"></script>
+<script src="/js/core/renderVals.js?v=5"></script>
 <script src="/js/auth.js?v=3"></script>
 <script src="/js/router.js?v=4"></script>
 <script src="/js/images.js?v=3"></script>
-<script src="/js/catalog.js?v=3"></script>
+<script src="/js/catalog.js?v=4"></script>
 <script src="/js/product.js?v=3"></script>
 <script src="/js/cart.js?v=3"></script>
 <script src="/js/checkout.js?v=5"></script>
+<script src="/js/customOrders.js?v=1"></script>
 <script src="/js/admin/products.js?v=3"></script>
 <script src="/js/admin/categories.js?v=3"></script>
 <script src="/js/admin/aromas.js?v=3"></script>
@@ -393,15 +394,27 @@
               
               
             </sc-if>
-            <div style="display: flex; align-items: center; gap: 20px; margin-bottom: -5px; flex-wrap: wrap">
-              <div style="display:flex;align-items:center;border:1px solid rgba(35,34,32,.16);border-radius:999px;overflow:hidden">
-                <button onClick="{{ decDetail }}" style="background:none;border:none;cursor:pointer;width:44px;height:46px;font-size:20px;color:#232220" style-hover="background:rgba(35,34,32,.05)">−</button>
-                <span style="min-width:34px;text-align:center;font-size:16px;font-weight:600">{{ detailQty }}</span>
-                <button onClick="{{ incDetail }}" style="background:none;border:none;cursor:pointer;width:44px;height:46px;font-size:20px;color:#232220" style-hover="background:rgba(35,34,32,.05)">+</button>
+            <sc-if value="{{ selectedProduct.showAddButton }}" hint-placeholder-val="{{ true }}">
+              <div style="display: flex; align-items: center; gap: 20px; margin-bottom: -5px; flex-wrap: wrap">
+                <div style="display:flex;align-items:center;border:1px solid rgba(35,34,32,.16);border-radius:999px;overflow:hidden">
+                  <button onClick="{{ decDetail }}" style="background:none;border:none;cursor:pointer;width:44px;height:46px;font-size:20px;color:#232220" style-hover="background:rgba(35,34,32,.05)">−</button>
+                  <span style="min-width:34px;text-align:center;font-size:16px;font-weight:600">{{ detailQty }}</span>
+                  <button onClick="{{ incDetail }}" style="background:none;border:none;cursor:pointer;width:44px;height:46px;font-size:20px;color:#232220" style-hover="background:rgba(35,34,32,.05)">+</button>
+                </div>
+                <span style="font-size:14px;color:{{ selectedProduct.stockColor }}">{{ selectedProduct.stockLabel }}</span>
               </div>
-              <span style="font-size:14px;color:{{ selectedProduct.stockColor }}">{{ selectedProduct.stockLabel }}</span>
-            </div>
-            <button onClick="{{ addDetail }}" style="width:100%;max-width:460px;background:#232220;color:#FAF9F6;border:none;cursor:pointer;border-radius:999px;padding:18px;font-size:15px;letter-spacing:.02em;margin:18px 0 28px;transition:background .25s,transform .2s" style-hover="background:#3a3833;transform:translateY(-2px)">{{ selectedProduct.addLabel }}</button>
+              <button onClick="{{ addDetail }}" style="width:100%;max-width:460px;background:#232220;color:#FAF9F6;border:none;cursor:pointer;border-radius:999px;padding:18px;font-size:15px;letter-spacing:.02em;margin:18px 0 28px;transition:background .25s,transform .2s" style-hover="background:#3a3833;transform:translateY(-2px)">{{ selectedProduct.addLabel }}</button>
+            </sc-if>
+            <sc-if value="{{ selectedProduct.canCustomOrder }}" hint-placeholder-val="{{ false }}">
+              <div style="background:#F3F0E9;border:1px solid rgba(35,34,32,.1);border-radius:16px;padding:20px 22px;margin:18px 0 28px;max-width:460px">
+                <div style="font-family:Newsreader,serif;font-size:18px;color:#232220;margin-bottom:6px">Esta pieza se fabrica por encargo</div>
+                <p style="font-size:14px;color:#6a665e;margin:0 0 4px">No tenemos esta combinación en stock ahora, pero podemos fabricarla especialmente para vos.</p>
+                <sc-if value="{{ selectedProduct.customOrderEtaLabel }}" hint-placeholder-val="{{ '' }}">
+                  <p style="font-size:13px;color:#8a857b;margin:0 0 14px">{{ selectedProduct.customOrderEtaLabel }}</p>
+                </sc-if>
+                <button onClick="{{ openCustomOrderModal }}" style="background:#232220;color:#FAF9F6;border:none;cursor:pointer;border-radius:999px;padding:14px 26px;font-size:14.5px;letter-spacing:.02em;transition:background .25s" style-hover="background:#3a3833">Encargar este producto</button>
+              </div>
+            </sc-if>
 
           </div>
         </div>
@@ -422,6 +435,35 @@
           </div>
         </sc-if>
       </section></div>
+    </sc-if>
+
+    <!-- ===================== MODAL: ENCARGAR PRODUCTO ===================== -->
+    <sc-if value="{{ customOrderOpen }}" hint-placeholder-val="{{ false }}">
+      <div onClick="{{ closeCustomOrderModal }}" style="position:fixed;inset:0;background:rgba(20,19,17,.5);z-index:82;display:flex;align-items:center;justify-content:center;padding:16px;animation:ecOverlayIn .2s ease both">
+        <div onClick="{{ stop }}" style="background:#FAF9F6;border-radius:18px;width:min(480px,100%);max-height:90vh;overflow-y:auto;padding:26px;animation:ecPop .25s ease both">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:6px">
+            <h3 style="font-family:Newsreader,serif;font-weight:400;font-size:22px;margin:0">Encargar este producto</h3>
+            <button onClick="{{ closeCustomOrderModal }}" style="background:none;border:none;cursor:pointer;font-size:24px;color:#6a665e;line-height:1" style-hover="color:#232220">×</button>
+          </div>
+          <p style="font-size:13.5px;color:#6a665e;margin:0 0 18px">{{ customOrderDraft.productName }}<sc-if value="{{ customOrderDraft.color }}" hint-placeholder-val="{{ '' }}"> · {{ customOrderDraft.color }}</sc-if><sc-if value="{{ customOrderDraft.scent }}" hint-placeholder-val="{{ '' }}"> · {{ customOrderDraft.scent }}</sc-if></p>
+
+          <label style="display:flex;flex-direction:column;gap:6px;font-size:12px;color:#6a665e;margin-bottom:14px">Cantidad
+            <div style="display:flex;align-items:center;border:1px solid rgba(35,34,32,.16);border-radius:999px;overflow:hidden;width:fit-content">
+              <button onClick="{{ decCoQty }}" style="background:none;border:none;cursor:pointer;width:38px;height:42px;font-size:18px;color:#232220" style-hover="background:rgba(35,34,32,.05)">−</button>
+              <span style="min-width:32px;text-align:center;font-size:15px;font-weight:600">{{ customOrderDraft.qty }}</span>
+              <button onClick="{{ incCoQty }}" style="background:none;border:none;cursor:pointer;width:38px;height:42px;font-size:18px;color:#232220" style-hover="background:rgba(35,34,32,.05)">+</button>
+            </div>
+          </label>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px">
+            <input value="{{ customOrderDraft.nombre }}" onChange="{{ onCoNombre }}" placeholder="Nombre" style="border:1px solid rgba(35,34,32,.16);border-radius:10px;padding:11px 13px;font-size:14px;outline:none;min-width:0" style-focus="border-color:#232220">
+            <input value="{{ customOrderDraft.telefono }}" onChange="{{ onCoTelefono }}" placeholder="Teléfono" style="border:1px solid rgba(35,34,32,.16);border-radius:10px;padding:11px 13px;font-size:14px;outline:none;min-width:0" style-focus="border-color:#232220">
+          </div>
+          <label style="display:flex;flex-direction:column;gap:6px;font-size:12px;color:#6a665e;margin-bottom:20px">Comentario (opcional)
+            <textarea value="{{ customOrderDraft.comentario }}" onChange="{{ onCoComentario }}" rows="3" placeholder="Alguna aclaración sobre tu pedido…" style="border:1px solid rgba(35,34,32,.16);border-radius:10px;padding:11px 13px;font-size:14px;outline:none;resize:vertical;font-family:inherit" style-focus="border-color:#232220"></textarea>
+          </label>
+          <button onClick="{{ submitCustomOrder }}" style="width:100%;background:#232220;color:#FAF9F6;border:none;cursor:pointer;border-radius:999px;padding:15px;font-size:14.5px;letter-spacing:.02em;transition:background .25s" style-hover="background:#3a3833">Enviar pedido</button>
+        </div>
+      </div>
     </sc-if>
 
     <!-- ===================== CONOCENOS ===================== -->
@@ -1670,7 +1712,7 @@ class Component extends DCLogic {
     super(props);
     // Métodos compartidos, definidos en js/core/*.js (ver <helmet>) y mezclados acá
     // antes de armar el estado inicial, porque emptyNP()/parseRoute() ya se usan abajo.
-    Object.assign(this, EC.utils(this), EC.gestures(this), EC.seo(this), EC.auth(this), EC.router(this), EC.images(this), EC.email(this), EC.catalog(this), EC.product(this), EC.cart(this), EC.checkout(this), EC.admin.products(this), EC.admin.categories(this), EC.admin.aromas(this), EC.admin.sales(this), EC.admin.stock(this), EC.admin.siteContent(this), EC.admin.featured(this), EC.admin.config(this), EC.core.renderVals(this));
+    Object.assign(this, EC.utils(this), EC.gestures(this), EC.seo(this), EC.auth(this), EC.router(this), EC.images(this), EC.email(this), EC.catalog(this), EC.product(this), EC.cart(this), EC.checkout(this), EC.customOrders(this), EC.admin.products(this), EC.admin.categories(this), EC.admin.aromas(this), EC.admin.sales(this), EC.admin.stock(this), EC.admin.siteContent(this), EC.admin.featured(this), EC.admin.config(this), EC.core.renderVals(this));
     this.HEX = {'Arena':'#D8CBB6','Cemento':'#B6B1A8','Blanco':'#EFEDE7','Carbón':'#2A2926','Negro':'#2A2926','Terrazo claro':'#D6CFC2','Terrazo oscuro':'#8C877E'};
     this.PHOTO_IDS = new Set(['vela-bruma','vela-niebla','portavela-cilindro','portavela-trio','bandeja-organica','bandeja-rect','florero-tubo','florero-bombe','posavasos-cuarteto','posavasos-terrazo','sahumerio-lineal','sahumerio-cuenco']);
     this.NO_PHOTO_IMG = 'data:image/svg+xml,'+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="400" height="500"><rect width="100%" height="100%" fill="#EFEEEA"/><text x="50%" y="50%" font-family="sans-serif" font-size="22" fill="#9a958c" text-anchor="middle" dominant-baseline="middle">Sin imagen</text></svg>');
@@ -1693,6 +1735,7 @@ class Component extends DCLogic {
       oficio:{eyebrow:'',title:'',body:'',steps:[]}, oficioPhotoUrl:'', oficioEditing:false, oficioDraft:null,
       saleEditSeq:null, saleEditItems:[], saleSearch:'', photoModal:null,
       cart:[],
+      customOrderOpen:false, customOrderDraft:null,
       navMounted:false, navOpen:false,
       filter:'todos', searchQuery:'', chipsExpanded:false, navCatExpanded:false, homeCatExpanded:false, catalogColors:{}, catalogScroll:0, lastCatalogProductId:null, cartBump:0, galleryIndex:0, videoActivated:false,
       prodSearch:'', prodCatFilter:'todas', expanded:{}, catGroupCollapsed:{},

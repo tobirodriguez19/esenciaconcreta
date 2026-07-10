@@ -7,7 +7,7 @@ EC.catalog = function (self) {
       try {
         const [catsQ, prodQ, colorsQ, aromasQ, prodAromasQ, stockQ, photosQ] = await Promise.all([
           supabaseClient.from('categories').select('id,label,photo_url,sort_order').eq('active', true).order('sort_order'),
-          supabaseClient.from('products').select('id,category_id,sku,name,short_desc,long_desc,price,featured,featured_order,video_url').eq('active', true),
+          supabaseClient.from('products').select('id,category_id,sku,name,short_desc,long_desc,price,featured,featured_order,video_url,allow_custom_order,custom_order_eta').eq('active', true),
           supabaseClient.from('product_colors').select('product_id,color_name,hex_value,sort_order').order('sort_order'),
           supabaseClient.from('aromas').select('name').eq('active', true),
           supabaseClient.from('product_aromas').select('product_id,aroma_name,sort_order').order('sort_order'),
@@ -31,7 +31,7 @@ EC.catalog = function (self) {
             if (scented && r.aroma_name) cstock[r.color_name][r.aroma_name] = r.quantity;
             else if (!scented) cstock[r.color_name] = r.quantity;
           });
-          return { id: p.id, sku: p.sku, category: p.category_id, name: p.name, price: p.price, featured: p.featured, featuredPos: p.featured_order, shortDesc: p.short_desc, longDesc: p.long_desc, colors, scents, cstock, photoSlots: {}, photos: photosByProduct[p.id] || [], colorHex: colorHexByProduct[p.id] || {}, videoUrl: p.video_url || '' };
+          return { id: p.id, sku: p.sku, category: p.category_id, name: p.name, price: p.price, featured: p.featured, featuredPos: p.featured_order, shortDesc: p.short_desc, longDesc: p.long_desc, colors, scents, cstock, photoSlots: {}, photos: photosByProduct[p.id] || [], colorHex: colorHexByProduct[p.id] || {}, videoUrl: p.video_url || '', allowCustomOrder: !!p.allow_custom_order, customOrderEta: p.custom_order_eta || '' };
         });
         const aromas = aromasQ.data.map(a => a.name);
         self.setState({ categories, products, aromas });
