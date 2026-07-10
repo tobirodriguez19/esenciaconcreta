@@ -69,6 +69,8 @@
 <script src="/js/admin/aromas.js"></script>
 <script src="/js/admin/sales.js"></script>
 <script src="/js/admin/stock.js"></script>
+<script src="/js/admin/siteContent.js"></script>
+<script src="/js/admin/featured.js"></script>
 </helmet>
 <meta name="ext-resource-dependency" content="uploads/products/bandeja-organica.jpg">
 <meta name="ext-resource-dependency" content="uploads/products/bandeja-rect.jpg">
@@ -1615,7 +1617,7 @@ class Component extends DCLogic {
     super(props);
     // Métodos compartidos, definidos en js/core/*.js (ver <helmet>) y mezclados acá
     // antes de armar el estado inicial, porque emptyNP()/parseRoute() ya se usan abajo.
-    Object.assign(this, EC.utils(this), EC.gestures(this), EC.seo(this), EC.auth(this), EC.router(this), EC.images(this), EC.catalog(this), EC.product(this), EC.cart(this), EC.checkout(this), EC.admin.products(this), EC.admin.categories(this), EC.admin.aromas(this), EC.admin.sales(this), EC.admin.stock(this));
+    Object.assign(this, EC.utils(this), EC.gestures(this), EC.seo(this), EC.auth(this), EC.router(this), EC.images(this), EC.catalog(this), EC.product(this), EC.cart(this), EC.checkout(this), EC.admin.products(this), EC.admin.categories(this), EC.admin.aromas(this), EC.admin.sales(this), EC.admin.stock(this), EC.admin.siteContent(this), EC.admin.featured(this));
     this.HEX = {'Arena':'#D8CBB6','Cemento':'#B6B1A8','Blanco':'#EFEDE7','Carbón':'#2A2926','Negro':'#2A2926','Terrazo claro':'#D6CFC2','Terrazo oscuro':'#8C877E'};
     this.PHOTO_IDS = new Set(['vela-bruma','vela-niebla','portavela-cilindro','portavela-trio','bandeja-organica','bandeja-rect','florero-tubo','florero-bombe','posavasos-cuarteto','posavasos-terrazo','sahumerio-lineal','sahumerio-cuenco']);
     this.NO_PHOTO_IMG = 'data:image/svg+xml,'+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="400" height="500"><rect width="100%" height="100%" fill="#EFEEEA"/><text x="50%" y="50%" font-family="sans-serif" font-size="22" fill="#9a958c" text-anchor="middle" dominant-baseline="middle">Sin imagen</text></svg>');
@@ -1706,44 +1708,7 @@ class Component extends DCLogic {
 
   // Ventas (alta, listado, cancelar/deshacer, editar) → js/admin/sales.js
 
-  // El Oficio (home) — contenido real en Supabase (site_content), editado con borrador local
-  async loadSiteContent(){
-    const { data,error } = await supabaseClient.from('site_content').select('*').eq('id',1).single();
-    if(error){ console.error('loadSiteContent error',error); return; }
-    this.setState({oficio:{eyebrow:data.oficio_eyebrow,title:data.oficio_title,body:data.oficio_body,steps:data.oficio_steps||[]},oficioPhotoUrl:data.oficio_photo_url||''});
-  }
-  startEditOficio=()=>this.setState({oficioEditing:true,oficioDraft:JSON.parse(JSON.stringify(this.state.oficio))});
-  cancelEditOficio=()=>this.setState({oficioEditing:false,oficioDraft:null});
-  setOficioDraftField(key,v){ this.setState({oficioDraft:{...this.state.oficioDraft,[key]:v}}); }
-  setOficioDraftStep(i,field,v){ const steps=this.state.oficioDraft.steps.map((st,idx)=>idx===i?{...st,[field]:v}:st); this.setState({oficioDraft:{...this.state.oficioDraft,steps}}); }
-  saveOficioDraft=async()=>{
-    const d=this.state.oficioDraft;
-    const { error } = await supabaseClient.from('site_content').update({oficio_eyebrow:d.eyebrow,oficio_title:d.title,oficio_body:d.body,oficio_steps:d.steps}).eq('id',1);
-    if(error){ this.showToast('Error al guardar: '+error.message); return; }
-    this.setState({oficio:d,oficioEditing:false,oficioDraft:null});
-    this.showToast('Cambios guardados');
-  };
-
-  toggleFeatured=async(id)=>{
-    const p=this.getProduct(id); const willFeature=!p.featured;
-    let featuredPos=p.featuredPos;
-    if(willFeature){ const maxPos=this.state.products.reduce((m,x)=>x.featured?Math.max(m,x.featuredPos||0):m,0); featuredPos=maxPos+1; }
-    this.updateProduct(id,{featured:willFeature,featuredPos});
-    const { error } = await supabaseClient.from('products').update({featured:willFeature,featured_order:featuredPos}).eq('id',id);
-    if(error) this.showToast('Error al guardar: '+error.message);
-  };
-  moveFeatured=async(id,dir)=>{
-    const list=this.state.products.filter(p=>p.featured).sort((a,b)=>(a.featuredPos??1e9)-(b.featuredPos??1e9));
-    const i=list.findIndex(p=>p.id===id); if(i<0) return;
-    const j=i+dir; if(j<0||j>=list.length) return;
-    const a=list[i], b=list[j];
-    const posA=a.featuredPos??i, posB=b.featuredPos??j;
-    const products=this.state.products.map(p=>{ if(p.id===a.id) return {...p,featuredPos:posB}; if(p.id===b.id) return {...p,featuredPos:posA}; return p; });
-    this.setState({products});
-    const { error:e1 } = await supabaseClient.from('products').update({featured_order:posB}).eq('id',a.id);
-    const { error:e2 } = await supabaseClient.from('products').update({featured_order:posA}).eq('id',b.id);
-    if(e1||e2) this.showToast('Error al guardar el orden');
-  };
+  // El Oficio → js/admin/siteContent.js. Destacados → js/admin/featured.js.
 
   renderVals(){
     const s=this.state;
