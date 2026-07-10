@@ -64,6 +64,7 @@
 <script src="/js/product.js"></script>
 <script src="/js/cart.js"></script>
 <script src="/js/checkout.js"></script>
+<script src="/js/admin/products.js"></script>
 </helmet>
 <meta name="ext-resource-dependency" content="uploads/products/bandeja-organica.jpg">
 <meta name="ext-resource-dependency" content="uploads/products/bandeja-rect.jpg">
@@ -1610,7 +1611,7 @@ class Component extends DCLogic {
     super(props);
     // Métodos compartidos, definidos en js/core/*.js (ver <helmet>) y mezclados acá
     // antes de armar el estado inicial, porque emptyNP()/parseRoute() ya se usan abajo.
-    Object.assign(this, EC.utils(this), EC.gestures(this), EC.seo(this), EC.auth(this), EC.router(this), EC.images(this), EC.catalog(this), EC.product(this), EC.cart(this), EC.checkout(this));
+    Object.assign(this, EC.utils(this), EC.gestures(this), EC.seo(this), EC.auth(this), EC.router(this), EC.images(this), EC.catalog(this), EC.product(this), EC.cart(this), EC.checkout(this), EC.admin.products(this));
     this.HEX = {'Arena':'#D8CBB6','Cemento':'#B6B1A8','Blanco':'#EFEDE7','Carbón':'#2A2926','Negro':'#2A2926','Terrazo claro':'#D6CFC2','Terrazo oscuro':'#8C877E'};
     this.PHOTO_IDS = new Set(['vela-bruma','vela-niebla','portavela-cilindro','portavela-trio','bandeja-organica','bandeja-rect','florero-tubo','florero-bombe','posavasos-cuarteto','posavasos-terrazo','sahumerio-lineal','sahumerio-cuenco']);
     this.NO_PHOTO_IMG = 'data:image/svg+xml,'+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="400" height="500"><rect width="100%" height="100%" fill="#EFEEEA"/><text x="50%" y="50%" font-family="sans-serif" font-size="22" fill="#9a958c" text-anchor="middle" dominant-baseline="middle">Sin imagen</text></svg>');
@@ -1636,7 +1637,7 @@ class Component extends DCLogic {
       form:{nombre:'',apellido:'',telefono:'',email:'',direccion:''},
       fulfillment:'retiro', payment:'transferencia',
       heroIndex:0,
-      stockEditId:null, aromaSearch:'', cropModal:null,
+      aromaSearch:'', cropModal:null,
       inactiveProducts:[], inactiveCategories:[], inactiveAromas:[],
       inactiveProductsOpen:false, inactiveCategoriesOpen:false, inactiveAromasOpen:false,
       editingProductId:null, productDraft:null, draftColorInput:'', draftColorHex:'#B6B1A8',
@@ -1660,163 +1661,7 @@ class Component extends DCLogic {
   // ============================================================
   salesUnits(id){ let n=0; this.state.sales.forEach(s=>{ if(s.cancelled) return; s.items.forEach(i=>{ if(i.id===id) n+=i.qty; }); }); return n; }
 
-  // ============================================================
-  // PRODUCTOS — edición con borrador local (Guardar/Cancelar)
-  // Nada se escribe en Supabase hasta saveProductDraft().
-  // ============================================================
-  toggleExpand(id){ if(this.state.expanded[id]) this.cancelEditProduct(id); else this.startEditProduct(id); }
-  buildDraft(p){
-    return {
-      name:p.name, shortDesc:p.shortDesc||'', longDesc:p.longDesc||'', price:p.price, sku:p.sku||'', category:p.category,
-      colors:(p.colors||[]).map(name=>({orig:name,name,hex:(p.colorHex&&p.colorHex[name])||''})),
-      scents:(p.scents||[]).slice(),
-      cstock:JSON.parse(JSON.stringify(p.cstock||{}))
-    };
-  }
-  startEditProduct(id){
-    const p=this.getProduct(id); if(!p) return;
-    this.setState({expanded:{...this.state.expanded,[id]:true}, editingProductId:id, productDraft:this.buildDraft(p), draftColorInput:'', draftColorHex:'#B6B1A8'});
-  }
-  cancelEditProduct(id){
-    this.setState({editingProductId:null, productDraft:null, expanded:{...this.state.expanded,[id]:false}});
-  }
-  setDraftField(key,v){ this.setState({productDraft:{...this.state.productDraft,[key]:v}}); }
-  onDraftColorInput=e=>this.setState({draftColorInput:e.target.value});
-  onDraftColorHex=e=>this.setState({draftColorHex:e.target.value});
-  addDraftColor=()=>{
-    const name=(this.state.draftColorInput||'').trim(); if(!name) return;
-    const d=this.state.productDraft;
-    if(d.colors.some(c=>c.name.toLowerCase()===name.toLowerCase())){ this.showToast('Ese color ya existe'); return; }
-    const colors=[...d.colors,{orig:null,name,hex:this.state.draftColorHex}];
-    const cstock={...d.cstock}; cstock[name]=d.scents.length?d.scents.reduce((o,sc)=>{o[sc]=0;return o;},{}):0;
-    this.setState({productDraft:{...d,colors,cstock},draftColorInput:'',draftColorHex:'#B6B1A8'});
-  };
-  renameDraftColor=(idx,name)=>{
-    const d=this.state.productDraft; if(!name||!name.trim()) return; const old=d.colors[idx].name;
-    const colors=d.colors.map((c,i)=>i===idx?{...c,name}:c);
-    const cstock={...d.cstock}; if(old in cstock){ cstock[name]=cstock[old]; if(name!==old) delete cstock[old]; }
-    this.setState({productDraft:{...d,colors,cstock}});
-  };
-  setDraftColorHex=(idx,hex)=>{ const d=this.state.productDraft; const colors=d.colors.map((c,i)=>i===idx?{...c,hex}:c); this.setState({productDraft:{...d,colors}}); };
-  removeDraftColor=(idx)=>{
-    const d=this.state.productDraft;
-    const name=d.colors[idx].name; const colors=d.colors.filter((_,i)=>i!==idx);
-    const cstock={...d.cstock}; delete cstock[name];
-    if(!colors.length){ cstock['']=d.scents.length?d.scents.reduce((o,sc)=>{o[sc]=0;return o;},{}):0; }
-    this.setState({productDraft:{...d,colors,cstock}});
-  };
-  draftAdjustVariant=(color,scent,delta)=>{
-    const d=this.state.productDraft; const cstock=JSON.parse(JSON.stringify(d.cstock)); const scented=d.scents.length>0;
-    if(scented){ if(!cstock[color]||typeof cstock[color]!=='object') cstock[color]={}; cstock[color][scent]=Math.max(0,(cstock[color][scent]||0)+delta); }
-    else { cstock[color]=Math.max(0,(typeof cstock[color]==='number'?cstock[color]:0)+delta); }
-    this.setState({productDraft:{...d,cstock}});
-  };
-  draftSetVariant=(color,scent,v)=>{
-    const n=Math.max(0,parseInt(String(v).replace(/\D/g,''),10)||0);
-    const d=this.state.productDraft; const cstock=JSON.parse(JSON.stringify(d.cstock)); const scented=d.scents.length>0;
-    if(scented){ if(!cstock[color]||typeof cstock[color]!=='object') cstock[color]={}; cstock[color][scent]=n; } else { cstock[color]=n; }
-    this.setState({productDraft:{...d,cstock}});
-  };
-  draftAssignAroma=(name)=>{
-    const d=this.state.productDraft; if(d.scents.indexOf(name)>=0) return;
-    const scents=[...d.scents,name]; const cstock=JSON.parse(JSON.stringify(d.cstock));
-    const keys=d.colors.length?d.colors.map(c=>c.name):[''];
-    keys.forEach(k=>{ if(!cstock[k]||typeof cstock[k]!=='object') cstock[k]={}; if(!(name in cstock[k])) cstock[k][name]=0; });
-    this.setState({productDraft:{...d,scents,cstock}});
-  };
-  draftRemoveAroma=(name)=>{
-    const d=this.state.productDraft; const scents=d.scents.filter(s=>s!==name); const cstock=JSON.parse(JSON.stringify(d.cstock));
-    const keys=d.colors.length?d.colors.map(c=>c.name):[''];
-    keys.forEach(k=>{ if(cstock[k]&&typeof cstock[k]==='object') delete cstock[k][name]; });
-    this.setState({productDraft:{...d,scents,cstock}});
-  };
-  createAndAssignAroma=async()=>{
-    const name=(this.state.aromaSearch||'').trim(); if(!name) return;
-    if(this.state.aromas.some(a=>a.toLowerCase()===name.toLowerCase())){ this.draftAssignAroma(name); this.setState({aromaSearch:''}); return; }
-    const { error } = await supabaseClient.from('aromas').insert({name});
-    if(error){ this.showToast('Error al crear aroma: '+error.message); return; }
-    this.setState({aromas:[name,...this.state.aromas],aromaSearch:''});
-    this.draftAssignAroma(name);
-  };
-  saveProductDraft=async()=>{
-    const id=this.state.editingProductId; const d=this.state.productDraft; const orig=this.getProduct(id);
-    if(!id||!d||!orig) return;
-    if(!d.name.trim()){ this.showToast('Poné un nombre'); return; }
-    try{
-      const price=parseInt(String(d.price).replace(/\D/g,''),10)||0;
-      const { error:pErr } = await supabaseClient.from('products').update({name:d.name.trim(),short_desc:d.shortDesc,long_desc:d.longDesc,price,sku:d.sku||null,category_id:d.category}).eq('id',id);
-      if(pErr) throw pErr;
-
-      // product_colors solo guarda colores con nombre real — un producto sin color no tiene filas ahí.
-      const origColors=orig.colors||[];
-      for(const oc of origColors){
-        if(!d.colors.some(c=>c.orig===oc)){
-          await supabaseClient.from('product_colors').delete().eq('product_id',id).eq('color_name',oc);
-          await supabaseClient.from('stock').delete().eq('product_id',id).eq('color_name',oc);
-        }
-      }
-      for(let i=0;i<d.colors.length;i++){
-        const c=d.colors[i];
-        if(c.orig===null){
-          await supabaseClient.from('product_colors').insert({product_id:id,color_name:c.name,hex_value:c.hex||null,sort_order:i});
-        } else {
-          const patch={sort_order:i, hex_value:c.hex||null};
-          if(c.orig!==c.name) patch.color_name=c.name;
-          await supabaseClient.from('product_colors').update(patch).eq('product_id',id).eq('color_name',c.orig);
-          if(c.orig!==c.name) await supabaseClient.from('stock').update({color_name:c.name}).eq('product_id',id).eq('color_name',c.orig);
-        }
-      }
-
-      // aromas del catálogo global asignados/quitados a este producto
-      const origScents=orig.scents||[];
-      for(const os of origScents){
-        if(d.scents.indexOf(os)<0){
-          await supabaseClient.from('product_aromas').delete().eq('product_id',id).eq('aroma_name',os);
-          await supabaseClient.from('stock').delete().eq('product_id',id).eq('aroma_name',os);
-        }
-      }
-      for(const sc of d.scents){
-        if(origScents.indexOf(sc)<0){
-          await supabaseClient.from('product_aromas').insert({product_id:id,aroma_name:sc,sort_order:d.scents.indexOf(sc)});
-        }
-      }
-
-      // Stock: se normaliza a "al menos un color" usando '' como bucket general cuando el
-      // producto no tiene colores (evita casos especiales duplicados de inserción).
-      const draftColors=d.colors.length?d.colors:[{orig:origColors.length?null:'',name:'',hex:''}];
-      const scentedDraft=d.scents.length>0;
-      for(const c of draftColors){
-        const key=c.name;
-        if(scentedDraft){
-          for(const sc of d.scents){
-            const draftQty=(d.cstock[key]&&d.cstock[key][sc])||0;
-            const origHasCombo=c.orig!==null&&orig.cstock&&orig.cstock[c.orig]&&typeof orig.cstock[c.orig]==='object'&&origScents.indexOf(sc)>=0;
-            if(!origHasCombo){
-              await supabaseClient.from('stock').insert({product_id:id,color_name:key,aroma_name:sc,quantity:draftQty});
-              if(draftQty>0) await this.recordStockMovement(id,key,sc,'entrada',draftQty,'Alta de variante');
-              continue;
-            }
-            const origQty=orig.cstock[c.orig][sc]||0;
-            if(draftQty!==origQty){ await this.upsertStockRemote(id,key,sc,draftQty); await this.recordStockMovement(id,key,sc,'ajuste',draftQty-origQty,'Edición de producto'); }
-          }
-        } else {
-          const draftQty=typeof d.cstock[key]==='number'?d.cstock[key]:0;
-          const origHasColor=c.orig!==null&&typeof orig.cstock[c.orig]==='number';
-          if(!origHasColor){
-            await supabaseClient.from('stock').insert({product_id:id,color_name:key,aroma_name:null,quantity:draftQty});
-            if(draftQty>0) await this.recordStockMovement(id,key,null,'entrada',draftQty,'Alta de variante');
-            continue;
-          }
-          const origQty=typeof orig.cstock[c.orig]==='number'?orig.cstock[c.orig]:0;
-          if(draftQty!==origQty){ await this.upsertStockRemote(id,key,null,draftQty); await this.recordStockMovement(id,key,null,'ajuste',draftQty-origQty,'Edición de producto'); }
-        }
-      }
-
-      this.setState({editingProductId:null,productDraft:null,expanded:{...this.state.expanded,[id]:false}});
-      await this.loadCatalog();
-      this.showToast('Cambios guardados');
-    }catch(e){ console.error('saveProductDraft failed',e); this.showToast('Error al guardar: '+(e&&e.message?e.message:'')); }
-  };
+  // Productos: edición con borrador y alta/baja → js/admin/products.js
   // ============================================================
   // IMAGENES Y VIDEO (Supabase Storage) -> js/images.js
   // ============================================================
@@ -1902,63 +1747,6 @@ class Component extends DCLogic {
   // Carrito → js/cart.js
 
   // Checkout público (RPC create_order) → js/checkout.js
-
-  // ============================================================
-  // PRODUCTOS — alta y borrado
-  // ============================================================
-  setNP(patch){ this.setState({newProduct:{...this.state.newProduct,...patch}}); }
-  toggleProdAdding=()=>this.setState({prodAdding:!this.state.prodAdding,newProduct:this.emptyNP(),newProductPhoto:null});
-  addNPColor=()=>{ const np=this.state.newProduct; const name=(np.colorDraft||'').trim(); if(!name) return; if(np.colorsList.some(c=>c.name.toLowerCase()===name.toLowerCase())){ this.showToast('Ese color ya existe'); return; } this.setNP({colorsList:[...np.colorsList,{name,hex:np.colorDraftHex}],colorDraft:'',colorDraftHex:'#B6B1A8',stockMap:{},stockTouched:false}); };
-  removeNPColor=(idx)=>{ const np=this.state.newProduct; this.setNP({colorsList:np.colorsList.filter((_,i)=>i!==idx),stockMap:{},stockTouched:false}); };
-  addNPAroma=(name)=>{ const np=this.state.newProduct; const v=(name||np.aromaDraft||'').trim(); if(!v) return; if(np.aromasList.some(a=>a.toLowerCase()===v.toLowerCase())){ this.showToast('Ese aroma ya está agregado'); return; } this.setNP({aromasList:[...np.aromasList,v],aromaDraft:'',stockMap:{},stockTouched:false}); };
-  removeNPAroma=(idx)=>{ const np=this.state.newProduct; this.setNP({aromasList:np.aromasList.filter((_,i)=>i!==idx),stockMap:{},stockTouched:false}); };
-  onNPPhoto=e=>{ const f=e.target.files&&e.target.files[0]; this.setState({newProductPhoto:f||null}); this.setNP({photoName:f?f.name:''}); };
-  npComboList(np){
-    const colors=np.colorsList||[]; const aromas=np.aromasList||[];
-    const colorKeys=colors.length?colors.map(c=>c.name):[''];
-    return aromas.length?colorKeys.flatMap(ck=>aromas.map(a=>({color:ck,aroma:a}))):colorKeys.map(ck=>({color:ck,aroma:null}));
-  }
-  setNPStockCombo=(key,v)=>{ const np=this.state.newProduct; this.setNP({stockMap:{...np.stockMap,[key]:v},stockTouched:true}); };
-  addProduct=async()=>{
-    const np=this.state.newProduct; const name=(np.name||'').trim();
-    if(!name){ this.showToast('Poné un nombre'); return; }
-    if(!np.category){ this.showToast('Elegí una categoría'); return; }
-    const price=parseInt(String(np.price).replace(/\D/g,''),10)||0;
-    const colors=np.colorsList||[]; const aromas=np.aromasList||[];
-    const comboList=this.npComboList(np);
-    if(comboList.length>1&&!np.stockTouched){ this.showToast('Repartí el stock entre las variantes antes de crear el producto'); return; }
-    let id=this.slug(name); if(!id) id='prod-'+Date.now();
-    if(this.state.products.some(p=>p.id===id)) id=id+'-'+Math.floor(Math.random()*999);
-    const sd=(np.shortDesc||'').trim();
-    const sku=(np.sku||'').trim()||('AUTO-'+Date.now().toString().slice(-6));
-    const { error:prodErr } = await supabaseClient.from('products').insert({id,sku,category_id:np.category,name,short_desc:sd||'Pieza artesanal de hormigón.',long_desc:sd||'Pieza artesanal hecha a mano en hormigón.',price,featured:false,active:true});
-    if(prodErr){ this.showToast('Error al crear producto: '+prodErr.message); return; }
-
-    if(colors.length){
-      await supabaseClient.from('product_colors').insert(colors.map((c,i)=>({product_id:id,color_name:c.name,hex_value:c.hex||null,sort_order:i})));
-    }
-    if(aromas.length){
-      const newAromaNames=aromas.filter(a=>!this.state.aromas.some(x=>x.toLowerCase()===a.toLowerCase()));
-      if(newAromaNames.length) await supabaseClient.from('aromas').insert(newAromaNames.map(name=>({name})));
-      await supabaseClient.from('product_aromas').insert(aromas.map((a,i)=>({product_id:id,aroma_name:a,sort_order:i})));
-    }
-
-    const stockRows=comboList.length===1
-      ? [{product_id:id,color_name:comboList[0].color,aroma_name:comboList[0].aroma,quantity:Math.max(0,parseInt(np.stock,10)||0)}]
-      : comboList.map(cb=>({product_id:id,color_name:cb.color,aroma_name:cb.aroma,quantity:Math.max(0,parseInt(np.stockMap[cb.color+'|'+(cb.aroma||'')],10)||0)}));
-    await supabaseClient.from('stock').insert(stockRows);
-    await Promise.all(stockRows.map(r=>this.recordStockMovement(id,r.color_name,r.aroma_name,'entrada',r.quantity,'Alta de producto')));
-
-    if(this.state.newProductPhoto) await this.uploadProductPhoto(id,null,this.state.newProductPhoto);
-
-    this.setState({newProduct:this.emptyNP(),newProductPhoto:null,prodAdding:false});
-    await this.loadCatalog();
-    this.showToast(name+' · creado');
-  };
-  deleteProduct(id){ const p=this.getProduct(id); this.askConfirm({title:'Desactivar producto',message:'¿Desactivar "'+(p?p.name:'')+'"? Deja de verse en la tienda, pero podés reactivarlo después desde "Inactivos".',yesLabel:'Desactivar',danger:true,onYes:async()=>{ const { error } = await supabaseClient.from('products').update({active:false}).eq('id',id); if(error){ this.showToast('Error: '+error.message); return; } this.setState({products:this.state.products.filter(x=>x.id!==id),cart:this.state.cart.filter(c=>c.id!==id)}); await this.loadInactive(); this.showToast('Producto desactivado'); }}); }
-  reactivateProduct=async(id)=>{ const { error } = await supabaseClient.from('products').update({active:true}).eq('id',id); if(error){ this.showToast('Error: '+error.message); return; } await this.loadCatalog(); await this.loadInactive(); this.showToast('Producto reactivado'); };
-  toggleStockEdit(id){ this.setState({stockEditId:this.state.stockEditId===id?null:id}); }
-  onAromaSearch=e=>this.setState({aromaSearch:e.target.value});
 
   // ============================================================
   // CATEGORÍAS
