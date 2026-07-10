@@ -49,6 +49,12 @@ EC.admin.sales = function (self) {
         p_pay_status: d.payStatus, p_delivery_status: d.delivery, p_address: null, p_notes: null, p_seen: true
       });
       if (error) { self.showToast(/sin stock/i.test(error.message) ? error.message : 'Error al registrar la venta'); return; }
+      self.notifySale({
+        to_email: self.state.config.notifyEmails || '', order_id: data.sale_id, customer_name: (d.nombre || 'Mostrador') + (d.apellido ? ' ' + d.apellido : ''), customer_phone: '', customer_email: '',
+        delivery_method: 'Venta presencial', payment_method: d.method === 'efectivo' ? 'Efectivo' : d.method,
+        items: d.items.map(it => { const p = self.getProduct(it.id); const meta = it.color ? (' (' + it.color + (it.scent ? ' · ' + it.scent : '') + ')') : ''; return '- ' + p.name + meta + ' x' + it.qty + ' — ' + self.fmt(p.price * it.qty); }).join('\n'),
+        shipping: self.fmt(0), total: self.fmt(data.total)
+      });
       const products = self.applyStock(self.state.products, d.items, -1);
       self.setState({ products, saleAdding: false, salePick: { id: '', color: '', scent: '', qty: 1 }, saleDraft: self.emptySaleDraft() });
       await self.loadSales();

@@ -44,6 +44,8 @@
 </script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script src="/supabase-config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<script src="/email-config.js"></script>
 <script src="/support.js"></script>
 </head>
 <body>
@@ -64,15 +66,16 @@
 <script src="/js/catalog.js?v=3"></script>
 <script src="/js/product.js?v=3"></script>
 <script src="/js/cart.js?v=3"></script>
-<script src="/js/checkout.js?v=3"></script>
+<script src="/js/checkout.js?v=4"></script>
 <script src="/js/admin/products.js?v=3"></script>
 <script src="/js/admin/categories.js?v=3"></script>
 <script src="/js/admin/aromas.js?v=3"></script>
-<script src="/js/admin/sales.js?v=3"></script>
+<script src="/js/admin/sales.js?v=4"></script>
 <script src="/js/admin/stock.js?v=3"></script>
 <script src="/js/admin/siteContent.js?v=3"></script>
 <script src="/js/admin/featured.js?v=3"></script>
 <script src="/js/admin/config.js?v=4"></script>
+<script src="/js/email.js?v=1"></script>
 </helmet>
 <meta name="ext-resource-dependency" content="uploads/products/bandeja-organica.jpg">
 <meta name="ext-resource-dependency" content="uploads/products/bandeja-rect.jpg">
@@ -1086,6 +1089,7 @@
                 <div><div style="font-size:12px;color:#9a958c;margin-bottom:4px">Alias</div><div style="font-size:14px;font-weight:600">{{ cfg.alias }}</div></div>
                 <div><div style="font-size:12px;color:#9a958c;margin-bottom:4px">WhatsApp (comprobantes)</div><div style="font-size:14px;font-weight:600">{{ cfg.whatsapp }}</div></div>
                 <div><div style="font-size:12px;color:#9a958c;margin-bottom:4px">CBU</div><div style="font-size:14px;font-weight:600">{{ cfg.cbu }}</div></div>
+                <div style="grid-column:1/-1"><div style="font-size:12px;color:#9a958c;margin-bottom:4px">Avisos de venta por email</div><div style="font-size:14px;font-weight:600">{{ cfg.notifyEmails }}</div></div>
               </div>
             </sc-if>
             <sc-if value="{{ cfgEditing }}" hint-placeholder-val="{{ false }}">
@@ -1107,6 +1111,9 @@
                 </label>
                 <label style="display:flex;flex-direction:column;gap:6px;font-size:12px;color:#6a665e">CBU
                   <input value="{{ cfgDraftCbu }}" onChange="{{ onCfgDraftCbu }}" style="border:1px solid rgba(35,34,32,.16);border-radius:10px;padding:11px 12px;font-size:14px;outline:none" style-focus="border-color:#232220">
+                </label>
+                <label style="display:flex;flex-direction:column;gap:6px;font-size:12px;color:#6a665e;grid-column:1/-1">Avisos de venta por email (separados por coma)
+                  <input value="{{ cfgDraftNotifyEmails }}" onChange="{{ onCfgDraftNotifyEmails }}" placeholder="Ej. vos@mail.com, socio@mail.com" style="border:1px solid rgba(35,34,32,.16);border-radius:10px;padding:11px 12px;font-size:14px;outline:none" style-focus="border-color:#232220">
                 </label>
               </div>
             </sc-if>
@@ -1663,7 +1670,7 @@ class Component extends DCLogic {
     super(props);
     // Métodos compartidos, definidos en js/core/*.js (ver <helmet>) y mezclados acá
     // antes de armar el estado inicial, porque emptyNP()/parseRoute() ya se usan abajo.
-    Object.assign(this, EC.utils(this), EC.gestures(this), EC.seo(this), EC.auth(this), EC.router(this), EC.images(this), EC.catalog(this), EC.product(this), EC.cart(this), EC.checkout(this), EC.admin.products(this), EC.admin.categories(this), EC.admin.aromas(this), EC.admin.sales(this), EC.admin.stock(this), EC.admin.siteContent(this), EC.admin.featured(this), EC.admin.config(this), EC.core.renderVals(this));
+    Object.assign(this, EC.utils(this), EC.gestures(this), EC.seo(this), EC.auth(this), EC.router(this), EC.images(this), EC.email(this), EC.catalog(this), EC.product(this), EC.cart(this), EC.checkout(this), EC.admin.products(this), EC.admin.categories(this), EC.admin.aromas(this), EC.admin.sales(this), EC.admin.stock(this), EC.admin.siteContent(this), EC.admin.featured(this), EC.admin.config(this), EC.core.renderVals(this));
     this.HEX = {'Arena':'#D8CBB6','Cemento':'#B6B1A8','Blanco':'#EFEDE7','Carbón':'#2A2926','Negro':'#2A2926','Terrazo claro':'#D6CFC2','Terrazo oscuro':'#8C877E'};
     this.PHOTO_IDS = new Set(['vela-bruma','vela-niebla','portavela-cilindro','portavela-trio','bandeja-organica','bandeja-rect','florero-tubo','florero-bombe','posavasos-cuarteto','posavasos-terrazo','sahumerio-lineal','sahumerio-cuenco']);
     this.NO_PHOTO_IMG = 'data:image/svg+xml,'+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="400" height="500"><rect width="100%" height="100%" fill="#EFEEEA"/><text x="50%" y="50%" font-family="sans-serif" font-size="22" fill="#9a958c" text-anchor="middle" dominant-baseline="middle">Sin imagen</text></svg>');
@@ -1681,7 +1688,7 @@ class Component extends DCLogic {
       view:initView, adminTab:'productos', productId:initProductId,
       cartMounted:initCartOpen, cartOpen:initCartOpen,
       categories:cats, products:[], aromas:[], sales:[],
-      config:{shipping:5000,alias:'esencia.concreta',cbu:'0000003100093421750001',titular:'María Pérez',whatsapp:'5493492583885'},
+      config:{shipping:5000,alias:'esencia.concreta',cbu:'0000003100093421750001',titular:'María Pérez',whatsapp:'5493492583885',notifyEmails:'tobiirodriguezz19@gmail.com'},
       cfgEditing:false, cfgDraft:null,
       oficio:{eyebrow:'',title:'',body:'',steps:[]}, oficioPhotoUrl:'', oficioEditing:false, oficioDraft:null,
       saleEditSeq:null, saleEditItems:[], saleSearch:'', photoModal:null,

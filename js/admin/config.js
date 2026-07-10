@@ -14,7 +14,7 @@ EC.admin.config = function (self) {
     loadConfig: async () => {
       const { data, error } = await supabaseClient.from('site_config').select('*').eq('id', 1).single();
       if (error) { console.error('loadConfig error', error); return; }
-      self.setState({ config: { shipping: data.shipping, alias: data.alias, cbu: data.cbu, titular: data.titular, whatsapp: data.whatsapp } });
+      self.setState({ config: { shipping: data.shipping, alias: data.alias, cbu: data.cbu, titular: data.titular, whatsapp: data.whatsapp, notifyEmails: data.notify_emails || '' } });
     },
     startEditCfg: () => self.setState({ cfgEditing: true, cfgDraft: { ...self.state.config } }),
     cancelEditCfg: () => self.setState({ cfgEditing: false, cfgDraft: null }),
@@ -22,8 +22,9 @@ EC.admin.config = function (self) {
     saveCfgDraft: async () => {
       const d = self.state.cfgDraft;
       const n = parseInt(String(d.shipping).replace(/\D/g, ''), 10);
-      const config = { shipping: isNaN(n) ? 0 : n, alias: d.alias || '', cbu: d.cbu || '', titular: d.titular || '', whatsapp: d.whatsapp || '' };
-      const { error } = await supabaseClient.from('site_config').update(config).eq('id', 1);
+      const config = { shipping: isNaN(n) ? 0 : n, alias: d.alias || '', cbu: d.cbu || '', titular: d.titular || '', whatsapp: d.whatsapp || '', notifyEmails: d.notifyEmails || '' };
+      const dbRow = { shipping: config.shipping, alias: config.alias, cbu: config.cbu, titular: config.titular, whatsapp: config.whatsapp, notify_emails: config.notifyEmails };
+      const { error } = await supabaseClient.from('site_config').update(dbRow).eq('id', 1);
       if (error) { self.showToast('Error al guardar: ' + error.message); return; }
       self.setState({ config, cfgEditing: false, cfgDraft: null });
       self.showToast('Cambios guardados');

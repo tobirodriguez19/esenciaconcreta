@@ -254,6 +254,7 @@ EC.core.renderVals = function (self) {
       cfgDraftAlias:s.cfgEditing?s.cfgDraft.alias:'', onCfgDraftAlias:e=>self.setCfgDraftField('alias',e.target.value),
       cfgDraftWhatsapp:s.cfgEditing?s.cfgDraft.whatsapp:'', onCfgDraftWhatsapp:e=>self.setCfgDraftField('whatsapp',e.target.value),
       cfgDraftCbu:s.cfgEditing?s.cfgDraft.cbu:'', onCfgDraftCbu:e=>self.setCfgDraftField('cbu',e.target.value),
+      cfgDraftNotifyEmails:s.cfgEditing?s.cfgDraft.notifyEmails:'', onCfgDraftNotifyEmails:e=>self.setCfgDraftField('notifyEmails',e.target.value),
       adminSales, salesTotal:s.sales.length, hasSales:adminSales.length>0, noSales:adminSales.length===0,
       saleAdding:s.saleAdding, saleAddBtnLabel:s.saleAdding?'Cerrar':'+ Registrar venta presencial', saleAddBtnStyle:self.pillBtn(s.saleAdding), toggleSaleAdding:self.toggleSaleAdding,
       salePick:sp, spActive:!!spProd, spInactive:!spProd, spName:spProd?spProd.name:'—', spPriceFmt:spProd?spProd.priceFmt:'—', spImg:spProd?self.photoUrlFor(spProd):'', spSlot:spProd?('ec-prod-'+spProd.id):'ec-sale-pick',
