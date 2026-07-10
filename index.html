@@ -52,14 +52,14 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
 <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;0,6..72,500;1,6..72,400&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/css/app.css?v=3">
-<script src="/image-slot.js?v=3"></script>
+<link rel="stylesheet" href="/css/app.css?v=4">
+<script src="/image-slot.js?v=4"></script>
 <script src="/js/core/utils.js?v=3"></script>
 <script src="/js/core/gestures.js?v=3"></script>
-<script src="/js/core/seo.js?v=3"></script>
-<script src="/js/core/renderVals.js?v=3"></script>
+<script src="/js/core/seo.js?v=4"></script>
+<script src="/js/core/renderVals.js?v=4"></script>
 <script src="/js/auth.js?v=3"></script>
-<script src="/js/router.js?v=3"></script>
+<script src="/js/router.js?v=4"></script>
 <script src="/js/images.js?v=3"></script>
 <script src="/js/catalog.js?v=3"></script>
 <script src="/js/product.js?v=3"></script>
@@ -72,7 +72,7 @@
 <script src="/js/admin/stock.js?v=3"></script>
 <script src="/js/admin/siteContent.js?v=3"></script>
 <script src="/js/admin/featured.js?v=3"></script>
-<script src="/js/admin/config.js?v=3"></script>
+<script src="/js/admin/config.js?v=4"></script>
 </helmet>
 <meta name="ext-resource-dependency" content="uploads/products/bandeja-organica.jpg">
 <meta name="ext-resource-dependency" content="uploads/products/bandeja-rect.jpg">
@@ -213,24 +213,34 @@
             <div style="font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:#9a958c;margin-bottom:12px">Explorá</div>
             <h2 style="font-family:Newsreader,serif;font-weight:400;font-size:clamp(26px,4vw,46px);margin:0;letter-spacing:-.01em">Nuestras categorías</h2>
           </div>
-          <div style="display:flex;align-items:center;gap:10px">
-            <button onClick="{{ scrollCatPrev }}" aria-label="Anterior" style="width:42px;height:42px;border-radius:999px;background:#fff;border:1px solid rgba(35,34,32,.16);cursor:pointer;font-size:18px;color:#232220;display:flex;align-items:center;justify-content:center;transition:background .2s" style-hover="background:rgba(35,34,32,.05)">‹</button>
-            <button onClick="{{ scrollCatNext }}" aria-label="Siguiente" style="width:42px;height:42px;border-radius:999px;background:#fff;border:1px solid rgba(35,34,32,.16);cursor:pointer;font-size:18px;color:#232220;display:flex;align-items:center;justify-content:center;transition:background .2s" style-hover="background:rgba(35,34,32,.05)">›</button>
+          <div style="display:flex;align-items:center;gap:10px;margin-left:auto">
             <button onClick="{{ goCatalog }}" style="display:inline-flex;align-items:center;gap:10px;background:#232220;color:#FAF9F6;border:none;cursor:pointer;border-radius:999px;padding:13px 24px;font-size:14px;letter-spacing:.01em;transition:background .25s,transform .25s" style-hover="background:#3a3833;transform:translateY(-2px)">Ver todo el catálogo →</button>
           </div>
         </div>
-        <div id="ec-cat-scroll" class="ec-dragscroll" style="display:flex;gap:clamp(12px,1.6vw,22px);overflow-x:auto;scroll-snap-type:x proximity;scroll-behavior:smooth;scroll-padding-left:clamp(20px,5vw,56px);-webkit-overflow-scrolling:touch;cursor:grab;padding:6px clamp(20px,5vw,56px) 12px;margin:-6px calc(-1*clamp(20px,5vw,56px)) 0">
-          <sc-for list="{{ categories }}" as="cat" hint-placeholder-count="6">
-            <button onClick="{{ cat.open }}" style="flex:0 0 clamp(150px,42vw,196px);scroll-snap-align:start;text-align:left;background:#fff;border:1px solid rgba(35,34,32,.06);cursor:pointer;border-radius:16px;overflow:hidden;padding:0;transition:transform .35s ease,box-shadow .35s ease;box-shadow:0 1px 2px rgba(0,0,0,.03)" style-hover="transform:translateY(-5px);box-shadow:0 26px 44px -32px rgba(35,34,32,.5)">
-              <div style="aspect-ratio:4/5;background:#EFEEEA;overflow:hidden">
-                <image-slot id="{{ cat.slotId }}" src="{{ cat.img }}" shape="rect" placeholder="{{ cat.label }}"></image-slot>
-              </div>
+        <div id="ec-cat-scroll" class="{{ homeCatGridClass }}">
+          <sc-for list="{{ homeCatTiles }}" as="cat" hint-placeholder-count="6">
+            <button onClick="{{ cat.open }}" style="text-align:left;background:#fff;border:1px solid rgba(35,34,32,.06);cursor:pointer;border-radius:16px;overflow:hidden;padding:0;transition:transform .35s ease,box-shadow .35s ease;box-shadow:0 1px 2px rgba(0,0,0,.03)" style-hover="transform:translateY(-5px);box-shadow:0 26px 44px -32px rgba(35,34,32,.5)">
+              <sc-if value="{{ cat.isAll }}" hint-placeholder-val="{{ false }}">
+                <div style="aspect-ratio:4/5;background:#232220;overflow:hidden;display:flex;align-items:center;justify-content:center">
+                  <span style="color:#FAF9F6;font-size:28px">→</span>
+                </div>
+              </sc-if>
+              <sc-if value="{{ cat.isCat }}" hint-placeholder-val="{{ true }}">
+                <div style="aspect-ratio:4/5;background:#EFEEEA;overflow:hidden">
+                  <image-slot id="{{ cat.slotId }}" src="{{ cat.img }}" shape="rect" placeholder="{{ cat.label }}"></image-slot>
+                </div>
+              </sc-if>
               <div style="padding:14px 16px 16px">
                 <div style="font-family:Newsreader,serif;font-size:19px;color:#232220">{{ cat.label }}</div>
               </div>
             </button>
           </sc-for>
         </div>
+        <sc-if value="{{ homeCatHasMore }}" hint-placeholder-val="{{ false }}">
+          <div class="ec-cat-more-btn" style="text-align:center;margin-top:18px">
+            <button onClick="{{ onLoadMoreCats }}" style="background:transparent;color:#232220;border:1px solid rgba(35,34,32,.2);cursor:pointer;border-radius:999px;padding:12px 26px;font-size:14px;letter-spacing:.01em;transition:background .25s" style-hover="background:rgba(35,34,32,.05)">Cargar más categorías</button>
+          </div>
+        </sc-if>
       </section>
 
       <!-- EL OFICIO -->
@@ -395,7 +405,7 @@
         <sc-if value="{{ hasRelated }}" hint-placeholder-val="{{ false }}">
           <div style="margin-top:clamp(48px,7vw,80px)">
             <h2 style="font-family:Newsreader,serif;font-weight:400;font-size:clamp(22px,3vw,30px);margin:0 0 18px;letter-spacing:-.01em">También te puede interesar</h2>
-            <div class="ec-dragscroll" style="display:flex;gap:16px;overflow-x:auto;scroll-snap-type:x proximity;-webkit-overflow-scrolling:touch;padding-bottom:8px">
+            <div id="ec-related-scroll" class="ec-dragscroll" style="display:flex;gap:16px;overflow-x:auto;scroll-snap-type:x proximity;-webkit-overflow-scrolling:touch;padding-bottom:8px">
               <sc-for list="{{ relatedProducts }}" as="rp" hint-placeholder-count="4">
                 <button onClick="{{ rp.open }}" style="flex:0 0 clamp(140px,32vw,180px);scroll-snap-align:start;text-align:left;background:none;border:none;padding:0;cursor:pointer">
                   <div style="aspect-ratio:1/1;background:#EFEEEA;border-radius:14px;overflow:hidden;margin-bottom:8px">
@@ -457,6 +467,18 @@
             </a>
           </div>
         </div>
+      </section>
+    </div>
+    </sc-if>
+
+    <!-- ===================== 404 ===================== -->
+    <sc-if value="{{ isNotFound }}" hint-placeholder-val="{{ false }}">
+    <div data-screen-label="404" style="animation:ecFade .5s ease both">
+      <section style="max-width:720px;margin:0 auto;padding:clamp(72px,14vw,160px) clamp(20px,5vw,56px);text-align:center">
+        <div style="font-family:Newsreader,serif;font-size:clamp(48px,10vw,96px);color:#DED9CF;line-height:1;margin-bottom:18px">404</div>
+        <h1 style="font-family:Newsreader,serif;font-weight:400;font-size:clamp(24px,4vw,36px);margin:0 0 14px;letter-spacing:-.01em">Esta página no existe</h1>
+        <p style="font-size:15px;color:#6a665e;margin:0 0 32px">Puede que el enlace esté roto o que la página se haya movido.</p>
+        <button onClick="{{ goHome }}" style="background:#232220;color:#FAF9F6;border:none;border-radius:999px;padding:14px 28px;font-size:14.5px;cursor:pointer" style-hover="background:#3a3833">Volver al inicio</button>
       </section>
     </div>
     </sc-if>
@@ -1045,27 +1067,49 @@
         <sc-if value="{{ tabVentas }}" hint-placeholder-val="{{ false }}">
         <div>
           <div style="background:#fff;border:1px solid rgba(35,34,32,.07);border-radius:16px;padding:22px;margin-bottom:24px">
-            <div style="font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:#9a958c;margin-bottom:16px;font-weight:600">Configuración de la tienda</div>
-            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:14px">
-              <label style="display:flex;flex-direction:column;gap:6px;font-size:12px;color:#6a665e">Costo de envío (Rafaela)
-                <div style="display:flex;align-items:center;border:1px solid rgba(35,34,32,.16);border-radius:10px;overflow:hidden;background:#fff">
-                  <span style="padding:0 2px 0 12px;color:#9a958c">$</span>
-                  <input value="{{ cfg.shipping }}" onChange="{{ onCfgShipping }}" style="border:none;outline:none;padding:11px 12px 11px 4px;font-size:14px;width:100%;background:transparent">
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;margin-bottom:16px">
+              <div style="font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:#9a958c;font-weight:600">Configuración de la tienda</div>
+              <sc-if value="{{ cfgNotEditing }}" hint-placeholder-val="{{ true }}">
+                <button onClick="{{ startEditCfg }}" style="background:none;border:1px solid rgba(35,34,32,.18);cursor:pointer;border-radius:999px;padding:8px 16px;font-size:12.5px;color:#56534c" style-hover="background:rgba(35,34,32,.05)">Editar</button>
+              </sc-if>
+              <sc-if value="{{ cfgEditing }}" hint-placeholder-val="{{ false }}">
+                <div style="display:flex;gap:8px">
+                  <button onClick="{{ cancelEditCfg }}" style="background:none;border:1px solid rgba(35,34,32,.18);cursor:pointer;border-radius:999px;padding:8px 16px;font-size:12.5px;color:#56534c" style-hover="background:rgba(35,34,32,.05)">Cancelar</button>
+                  <button onClick="{{ saveCfgDraft }}" style="background:#232220;color:#FAF9F6;border:none;cursor:pointer;border-radius:999px;padding:8px 18px;font-size:12.5px" style-hover="background:#3a3833">Guardar cambios</button>
                 </div>
-              </label>
-              <label style="display:flex;flex-direction:column;gap:6px;font-size:12px;color:#6a665e">Titular
-                <input value="{{ cfg.titular }}" onChange="{{ onCfgTitular }}" style="border:1px solid rgba(35,34,32,.16);border-radius:10px;padding:11px 12px;font-size:14px;outline:none" style-focus="border-color:#232220">
-              </label>
-              <label style="display:flex;flex-direction:column;gap:6px;font-size:12px;color:#6a665e">Alias
-                <input value="{{ cfg.alias }}" onChange="{{ onCfgAlias }}" style="border:1px solid rgba(35,34,32,.16);border-radius:10px;padding:11px 12px;font-size:14px;outline:none" style-focus="border-color:#232220">
-              </label>
-              <label style="display:flex;flex-direction:column;gap:6px;font-size:12px;color:#6a665e">WhatsApp (para recibir comprobantes)
-                <input value="{{ cfg.whatsapp }}" onChange="{{ onCfgWhatsapp }}" placeholder="Ej. 5493492583885" style="border:1px solid rgba(35,34,32,.16);border-radius:10px;padding:11px 12px;font-size:14px;outline:none" style-focus="border-color:#232220">
-              </label>
-              <label style="display:flex;flex-direction:column;gap:6px;font-size:12px;color:#6a665e">CBU
-                <input value="{{ cfg.cbu }}" onChange="{{ onCfgCbu }}" style="border:1px solid rgba(35,34,32,.16);border-radius:10px;padding:11px 12px;font-size:14px;outline:none" style-focus="border-color:#232220">
-              </label>
+              </sc-if>
             </div>
+            <sc-if value="{{ cfgNotEditing }}" hint-placeholder-val="{{ true }}">
+              <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:14px">
+                <div><div style="font-size:12px;color:#9a958c;margin-bottom:4px">Costo de envío (Rafaela)</div><div style="font-size:14px;font-weight:600">{{ cfgShippingFmt }}</div></div>
+                <div><div style="font-size:12px;color:#9a958c;margin-bottom:4px">Titular</div><div style="font-size:14px;font-weight:600">{{ cfg.titular }}</div></div>
+                <div><div style="font-size:12px;color:#9a958c;margin-bottom:4px">Alias</div><div style="font-size:14px;font-weight:600">{{ cfg.alias }}</div></div>
+                <div><div style="font-size:12px;color:#9a958c;margin-bottom:4px">WhatsApp (comprobantes)</div><div style="font-size:14px;font-weight:600">{{ cfg.whatsapp }}</div></div>
+                <div><div style="font-size:12px;color:#9a958c;margin-bottom:4px">CBU</div><div style="font-size:14px;font-weight:600">{{ cfg.cbu }}</div></div>
+              </div>
+            </sc-if>
+            <sc-if value="{{ cfgEditing }}" hint-placeholder-val="{{ false }}">
+              <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:14px">
+                <label style="display:flex;flex-direction:column;gap:6px;font-size:12px;color:#6a665e">Costo de envío (Rafaela)
+                  <div style="display:flex;align-items:center;border:1px solid rgba(35,34,32,.16);border-radius:10px;overflow:hidden;background:#fff">
+                    <span style="padding:0 2px 0 12px;color:#9a958c">$</span>
+                    <input value="{{ cfgDraftShipping }}" onChange="{{ onCfgDraftShipping }}" style="border:none;outline:none;padding:11px 12px 11px 4px;font-size:14px;width:100%;background:transparent">
+                  </div>
+                </label>
+                <label style="display:flex;flex-direction:column;gap:6px;font-size:12px;color:#6a665e">Titular
+                  <input value="{{ cfgDraftTitular }}" onChange="{{ onCfgDraftTitular }}" style="border:1px solid rgba(35,34,32,.16);border-radius:10px;padding:11px 12px;font-size:14px;outline:none" style-focus="border-color:#232220">
+                </label>
+                <label style="display:flex;flex-direction:column;gap:6px;font-size:12px;color:#6a665e">Alias
+                  <input value="{{ cfgDraftAlias }}" onChange="{{ onCfgDraftAlias }}" style="border:1px solid rgba(35,34,32,.16);border-radius:10px;padding:11px 12px;font-size:14px;outline:none" style-focus="border-color:#232220">
+                </label>
+                <label style="display:flex;flex-direction:column;gap:6px;font-size:12px;color:#6a665e">WhatsApp (para recibir comprobantes)
+                  <input value="{{ cfgDraftWhatsapp }}" onChange="{{ onCfgDraftWhatsapp }}" placeholder="Ej. 5493492583885" style="border:1px solid rgba(35,34,32,.16);border-radius:10px;padding:11px 12px;font-size:14px;outline:none" style-focus="border-color:#232220">
+                </label>
+                <label style="display:flex;flex-direction:column;gap:6px;font-size:12px;color:#6a665e">CBU
+                  <input value="{{ cfgDraftCbu }}" onChange="{{ onCfgDraftCbu }}" style="border:1px solid rgba(35,34,32,.16);border-radius:10px;padding:11px 12px;font-size:14px;outline:none" style-focus="border-color:#232220">
+                </label>
+              </div>
+            </sc-if>
           </div>
 
           <div style="display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;margin-bottom:16px">
@@ -1638,11 +1682,12 @@ class Component extends DCLogic {
       cartMounted:initCartOpen, cartOpen:initCartOpen,
       categories:cats, products:[], aromas:[], sales:[],
       config:{shipping:5000,alias:'esencia.concreta',cbu:'0000003100093421750001',titular:'María Pérez',whatsapp:'5493492583885'},
+      cfgEditing:false, cfgDraft:null,
       oficio:{eyebrow:'',title:'',body:'',steps:[]}, oficioPhotoUrl:'', oficioEditing:false, oficioDraft:null,
       saleEditSeq:null, saleEditItems:[], saleSearch:'', photoModal:null,
       cart:[],
       navMounted:false, navOpen:false,
-      filter:'todos', searchQuery:'', chipsExpanded:false, navCatExpanded:false, catalogColors:{}, catalogScroll:0, lastCatalogProductId:null, cartBump:0, galleryIndex:0, videoActivated:false,
+      filter:'todos', searchQuery:'', chipsExpanded:false, navCatExpanded:false, homeCatExpanded:false, catalogColors:{}, catalogScroll:0, lastCatalogProductId:null, cartBump:0, galleryIndex:0, videoActivated:false,
       prodSearch:'', prodCatFilter:'todas', expanded:{}, catGroupCollapsed:{},
       detailColor:null, detailScent:null, detailQty:1,
       form:{nombre:'',apellido:'',telefono:'',email:'',direccion:''},

@@ -27,6 +27,12 @@ EC.core.renderVals = function (self) {
 
     const catsSorted=s.categories.slice().sort((a,b)=>(a.sortOrder??0)-(b.sortOrder??0));
     const categories=catsSorted.map(c=>({id:c.id,label:c.label,slotId:'ec-cat-'+c.id,img:c.photoUrl||self.NO_PHOTO_IMG,open:()=>self.openCatWith(c.id),openNav:()=>{ self.closeNav(); self.openCatWith(c.id); }}));
+    // Grid de "Nuestras categorías" del home: "Ver todos" siempre primero.
+    const homeCatAll=[{id:'__all__',isAll:true,isCat:false,label:'Ver todos',slotId:'',img:'',open:()=>self.goCatalog()}].concat(categories.map(c=>({...c,isAll:false,isCat:true})));
+    const homeCatMobileLimit=12;
+    const homeCatShowAll=s.homeCatExpanded||homeCatAll.length<=homeCatMobileLimit;
+    const homeCatGridClass='ec-cat-grid'+(homeCatShowAll?' ec-cat-grid-expanded':'');
+    const homeCatHasMore=!homeCatShowAll;
     const maxNavCats=8;
     const navCatShowAll=s.navCatExpanded||categories.length<=maxNavCats;
     const navCategories=navCatShowAll?categories:categories.slice(0,maxNavCats);
@@ -183,12 +189,13 @@ EC.core.renderVals = function (self) {
       isAdmin:s.view==='admin', isStore:s.view!=='admin',
       adminAuthed:s.view==='admin'&&s.authRole==='admin', adminNeedsLogin:s.view==='admin'&&s.authRole!=='admin',
       authEmail:s.authEmail, authPassword:s.authPassword, authError:s.authError, onAuthEmail:self.onAuthEmail, onAuthPassword:self.onAuthPassword, doLogin:self.doLogin, doLogout:self.doLogout,
-      isHome:s.view==='home', isCatalog:s.view==='catalog', isProduct:s.view==='product'&&!!selectedProduct, isCheckout:s.view==='checkout', isConfirm:s.view==='confirm'&&!!s.order, isAbout:s.view==='about', isContact:s.view==='contact',
+      isHome:s.view==='home', isCatalog:s.view==='catalog', isProduct:s.view==='product'&&!!selectedProduct, isCheckout:s.view==='checkout', isConfirm:s.view==='confirm'&&!!s.order, isAbout:s.view==='about', isContact:s.view==='contact', isNotFound:s.view==='notfound',
       cfg:s.config,
       goHome:self.goHome, goCatalog:self.goCatalog, goAdmin:self.goAdmin, verProceso:self.verProceso, verContacto:self.verContacto,
       openCart:self.openCart, closeCart:self.closeCart, cartCount, cartBumpAnim:(s.cartBump%2===0?'ecBumpA':'ecBumpB')+' .45s ease',
       navMounted:s.navMounted, openNav:self.openNav, closeNav:self.closeNav, navHome:self.navHome, navCatalog:self.navCatalog, navProceso:self.navProceso, navContacto:self.navContacto, goSearch:self.goSearch,
-      heroSlides, heroShift, heroDots, heroHasNav, heroPrev:self.heroPrev, heroNext:self.heroNext, categories, navCategories, scrollCatPrev:()=>self.scrollCat(-1), scrollCatNext:()=>self.scrollCat(1),
+      heroSlides, heroShift, heroDots, heroHasNav, heroPrev:self.heroPrev, heroNext:self.heroNext, categories, navCategories,
+      homeCatTiles:homeCatAll, homeCatGridClass, homeCatHasMore, onLoadMoreCats:()=>self.setState({homeCatExpanded:true}),
       catalogProducts:catalog, catalogCount:catalog.length, catalogNoResults:catalog.length===0, searchQuery:s.searchQuery, onSearchQuery:e=>self.setState({searchQuery:e.target.value}), chips, backToCatalog:self.backToCatalog, selectedProduct, relatedProducts, hasRelated, detailQty:s.detailQty, incDetail:self.incDetail, decDetail:self.decDetail, addDetail:self.addDetail,
       cartLines:lines, cartEmpty:cartCount===0, cartHasItems:cartCount>0, cartSubtotalFmt:self.fmt(subtotal), cartTotalFmt:self.fmt(total),
       shippingFmt:self.fmt(s.config.shipping||0), shippingLabel:shipping>0?self.fmt(shipping):'Gratis',
@@ -240,7 +247,13 @@ EC.core.renderVals = function (self) {
       closeCropEditor:self.closeCropEditor, applyCrop:self.applyCrop, restoreOriginal:self.restoreOriginal,
       adminCategories, adminCatCount:s.categories.length, catAdding:s.catAdding, catAddBtnLabel:s.catAdding?'Cerrar':'+ Agregar categoría', catAddBtnStyle:self.pillBtn(s.catAdding), ncat:s.newCat, onNCatLabel:e=>self.setNCat({label:e.target.value}), toggleCatAdding:self.toggleCatAdding, addCategory:self.addCategory,
       aromaList, aromaCount:s.aromas.length, newAroma:s.newAroma, onNewAroma:self.setNewAroma, addAroma:self.addAroma,
-      onCfgShipping:self.onCfgShipping, onCfgTitular:self.onCfgTitular, onCfgAlias:self.onCfgAlias, onCfgCbu:self.onCfgCbu, onCfgWhatsapp:self.onCfgWhatsapp,
+      cfgEditing:s.cfgEditing, cfgNotEditing:!s.cfgEditing, startEditCfg:self.startEditCfg, cancelEditCfg:self.cancelEditCfg, saveCfgDraft:self.saveCfgDraft,
+      cfgShippingFmt:self.fmt(s.config.shipping||0),
+      cfgDraftShipping:s.cfgEditing?s.cfgDraft.shipping:'', onCfgDraftShipping:e=>self.setCfgDraftField('shipping',e.target.value),
+      cfgDraftTitular:s.cfgEditing?s.cfgDraft.titular:'', onCfgDraftTitular:e=>self.setCfgDraftField('titular',e.target.value),
+      cfgDraftAlias:s.cfgEditing?s.cfgDraft.alias:'', onCfgDraftAlias:e=>self.setCfgDraftField('alias',e.target.value),
+      cfgDraftWhatsapp:s.cfgEditing?s.cfgDraft.whatsapp:'', onCfgDraftWhatsapp:e=>self.setCfgDraftField('whatsapp',e.target.value),
+      cfgDraftCbu:s.cfgEditing?s.cfgDraft.cbu:'', onCfgDraftCbu:e=>self.setCfgDraftField('cbu',e.target.value),
       adminSales, salesTotal:s.sales.length, hasSales:adminSales.length>0, noSales:adminSales.length===0,
       saleAdding:s.saleAdding, saleAddBtnLabel:s.saleAdding?'Cerrar':'+ Registrar venta presencial', saleAddBtnStyle:self.pillBtn(s.saleAdding), toggleSaleAdding:self.toggleSaleAdding,
       salePick:sp, spActive:!!spProd, spInactive:!spProd, spName:spProd?spProd.name:'—', spPriceFmt:spProd?spProd.priceFmt:'—', spImg:spProd?self.photoUrlFor(spProd):'', spSlot:spProd?('ec-prod-'+spProd.id):'ec-sale-pick',

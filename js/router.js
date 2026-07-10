@@ -14,7 +14,7 @@ EC.router = function (self) {
       if (pathname === '/contacto') return { view: 'contact' };
       const m = pathname.match(/^\/producto\/([^/]+)\/?$/);
       if (m) return { view: 'product', productId: decodeURIComponent(m[1]) };
-      return { view: 'home' };
+      return { view: 'notfound' };
     },
     navigate: (path, replace) => {
       try {
@@ -30,6 +30,7 @@ EC.router = function (self) {
       if (r.view === 'product') {
         const p = self.getProduct(r.productId);
         self.setState({ ...resetAdmin, view: 'product', productId: r.productId, detailColor: p ? (self.state.catalogColors[r.productId] || (p.colors[0] || null)) : null, detailScent: (p && self.isScented(p)) ? p.scents[0] : null, detailQty: 1, galleryIndex: 0, videoActivated: false });
+        self.resetRelatedScroll();
       } else if (r.view === 'confirm') {
         if (self.state.order) self.setState({ ...resetAdmin, view: 'confirm' }); else self.navigate('/', true);
       } else if (r.view === 'checkout' && !self.state.cart.length) {
@@ -60,7 +61,12 @@ EC.router = function (self) {
     },
     verProceso: () => { self.navigate('/conocenos'); self.setState({ view: 'about' }); self.scrollTop(); },
     verContacto: () => { self.navigate('/contacto'); self.setState({ view: 'contact' }); self.scrollTop(); },
-    openProduct: (id) => { const p = self.getProduct(id); const fromCat = self.state.view === 'catalog'; self.navigate('/producto/' + encodeURIComponent(id)); self.setState({ view: 'product', productId: id, detailColor: p ? (self.state.catalogColors[id] || (p.colors[0] || null)) : null, detailScent: self.isScented(p) ? p.scents[0] : null, detailQty: 1, galleryIndex: 0, videoActivated: false, catalogScroll: fromCat ? (window.scrollY || 0) : self.state.catalogScroll, lastCatalogProductId: fromCat ? id : self.state.lastCatalogProductId }); self.scrollTop(); },
+    openProduct: (id) => { const p = self.getProduct(id); const fromCat = self.state.view === 'catalog'; self.navigate('/producto/' + encodeURIComponent(id)); self.setState({ view: 'product', productId: id, detailColor: p ? (self.state.catalogColors[id] || (p.colors[0] || null)) : null, detailScent: self.isScented(p) ? p.scents[0] : null, detailQty: 1, galleryIndex: 0, videoActivated: false, catalogScroll: fromCat ? (window.scrollY || 0) : self.state.catalogScroll, lastCatalogProductId: fromCat ? id : self.state.lastCatalogProductId }); self.scrollTop(); self.resetRelatedScroll(); },
+    // El navegador conserva el scrollLeft de este contenedor entre renders
+    // (mismo nodo del DOM aunque cambie el producto), así que sin este reset
+    // "también te puede interesar" aparecía scrolleado donde había quedado
+    // el producto anterior.
+    resetRelatedScroll: () => { setTimeout(() => { const el = document.getElementById('ec-related-scroll'); if (el) el.scrollLeft = 0; }, 0); },
     backToCatalog: () => {
       const y = self.state.catalogScroll || 0;
       const pid = self.state.lastCatalogProductId;

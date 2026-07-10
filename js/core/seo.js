@@ -20,6 +20,7 @@ EC.seo = function (self) {
         else if (s.view === 'checkout') { title = 'Finalizar compra — Esencia Concreta'; path = '/checkout'; }
         else if (s.view === 'confirm') { title = 'Pedido confirmado — Esencia Concreta'; path = '/confirmacion'; }
         else if (s.view === 'admin') { title = 'Panel de administración — Esencia Concreta'; path = '/admin'; }
+        else if (s.view === 'notfound') { title = 'Página no encontrada — Esencia Concreta'; desc = 'La página que buscás no existe o fue movida.'; path = (typeof location !== 'undefined' ? location.pathname : '/'); }
         const key = title + '|' + path;
         if (self._seoKey === key) return;
         self._seoKey = key;
@@ -32,6 +33,11 @@ EC.seo = function (self) {
         setMeta('meta[name="twitter:title"]', 'content', title);
         setMeta('meta[name="twitter:description"]', 'content', desc);
         setMeta('link[rel="canonical"]', 'href', base + path);
+        let robotsMeta = document.querySelector('meta[name="robots"]');
+        if (s.view === 'notfound') {
+          if (!robotsMeta) { robotsMeta = document.createElement('meta'); robotsMeta.setAttribute('name', 'robots'); document.head.appendChild(robotsMeta); }
+          robotsMeta.setAttribute('content', 'noindex');
+        } else if (robotsMeta) { robotsMeta.remove(); }
         let ld = document.getElementById('ec-product-jsonld');
         if (product) {
           if (!ld) { ld = document.createElement('script'); ld.type = 'application/ld+json'; ld.id = 'ec-product-jsonld'; document.head.appendChild(ld); }

@@ -3,6 +3,10 @@
 // se persistía). Ahora se lee/guarda en la tabla site_config de Supabase
 // (lectura pública porque el checkout necesita mostrarla, escritura
 // solo admin vía RLS) — ver supabase/013_site_config.sql.
+//
+// Se edita con el mismo patrón de borrador (Editar/Guardar/Cancelar) que
+// el resto del admin, en vez de guardar en cada tecla — así no queda
+// editable "a primera vista" apenas se entra a la pestaña de Ventas.
 window.EC = window.EC || {};
 EC.admin = EC.admin || {};
 EC.admin.config = function (self) {
@@ -12,22 +16,17 @@ EC.admin.config = function (self) {
       if (error) { console.error('loadConfig error', error); return; }
       self.setState({ config: { shipping: data.shipping, alias: data.alias, cbu: data.cbu, titular: data.titular, whatsapp: data.whatsapp } });
     },
-    setCfg: (patch) => {
-      const config = { ...self.state.config, ...patch };
-      self.setState({ config });
-      // Debounce por una sola clave compartida: siempre manda el config
-      // completo ya mezclado, así una tanda rápida de ediciones en varios
-      // campos no pierde ninguna (la última corrida igual incluye todo).
-      self.debounce('siteConfig', () => {
-        supabaseClient.from('site_config').update({
-          shipping: config.shipping, alias: config.alias, cbu: config.cbu, titular: config.titular, whatsapp: config.whatsapp
-        }).eq('id', 1).then(({ error }) => { if (error) self.showToast('Error al guardar: ' + error.message); });
-      });
-    },
-    onCfgShipping: e => { const n = parseInt(String(e.target.value).replace(/\D/g, ''), 10); self.setCfg({ shipping: isNaN(n) ? 0 : n }); },
-    onCfgTitular: e => self.setCfg({ titular: e.target.value }),
-    onCfgAlias: e => self.setCfg({ alias: e.target.value }),
-    onCfgCbu: e => self.setCfg({ cbu: e.target.value }),
-    onCfgWhatsapp: e => self.setCfg({ whatsapp: e.target.value })
+    startEditCfg: () => self.setState({ cfgEditing: true, cfgDraft: { ...self.state.config } }),
+    cancelEditCfg: () => self.setState({ cfgEditing: false, cfgDraft: null }),
+    setCfgDraftField: (key, v) => self.setState({ cfgDraft: { ...self.state.cfgDraft, [key]: v } }),
+    saveCfgDraft: async () => {
+      const d = self.state.cfgDraft;
+      const n = parseInt(String(d.shipping).replace(/\D/g, ''), 10);
+      const config = { shipping: isNaN(n) ? 0 : n, alias: d.alias || '', cbu: d.cbu || '', titular: d.titular || '', whatsapp: d.whatsapp || '' };
+      const { error } = await supabaseClient.from('site_config').update(config).eq('id', 1);
+      if (error) { self.showToast('Error al guardar: ' + error.message); return; }
+      self.setState({ config, cfgEditing: false, cfgDraft: null });
+      self.showToast('Cambios guardados');
+    }
   };
 };

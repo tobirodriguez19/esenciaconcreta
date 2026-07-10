@@ -18,9 +18,10 @@ image-slot::part(image){touch-action:auto}
 @keyframes ecBumpA{0%{transform:scale(1)}40%{transform:scale(1.55)}100%{transform:scale(1)}}
 @keyframes ecBumpB{0%{transform:scale(1)}40%{transform:scale(1.55)}100%{transform:scale(1)}}
 #ec-carousel::-webkit-scrollbar{height:0;display:none}
-#ec-cat-scroll{scrollbar-width:thin}
-#ec-cat-scroll::-webkit-scrollbar{height:6px}
-#ec-cat-scroll::-webkit-scrollbar-thumb{background:rgba(35,34,32,.18);border-radius:999px}
+.ec-cat-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:clamp(12px,1.6vw,22px);max-height:1000px;overflow-y:auto;scrollbar-width:thin;padding:6px 4px 12px}
+.ec-cat-grid::-webkit-scrollbar{width:6px}
+.ec-cat-grid::-webkit-scrollbar-thumb{background:rgba(35,34,32,.18);border-radius:999px}
+.ec-cat-more-btn{display:none}
 .ec-hamburger{display:none}
 .ec-cat-dropdown{display:none;opacity:0;transform:translateY(4px);transition:opacity .16s ease,transform .16s ease}
 .ec-cat-nav:hover .ec-cat-dropdown{display:block;opacity:1;transform:translateY(0)}
@@ -30,6 +31,9 @@ image-slot::part(image){touch-action:auto}
   #ec-hero-pill{margin-left:0!important;font-size:16px!important}
   .ec-checkout-grid{grid-template-columns:1fr!important}
   .ec-catalog-grid{grid-template-columns:repeat(2,1fr)!important;gap:12px!important}
+  .ec-cat-grid{grid-template-columns:repeat(3,1fr)!important;max-height:none!important;overflow-y:visible!important;padding:6px 0 12px!important}
+  .ec-cat-grid:not(.ec-cat-grid-expanded)>*:nth-child(n+13){display:none!important}
+  .ec-cat-more-btn{display:block!important}
 }
 @media(max-width:1140px){
   .ec-hero-imgbox{max-width:360px!important}

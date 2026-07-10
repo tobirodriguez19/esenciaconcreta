@@ -168,7 +168,9 @@
     // same left/top/width/height in frame-%, computed by _applyView(), so the
     // inside-mask crop and the outside-mask spill stay pixel-aligned.
     '.frame img{position:absolute;max-width:none;transform:translate(-50%,-50%);' +
-    '  -webkit-user-drag:none;user-select:none;touch-action:none}' +
+    '  -webkit-user-drag:none;user-select:none;touch-action:none;' +
+    '  opacity:1;transition:opacity .2s ease}' +
+    '.frame img[data-loading]{opacity:0}' +
     // Reframe mode (double-click): the full image spills past the mask. The
     // spill layer is sized to the IMAGE bounds so its corners are where the
     // resize handles belong. The ghost <img> inside is translucent; the real
@@ -285,7 +287,11 @@
       });
       // naturalWidth/Height aren't known until load — re-apply so the cover
       // baseline is computed from real dimensions, not the 100%×100% fallback.
-      this._img.addEventListener('load', () => this._applyView());
+      // Also clears the fade-in flag set in _render() when the src changes,
+      // so switching photos (product/color) never leaves the old frame
+      // hanging mid-crossfade or the new one invisible if it errors out.
+      this._img.addEventListener('load', () => { this._applyView(); this._img.removeAttribute('data-loading'); });
+      this._img.addEventListener('error', () => { this._img.removeAttribute('data-loading'); });
       // Gated on editable + fit=cover so share links and contain/fill slots
       // stay static.
       this.addEventListener('dblclick', (e) => {
@@ -626,6 +632,11 @@
       // the display:flex / display:block rules in the stylesheet above.
       if (url) {
         if (this._img.getAttribute('src') !== url) {
+          // Fade out immediately, fade back in on load/error (see listeners
+          // above) — otherwise the previous photo just sits there while the
+          // new one downloads, which reads as "my click didn't do anything"
+          // when switching products/colors on a slow connection.
+          if (this._img.getAttribute('src')) this._img.setAttribute('data-loading', '');
           this._img.src = url;
           this._ghost.src = url;
         }
