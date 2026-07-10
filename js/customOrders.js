@@ -7,11 +7,15 @@
 window.EC = window.EC || {};
 EC.customOrders = function (self) {
   return {
-    openCustomOrderModal: () => {
+    openCustomOrderModal: () => self.openCustomOrderModalForShortfall(1),
+    // qty prefijada: usada tanto por el botón "Encargar este producto" (1) como
+    // por el aviso de "stock limitado" del stepper de cantidad (la cantidad que
+    // falta cubrir), ver askConfirm en js/cart.js incDetail.
+    openCustomOrderModalForShortfall: (qty) => {
       const p = self.getProduct(self.state.productId); if (!p) return;
       self.setState({
         customOrderOpen: true,
-        customOrderDraft: { productId: p.id, productName: p.name, color: self.state.detailColor || null, scent: self.isScented(p) ? self.state.detailScent : null, qty: 1, nombre: '', telefono: '', comentario: '' }
+        customOrderDraft: { productId: p.id, productName: p.name, color: self.state.detailColor || null, scent: self.isScented(p) ? self.state.detailScent : null, qty: qty || 1, nombre: '', telefono: '', comentario: '' }
       });
     },
     closeCustomOrderModal: () => self.setState({ customOrderOpen: false, customOrderDraft: null }),

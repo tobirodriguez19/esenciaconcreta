@@ -17,6 +17,11 @@ EC.utils = function (self) {
     colorStock: (p, color) => { const cs = p.cstock || {}; if (self.isScented(p)) { const m = cs[color] || {}; return p.scents.reduce((a, s) => a + (m[s] || 0), 0); } return cs[color] || 0; },
     totalStock: (p) => { if (!p) return 0; return self.colorKeys(p).reduce((a, c) => a + self.colorStock(p, c), 0); },
     stockFor: (id, color, scent) => { const p = self.getProduct(id); if (!p) return 0; if (color == null) { if (self.isScented(p)) { return self.colorKeys(p).reduce((a, c) => a + ((p.cstock[c] && p.cstock[c][scent]) || 0), 0); } return self.totalStock(p); } return self.variantQty(p, color, scent); },
+    // Color/aroma por defecto al abrir un producto: preferir uno con stock en
+    // vez de siempre el primero de la lista, para no aterrizar en "sin stock"
+    // cuando hay otra variante disponible.
+    firstStockedColor: (p) => { if (!p || !p.colors || !p.colors.length) return null; return p.colors.find(c => self.colorStock(p, c) > 0) || p.colors[0]; },
+    firstStockedScent: (p, color) => { if (!p || !self.isScented(p)) return null; return p.scents.find(sc => self.stockFor(p.id, color, sc) > 0) || p.scents[0]; },
 
     showToast: (m) => { self.setState({ toast: m }); if (self._toastT) clearTimeout(self._toastT); self._toastT = setTimeout(() => self.setState({ toast: null }), 2800); },
     askConfirm: (o) => { self.setState({ confirm: o }); },

@@ -14,7 +14,26 @@ EC.cart = function (self) {
     quickAdd: (id) => { const p = self.getProduct(id); const color = self.state.catalogColors[id] || (p.colors && p.colors.length ? p.colors[0] : null); self.addToCart(id, color, self.isScented(p) ? p.scents[0] : null, 1); },
     setDetailColor: (n) => { self.pauseVideos(); self.setState({ detailColor: n, galleryIndex: 0, videoActivated: false }); },
     setDetailScent: (n) => { self.setState({ detailScent: n, detailQty: 1 }); },
-    incDetail: () => { const max = self.stockFor(self.state.productId, self.state.detailColor, self.state.detailScent) || 0; self.setState({ detailQty: Math.min(Math.max(1, max), self.state.detailQty + 1) }); },
+    incDetail: () => {
+      const p = self.getProduct(self.state.productId);
+      const max = self.stockFor(self.state.productId, self.state.detailColor, self.state.detailScent) || 0;
+      const next = self.state.detailQty + 1;
+      if (next > max) {
+        if (p && p.allowCustomOrder) {
+          const falta = next - max;
+          self.askConfirm({
+            title: 'Stock limitado',
+            message: 'Por ahora tenemos ' + max + ' unidad' + (max === 1 ? '' : 'es') + ' disponible' + (max === 1 ? '' : 's') + '. ¿Querés encargar ' + falta + ' unidad' + (falta === 1 ? '' : 'es') + ' más por fabricación a pedido' + (p.customOrderEta ? (' (tiempo estimado: ' + p.customOrderEta + ')') : '') + '?',
+            yesLabel: 'Encargar el resto',
+            onYes: () => self.openCustomOrderModalForShortfall(falta)
+          });
+        } else {
+          self.showToast('No hay más stock disponible');
+        }
+        return;
+      }
+      self.setState({ detailQty: next });
+    },
     decDetail: () => { self.setState({ detailQty: Math.max(1, self.state.detailQty - 1) }); },
     addDetail: () => {
       const p = self.getProduct(self.state.productId); if (!p) return;
